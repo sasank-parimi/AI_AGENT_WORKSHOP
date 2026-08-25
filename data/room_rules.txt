@@ -1,0 +1,5 @@
+UWA AI Club Workshop Mock Room Rules
+
+This document is fictional workshop data.
+
+EZONE 110 capacity: 96. EZONE 109 capacity: 64. CSSE Lab 2 capacity: 48. For practical workshops, prefer a room with power access and at least 10 percent spare capacity above expected attendance.
