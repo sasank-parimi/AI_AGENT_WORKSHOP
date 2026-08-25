@@ -14,13 +14,17 @@ from pathlib import Path
 from typing import Any, Callable
 
 from anthropic import Anthropic
+from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
+load_dotenv(ROOT / ".env", override=True)
 DEFAULT_MODEL = os.getenv("WORKSHOP_MODEL", "claude-sonnet-5")
 
 
 def _client() -> Anthropic:
+    if (ROOT / ".env").exists():
+        load_dotenv(ROOT / ".env", override=True)
     api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY is not configured")

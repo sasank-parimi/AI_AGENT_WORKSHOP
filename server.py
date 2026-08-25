@@ -20,7 +20,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from anthropic import Anthropic
+from anthropic import Anthropic, AuthenticationError
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
@@ -28,10 +28,12 @@ from pydantic import BaseModel, Field
 import uvicorn
 
 ROOT = Path(__file__).resolve().parent
-load_dotenv(ROOT / ".env")
+# A local .env is the source of truth for notebooks and local presentation
+# runs. Hosted deployments do not contain this ignored file and use the
+# platform's environment variables instead.
+load_dotenv(ROOT / ".env", override=True)
 
 MODEL = os.getenv("WORKSHOP_MODEL", "claude-sonnet-5")
-API_KEY = os.getenv("ANTHROPIC_API_KEY", "").strip()
 MAX_PROMPT_CHARS = int(os.getenv("WORKSHOP_MAX_PROMPT_CHARS", "12000"))
 MAX_OUTPUT_TOKENS = int(os.getenv("WORKSHOP_MAX_OUTPUT_TOKENS", "1200"))
 
@@ -49,13 +51,28 @@ class AgentRequest(BaseModel):
     instructions: str = Field(default="", max_length=6000)
 
 
+def api_key() -> str:
+    """Reload local workshop credentials so editing .env does not require a restart."""
+    if (ROOT / ".env").exists():
+        load_dotenv(ROOT / ".env", override=True)
+    return os.getenv("ANTHROPIC_API_KEY", "").strip()
+
+
+def credential_source() -> str:
+    return "local .env" if (ROOT / ".env").exists() else "host environment"
+
+
 def client() -> Anthropic:
-    if not API_KEY:
+    key = api_key()
+    if not key:
         raise HTTPException(
             status_code=503,
-            detail="ANTHROPIC_API_KEY is not configured. Add it to .env or your shell before starting server.py.",
+            detail=(
+                "ANTHROPIC_API_KEY is not configured. Add it to the project .env for local use, "
+                "or to the hosting provider's environment variables for a deployed website."
+            ),
         )
-    return Anthropic(api_key=API_KEY)
+    return Anthropic(api_key=key)
 
 
 @app.get("/")
@@ -64,13 +81,34 @@ def deck() -> FileResponse:
 
 
 @app.get("/api/health")
-def health() -> dict[str, Any]:
-    return {
+def health(validate: bool = False) -> dict[str, Any]:
+    key = api_key()
+    result: dict[str, Any] = {
         "ok": True,
-        "configured": bool(API_KEY),
+        "configured": bool(key),
+        "authenticated": None,
+        "credential_source": credential_source(),
         "model": MODEL,
         "live": True,
     }
+    if validate and key:
+        try:
+            Anthropic(api_key=key).models.list(limit=1)
+            result["authenticated"] = True
+        except AuthenticationError:
+            result.update({
+                "ok": False,
+                "authenticated": False,
+                "error": (
+                    "Anthropic rejected the configured API key. Replace it in .env locally "
+                    "or in the deployed site's environment settings."
+                ),
+            })
+        except Exception:
+            # Authentication could not be checked, but a temporary network or
+            # provider problem should not be misreported as an invalid key.
+            result["validation_unavailable"] = True
+    return result
 
 
 @app.post("/api/claude/stream")
@@ -94,6 +132,11 @@ def claude_stream(req: ClaudeRequest) -> StreamingResponse:
             with c.messages.stream(**kwargs) as stream:
                 for text in stream.text_stream:
                     yield text
+        except AuthenticationError:
+            yield (
+                "\n\n[Website API authentication failed. Anthropic rejected the configured key. "
+                "Replace ANTHROPIC_API_KEY in the local .env or the deployed site's environment settings.]"
+            )
         except Exception as exc:  # surfaced as text because streaming may have begun
             yield f"\n\n[Workshop API error: {type(exc).__name__}: {exc}]"
 
@@ -275,10 +318,23 @@ def http_exception_handler(_, exc: HTTPException):
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 
+@app.exception_handler(AuthenticationError)
+def authentication_exception_handler(_, __: AuthenticationError):
+    return JSONResponse(
+        status_code=401,
+        content={
+            "detail": (
+                "Anthropic rejected the configured API key. Replace ANTHROPIC_API_KEY "
+                "in the local .env or the deployed site's environment settings."
+            )
+        },
+    )
+
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
     print("\nUWA AI Club — Live AI Agents Workshop")
     print(f"Model: {MODEL}")
-    print(f"API key configured: {'yes' if API_KEY else 'NO'}")
+    print(f"API key configured: {'yes' if api_key() else 'NO'} ({credential_source()})")
     print(f"Open: http://localhost:{port}\n")
     uvicorn.run(app, host="0.0.0.0", port=port, reload=False)

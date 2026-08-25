@@ -1578,10 +1578,12 @@ async function checkApi(){
   const status=q('#apiStatus'), text=q('#apiStatusText');
   if(!status||!text) return;
   try{
-    const res=await fetch('/api/health',{cache:'no-store'});
+    const res=await fetch('/api/health?validate=true',{cache:'no-store'});
     if(!res.ok) throw new Error('offline');
     const data=await res.json();
-    if(data.configured){ status.className='api-status online'; text.textContent=`LIVE CLAUDE · ${data.model}`; }
+    if(data.authenticated===false){ status.className='api-status offline'; text.textContent='API KEY REJECTED · check host settings'; }
+    else if(data.configured&&data.authenticated===true){ status.className='api-status online'; text.textContent=`LIVE CLAUDE · ${data.model}`; }
+    else if(data.configured){ status.className='api-status'; text.textContent='API CONFIGURED · validation unavailable'; }
     else { status.className='api-status offline'; text.textContent='API KEY NOT CONFIGURED'; }
   }catch(_){ status.className='api-status offline'; text.textContent='LIVE API OFFLINE · run server.py'; }
 }
@@ -1597,7 +1599,11 @@ async function streamClaude(root){
     if(!res.ok){ const msg=await res.text(); throw new Error(msg||`HTTP ${res.status}`); }
     const reader=res.body.getReader(); const decoder=new TextDecoder();
     while(true){ const {value,done}=await reader.read(); if(done) break; output.textContent += decoder.decode(value,{stream:true}); output.scrollTop=output.scrollHeight; }
-    state.textContent='complete'; state.className='live-state ok';
+    if(output.textContent.includes('[Website API authentication failed.')){
+      state.textContent='API key rejected'; state.className='live-state error';
+    }else{
+      state.textContent='complete'; state.className='live-state ok';
+    }
   }catch(err){
     if(err.name==='AbortError'){ state.textContent='stopped'; state.className='live-state'; }
     else { output.textContent = `API error: ${String(err.message||err)}`; state.textContent='API error'; state.className='live-state error'; }

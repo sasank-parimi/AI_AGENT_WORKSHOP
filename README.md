@@ -30,7 +30,9 @@ The presentation makes real Claude API calls and shows observable tool requests 
 
 Open http://localhost:8000.
 
-The API key stays in Python. It is never included in browser JavaScript. The status label appears only on slides that make a live call.
+The root `.env` is loaded by both the participant notebook and a locally running `server.py`. The API key stays in Python and is never included in browser JavaScript. Editing `.env` is picked up on the next API request.
+
+For a deployed website, `.env` is intentionally ignored and is not uploaded. Set a valid Anthropic `ANTHROPIC_API_KEY` in the hosting provider's environment settings, then redeploy. The live-slide status checks whether Anthropic accepts that credential; a non-empty but invalid key is shown as **API KEY REJECTED**.
 
 Presentation controls:
 
@@ -49,7 +51,7 @@ If the API is unavailable, navigation and non-API interactions still work. Live-
     pip install -r requirements.txt
     jupyter lab AI_AGENTS_WORKSHOP.ipynb
 
-The notebook requests the workshop API key through getpass() and imports the local workshopkit.py.
+The notebook loads `ANTHROPIC_API_KEY` from the root `.env`. If it is missing, the setup cell requests it through `getpass()` instead. It then imports the local `workshopkit.py`.
 
 ## Live API
 

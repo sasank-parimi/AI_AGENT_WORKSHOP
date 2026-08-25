@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 import workshopkit
-from server import find_study_room
+from server import find_study_room, health
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -40,14 +40,22 @@ class DeckTests(unittest.TestCase):
         self.assertIn("/api/agent/study-session", self.html)
         self.assertIn("data-agent-trace", self.deck)
         self.assertIn("hidden chain-of-thought", self.deck)
+        self.assertIn("/api/health?validate=true", self.html)
+        self.assertIn("API KEY REJECTED", self.html)
 
     def test_notebook_is_valid_and_uses_local_runtime(self) -> None:
         notebook = json.loads((ROOT / "AI_AGENTS_WORKSHOP.ipynb").read_text(encoding="utf-8"))
         source = "\n".join("".join(cell.get("source", [])) for cell in notebook["cells"])
+        self.assertIn("load_dotenv('.env', override=True)", source)
         self.assertIn("from workshopkit import *", source)
         self.assertIn("Maya", source)
         self.assertIn("Noah", source)
         self.assertIn("Priya", source)
+
+    def test_health_explains_credential_source(self) -> None:
+        result = health(validate=False)
+        self.assertIn(result["credential_source"], ("local .env", "host environment"))
+        self.assertIn("authenticated", result)
 
 
 class SimulatedToolTests(unittest.TestCase):
