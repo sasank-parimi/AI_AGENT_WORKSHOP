@@ -251,7 +251,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="live-grid" data-live-claude data-system="Answer the user's request directly. Do not pretend you have tools or external access that are not provided. If the request requires real-world actions, explain what you can provide rather than claiming you performed them.">
     <div class="card live-panel">
       <div class="pill">YOU // TYPE ANYTHING</div>
-      <textarea class="live-textarea fill" data-live-input aria-label="Prompt for Claude">Organise an AI workshop for 100 students next Friday.</textarea>
+      <textarea class="live-textarea fill" data-live-input aria-label="Prompt for Claude">Help me plan a study schedule for four university assignments due next Friday.</textarea>
       <div class="live-controls">
         <button class="btn primary" data-live-run>ASK CLAUDE ↗</button>
         <button class="btn" data-live-stop disabled>STOP</button>
@@ -271,7 +271,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">COLD OPEN // 02</div>
   <h2>Now give it <span class="mint">abilities.</span></h2>
   <div class="agent-map fill">
-    <div class="node human">USER<br><span class="muted small">organise the workshop</span></div>
+    <div class="node human">USER<br><span class="muted small">plan a study schedule</span></div>
     <div class="circuit-line"><span class="packet"></span></div>
     <div class="node agent" data-agent-locked>CLAUDE<br><span class="muted small">decides what it needs</span></div>
     <div class="node tool" data-hidden-tool style="opacity:.18;transform:translateY(8px);transition:.3s">find_room()</div>
@@ -315,7 +315,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="brand-mark" data-brand></div>
   <div class="eyebrow">INTERACTIVE // PROMPT BUILDER</div>
   <h2>Same model. Better specification.</h2>
-  <div class="prompt-builder" data-prompt-builder data-live-claude data-system="Follow the user's specification carefully. Do not invent missing event facts. Return only the content requested by the user.">
+  <div class="prompt-builder" data-prompt-builder data-live-claude data-system="Follow the user's specification carefully. Do not invent missing university details. Return only the content requested by the user.">
     <div class="prompt-parts">
       <button class="prompt-part" data-part="success"><b>SUCCESS</b>Define what a useful answer must accomplish.</button>
       <button class="prompt-part" data-part="task"><b>TASK</b>State the exact job.</button>
@@ -349,7 +349,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
       <div class="divider"></div>
       <p><span class="mint">Goal:</span> Get a student to register.</p>
       <p><span class="mint">Success:</span></p>
-      <div class="code">• under 120 words<br>• event facts correct<br>• single obvious CTA<br>• beginner-friendly tone</div>
+      <div class="code">• under 120 words<br>• timetable facts correct<br>• single obvious next step<br>• student-friendly tone</div>
     </div>
   </div>
   <p class="big-copy" style="margin-top:20px">Prompt engineering is much easier when the output is <span class="mint">testable.</span></p>
@@ -393,7 +393,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <h2>Sometimes explaining isn't enough. <span class="yellow">Show it.</span></h2>
   <div class="grid-2 fill">
     <div class="card"><div class="pill">0 EXAMPLES</div><div class="code" style="margin-top:18px">Input: “Where can I submit my assignment?”<br><br>Output: inconsistent answer format...</div></div>
-    <div class="card yellow-edge"><div class="pill">3 GOOD EXAMPLES</div><div class="code" style="margin-top:18px">&lt;examples&gt;<br>  &lt;example&gt;Where can I submit my assignment? → Give the portal and a short next step.&lt;/example&gt;<br>  &lt;example&gt;How do I join the study group? → Give the channel and meeting time.&lt;/example&gt;<br>  &lt;example&gt;I need a quiet place to study. → Suggest a library or campus study space.&lt;/example&gt;<br>&lt;/examples&gt;</div></div>
+    <div class="card yellow-edge"><div class="pill">3 GOOD EXAMPLES</div><div class="code" style="margin-top:18px">EXAMPLES:<br>Example 1: Where can I submit my assignment? → Give the portal and a short next step.<br>Example 2: How do I join the study group? → Give the channel and meeting time.<br>Example 3: I need a quiet place to study. → Suggest a library or campus study space.</div></div>
   </div>
   <p class="big-copy" style="margin-top:20px">Examples reduce ambiguity about <span class="mint">format, tone and boundaries.</span></p>
   <div class="source-note">Anthropic: “Use examples effectively”, with relevant, diverse and structured examples; 3–5 examples suggested for best results.</div>
@@ -405,7 +405,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <h2>Complex prompt? Separate the pieces.</h2>
   <div class="grid-2 fill">
     <div class="card soft"><div class="pill">BEFORE</div><div class="code" style="margin-top:16px">You are booking a university study room and here are the room rules and make it short and here are some examples and the new request is...</div></div>
-    <div class="card yellow-edge"><div class="pill">AFTER</div><div class="code" style="margin-top:16px">&lt;context&gt;Campus rooms require a booking and have capacity limits.&lt;/context&gt;<br><br>&lt;instructions&gt;Recommend a compliant room in two sentences.&lt;/instructions&gt;<br><br>&lt;examples&gt;Library seminar room → suitable for 12 students.&lt;/examples&gt;<br><br>&lt;input&gt;Need a room for 10 students on Tuesday.&lt;/input&gt;</div></div>
+    <div class="card yellow-edge"><div class="pill">AFTER</div><div class="code" style="margin-top:16px">CONTEXT: Campus rooms require a booking and have capacity limits.<br><br>INSTRUCTIONS: Recommend a compliant room in two sentences.<br><br>EXAMPLE: Library seminar room → suitable for 12 students.<br><br>INPUT: Need a room for 10 students on Tuesday.</div></div>
   </div>
   <div class="callout"><strong>NOT MAGIC</strong><span>XML tags are useful because they create explicit boundaries in a complex prompt.</span></div>
   <div class="source-note">Anthropic: “Structure prompts with XML tags” for prompts mixing instructions, context, examples and variable inputs.</div>
@@ -518,7 +518,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
       <div class="code">SYSTEM_PROMPT = """<br>You are ...<br>"""<br><br>USER_REQUEST = """<br>Help organise ...<br>"""<br><br>ask_claude(SYSTEM_PROMPT, USER_REQUEST)</div>
       <p class="big-copy" style="margin-top:22px">You control the <span class="yellow">instructions.</span> The notebook handles the API plumbing.</p>
     </div>
-    <div class="card center"><div class="pill">GOAL</div><div class="quote" style="margin-top:24px">Turn Claude into a useful event-planning assistant.</div></div>
+    <div class="card center"><div class="pill">GOAL</div><div class="quote" style="margin-top:24px">Turn Claude into a useful university study assistant.</div></div>
   </div>
 </section>
 
@@ -548,7 +548,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
       <label class="small muted" for="agentInstructions">AGENT INSTRUCTIONS</label>
       <textarea id="agentInstructions" class="live-textarea agent-input" data-agent-instructions>You are a practical event-planning agent. If the user's decision depends on weather, use the weather tool before recommending anything. Never claim the workshop weather simulator is live real-world data.</textarea>
       <label class="small muted" for="agentTask">TASK</label>
-      <textarea id="agentTask" class="live-textarea agent-input" data-agent-task>Should we run the club BBQ outside this Saturday in Perth?</textarea>
+      <textarea id="agentTask" class="live-textarea agent-input" data-agent-task>Should I study at the library or at home this Saturday in Perth?</textarea>
       <div class="live-controls"><button class="btn primary" data-agent-run>RUN LIVE AGENT ↗</button><span class="live-state" data-agent-state>ready</span></div>
     </div>
     <div class="trace live-trace" data-agent-trace aria-live="polite">
@@ -592,7 +592,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <h2>Give Marv a toolbox.</h2>
   <div class="grid-2 fill">
     <div class="card soft"><div class="pill">PREBUILT TOOLS</div><div class="code" style="margin-top:16px">TOOLS = [<br>  get_weather,<br>  find_room,<br>  calculate_budget,<br>  search_events,<br>  create_task<br>]</div></div>
-    <div class="card yellow-edge"><div class="pill">YOUR MISSION</div><div class="quote" style="font-size:clamp(28px,3vw,48px);margin-top:20px">Organise a 60-person beginner AI workshop next Friday with a $700 budget.</div><p class="muted">Write only the agent instructions. Watch what it chooses to do.</p></div>
+    <div class="card yellow-edge"><div class="pill">YOUR MISSION</div><div class="quote" style="font-size:clamp(28px,3vw,48px);margin-top:20px">Plan a one-week study timetable for five subjects using available time and deadlines.</div><p class="muted">Write only the agent instructions. Watch what it chooses to do.</p></div>
   </div>
 </section>
 
@@ -653,7 +653,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">NOTEBOOK // MISSION 4</div>
   <h2>Now make the path genuinely dynamic.</h2>
   <div class="grid-2 fill">
-    <div class="card yellow-edge"><div class="pill">MISSION</div><div class="quote" style="font-size:clamp(26px,3vw,46px);margin-top:20px">Choose a viable Careers Fair club activity using room capacity, weather, timing and budget.</div></div>
+    <div class="card yellow-edge"><div class="pill">MISSION</div><div class="quote" style="font-size:clamp(26px,3vw,46px);margin-top:20px">Choose a practical study location using room capacity, weather, opening hours and travel time.</div></div>
     <div class="card"><div class="pill">WHY AN AGENT?</div><div class="code" style="margin-top:16px">check room<br>↓<br>room too small<br>↓<br>find alternative<br>↓<br>recalculate budget<br>↓<br>weather changes plan<br>↓<br>recommend</div></div>
   </div>
 </section>
@@ -735,7 +735,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">NOTEBOOK // MISSION 5</div>
   <h2>Build an orchestrator.</h2>
   <div class="grid-2 fill">
-    <div class="card yellow-edge"><div class="pill">MISSION</div><div class="quote" style="font-size:clamp(26px,3vw,46px);margin-top:20px">Should UWA AI Club run an AI Hackathon, AI Careers Night or Agent Workshop next month?</div><p class="muted">Produce one recommendation.</p></div>
+    <div class="card yellow-edge"><div class="pill">MISSION</div><div class="quote" style="font-size:clamp(26px,3vw,46px);margin-top:20px">Should I revise in the library, book a study room or work from home this weekend?</div><p class="muted">Produce one recommendation.</p></div>
     <div class="card"><div class="pill">SPECIALISTS READY</div><div class="code" style="margin-top:16px">research_agent<br>budget_agent<br>audience_agent<br><br># You write:<br>MANAGER_PROMPT = """<br>...<br>"""</div></div>
   </div>
 </section>
@@ -756,8 +756,8 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">KNOWLEDGE // 32</div>
   <h2>Your agent doesn't know your private world.</h2>
   <div class="grid-2 fill" style="align-items:center">
-    <div class="card center"><div class="quote">“What does our sponsorship policy say about in-kind support?”</div></div>
-    <div class="card"><div class="pill">MODEL KNOWLEDGE</div><p class="big-copy" style="margin-top:22px">It may know general sponsorship concepts.</p><div class="divider"></div><div class="pill">PRIVATE / CURRENT KNOWLEDGE</div><p class="big-copy" style="margin-top:22px">It does not automatically know your club's latest policy.</p></div>
+    <div class="card center"><div class="quote">“What does my university's late-submission policy say?”</div></div>
+    <div class="card"><div class="pill">MODEL KNOWLEDGE</div><p class="big-copy" style="margin-top:22px">It may know general university policy concepts.</p><div class="divider"></div><div class="pill">PRIVATE / CURRENT KNOWLEDGE</div><p class="big-copy" style="margin-top:22px">It does not automatically know your university's latest policy.</p></div>
   </div>
 </section>
 
@@ -775,16 +775,16 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <h2 class="center" style="margin-top:12px"><span class="mint">Retrieval-Augmented Generation.</span></h2>
 </section>
 
-<section class="slide" data-section="knowledge" data-notes="Interactive visual only. Type sponsorship, room, constitution or event and click retrieve. The notebook does a real local retrieval over supplied documents.">
+<section class="slide" data-section="knowledge" data-notes="Interactive visual only. Type extension, room, timetable or assignment and click retrieve. The notebook does a real local retrieval over supplied documents.">
   <div class="brand-mark" data-brand></div>
   <div class="eyebrow">INTERACTIVE // WHAT SHOULD ENTER CONTEXT?</div>
   <h2>Retrieve only the relevant pieces.</h2>
   <div class="card fill" data-rag>
-    <div class="rag-search"><input value="sponsorship gift card in-kind support" aria-label="Search club documents"><button class="btn primary">RETRIEVE</button></div>
+    <div class="rag-search"><input value="late submission extension assignment" aria-label="Search university documents"><button class="btn primary">RETRIEVE</button></div>
     <div class="rag-results">
-      <div class="doc-result" data-keys="sponsorship,gift,in-kind" data-default="1"><div class="pill">sponsorship_policy.txt</div><p class="small">In-kind sponsorship can cover event consumables or equivalent support...</p></div>
+      <div class="doc-result" data-keys="late,submission,extension,assignment" data-default="1"><div class="pill">assessment_policy.txt</div><p class="small">Students may request an extension before the published deadline...</p></div>
       <div class="doc-result" data-keys="room,capacity,venue"><div class="pill">room_rules.txt</div><p class="small">Rooms must not exceed listed capacity and accessible access must remain clear...</p></div>
-      <div class="doc-result" data-keys="constitution,committee,vote"><div class="pill">constitution.txt</div><p class="small">Committee decisions requiring expenditure above the threshold...</p></div>
+      <div class="doc-result" data-keys="timetable,assignment,deadline"><div class="pill">assessment_calendar.txt</div><p class="small">Assignment deadlines and examination dates are listed by teaching period...</p></div>
     </div>
     <div class="architecture-stage" style="min-height:220px"><div class="arch-block">QUESTION</div><div class="arch-arrow">→</div><div class="arch-block">search_club_docs()</div><div class="arch-arrow">→</div><div class="arch-block agent">AGENT</div></div>
   </div>
@@ -795,7 +795,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">NOTEBOOK // MISSION 6</div>
   <h2>Make your agent document-aware.</h2>
   <div class="grid-2 fill">
-    <div class="card"><div class="pill">FILES PROVIDED</div><div class="code" style="margin-top:16px">club_constitution.txt<br>event_policy.txt<br>sponsorship_policy.txt<br>room_rules.txt</div></div>
+    <div class="card"><div class="pill">FILES PROVIDED</div><div class="code" style="margin-top:16px">student_handbook.txt<br>assessment_policy.txt<br>assessment_calendar.txt<br>room_rules.txt</div></div>
     <div class="card yellow-edge"><div class="pill">PREBUILT TOOL</div><div class="code" style="margin-top:16px">search_club_docs(query)</div><p class="big-copy" style="margin-top:18px">Your agent decides <span class="yellow">when private knowledge is needed.</span></p></div>
   </div>
 </section>
@@ -1091,19 +1091,18 @@ function initPromptBuilder(){
   const quality = q('[data-quality-fill]', root);
   const qualityLabel = q('[data-quality-label]', root);
   const snippets = {
-    success: 'Success means: the email is under 120 words, all event details are correct, and the CTA is obvious.',
-    task: 'Write a registration email for a beginner AI Agents workshop.',
-    context: 'Audience: UWA students, many with no agent-building experience. Event: 2 hours, hands-on, Jupyter notebooks provided.',
-    examples: `<examples>
-  <example>Invite UWA students to a free study-skills session with one clear registration link.</example>
-  </examples>`,
-    constraints: 'Keep the tone welcoming and practical. Avoid unexplained jargon. Do not invent event details.',
+    success: 'Success means: the email is under 120 words, all assignment details are correct, and the requested next step is obvious.',
+    task: 'Write an email asking a lecturer for an assignment extension.',
+    context: 'Audience: a university lecturer. Situation: illness has affected study time, and the assignment is due Friday.',
+    examples: `EXAMPLES:
+  Invite UWA students to a free study-skills session with one clear registration link.`,
+    constraints: 'Keep the tone respectful and practical. Avoid unexplained jargon. Do not invent assignment details.',
     output: 'Return: subject line + email body only.'
   };
   function setPrompt(value){ if('value' in promptOut) promptOut.value=value; else promptOut.textContent=value; }
   function update(){
     const active = parts.filter(p=>p.classList.contains('on')).map(p=>p.dataset.part);
-    setPrompt(active.length ? active.map(k=>snippets[k]).join(String.fromCharCode(10, 10)) : 'Write an email about my university event.');
+    setPrompt(active.length ? active.map(k=>snippets[k]).join(String.fromCharCode(10, 10)) : 'Write an email asking a lecturer for an assignment extension.');
     const score = Math.min(100, 18 + active.length*13);
     quality.style.width = `${score}%`;
     qualityLabel.textContent = active.length <= 1 ? 'vague' : active.length <= 4 ? 'much clearer' : 'testable specification';
