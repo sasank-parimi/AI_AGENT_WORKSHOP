@@ -392,8 +392,8 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">PROMPT ENGINEERING // EXAMPLES</div>
   <h2>Sometimes explaining isn't enough. <span class="yellow">Show it.</span></h2>
   <div class="grid-2 fill">
-    <div class="card"><div class="pill">0 EXAMPLES</div><div class="code" style="margin-top:18px">Input: “Where can I submit my assignment?”<br><br>Output: inconsistent answer format...</div></div>
-    <div class="card yellow-edge"><div class="pill">3 GOOD EXAMPLES</div><div class="code" style="margin-top:18px">EXAMPLES:<br>Example 1: Where can I submit my assignment? → Give the portal and a short next step.<br>Example 2: How do I join the study group? → Give the channel and meeting time.<br>Example 3: I need a quiet place to study. → Suggest a library or campus study space.</div></div>
+    <div class="card"><div class="pill">0 EXAMPLES</div><div class="code" style="margin-top:18px">User request: “Where can I submit my assignment?”<br><br>Response: inconsistent answer format...</div></div>
+    <div class="card yellow-edge"><div class="pill">3 GOOD EXAMPLES</div><div class="code" style="margin-top:18px">Examples:<br>Example 1: “Where can I submit my assignment?” → Give the portal and a short next step.<br>Example 2: “How do I join the study group?” → Give the channel and meeting time.<br>Example 3: “I need a quiet place to study.” → Suggest a library or campus study space.</div></div>
   </div>
   <p class="big-copy" style="margin-top:20px">Examples reduce ambiguity about <span class="mint">format, tone and boundaries.</span></p>
   <div class="source-note">Anthropic: “Use examples effectively”, with relevant, diverse and structured examples; 3–5 examples suggested for best results.</div>
@@ -405,7 +405,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <h2>Complex prompt? Separate the pieces.</h2>
   <div class="grid-2 fill">
     <div class="card soft"><div class="pill">BEFORE</div><div class="code" style="margin-top:16px">You are booking a university study room and here are the room rules and make it short and here are some examples and the new request is...</div></div>
-    <div class="card yellow-edge"><div class="pill">AFTER</div><div class="code" style="margin-top:16px">CONTEXT: Campus rooms require a booking and have capacity limits.<br><br>INSTRUCTIONS: Recommend a compliant room in two sentences.<br><br>EXAMPLE: Library seminar room → suitable for 12 students.<br><br>INPUT: Need a room for 10 students on Tuesday.</div></div>
+    <div class="card yellow-edge"><div class="pill">AFTER</div><div class="code" style="margin-top:16px">Campus rooms require a booking and have capacity limits. Recommend a compliant room in two sentences.<br><br>Example: “Library seminar room — suitable for 12 students.”<br><br>Request: “I need a room for 10 students on Tuesday.”</div></div>
   </div>
   <div class="callout"><strong>NOT MAGIC</strong><span>XML tags are useful because they create explicit boundaries in a complex prompt.</span></div>
   <div class="source-note">Anthropic: “Structure prompts with XML tags” for prompts mixing instructions, context, examples and variable inputs.</div>
@@ -1094,8 +1094,8 @@ function initPromptBuilder(){
     success: 'Success means: the email is under 120 words, all assignment details are correct, and the requested next step is obvious.',
     task: 'Write an email asking a lecturer for an assignment extension.',
     context: 'Audience: a university lecturer. Situation: illness has affected study time, and the assignment is due Friday.',
-    examples: `EXAMPLES:
-  Invite UWA students to a free study-skills session with one clear registration link.`,
+    examples: `Examples:
+  “Invite UWA students to a free study-skills session with one clear registration link.”`,
     constraints: 'Keep the tone respectful and practical. Avoid unexplained jargon. Do not invent assignment details.',
     output: 'Return: subject line + email body only.'
   };
