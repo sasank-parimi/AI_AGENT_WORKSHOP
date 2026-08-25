@@ -3,7 +3,7 @@
 Why this exists:
 - The browser slide deck can make real Claude API calls.
 - The Anthropic API key remains on the Python server, not in front-end JavaScript.
-- One endpoint demonstrates a real Claude tool-use loop using a workshop-only weather simulator.
+- One endpoint demonstrates a real Claude tool-use loop using a workshop-only study-room simulator.
 
 Run:
     pip install -r requirements-live.txt
@@ -104,62 +104,87 @@ def claude_stream(req: ClaudeRequest) -> StreamingResponse:
     )
 
 
-WEATHER_TOOL = {
-    "name": "get_weather",
+STUDY_ROOM_TOOL = {
+    "name": "find_study_room",
     "description": (
-        "Get simulated Perth weather for the AI Agents workshop. Use this tool whenever an event decision "
-        "depends on outdoor conditions. The result is workshop demo data, not a live forecast."
+        "Find simulated university study-room availability for a group. Use this tool when a recommendation "
+        "depends on whether a room fits the requested time, group size or accessibility needs. "
+        "Results are workshop simulation data, not live university bookings."
     ),
     "input_schema": {
         "type": "object",
         "properties": {
-            "date": {"type": "string", "description": "Date or day being considered, e.g. Saturday"},
-            "location": {"type": "string", "description": "Location, normally Perth", "default": "Perth"},
+            "date": {"type": "string", "description": "Requested date or day, for example next Tuesday"},
+            "time": {"type": "string", "description": "Requested start time, for example 15:00"},
+            "duration_minutes": {"type": "integer", "description": "Requested duration in minutes", "default": 120},
+            "group_size": {"type": "integer", "description": "Number of students who need seats"},
+            "accessibility_required": {
+                "type": "boolean",
+                "description": "Whether step-free access and an accessible route are required",
+                "default": False,
+            },
         },
-        "required": ["date"],
+        "required": ["date", "time", "group_size"],
     },
 }
 
 
-def get_weather(date: str, location: str = "Perth") -> dict[str, Any]:
-    """Deterministic workshop simulator so the lesson doesn't depend on external weather APIs."""
-    day = date.strip().lower()
-    if "saturday" in day or "sat" in day:
+def find_study_room(
+    date: str,
+    time: str,
+    group_size: int,
+    duration_minutes: int = 120,
+    accessibility_required: bool = False,
+) -> dict[str, Any]:
+    """Return deterministic room data so the lesson does not depend on a campus booking system."""
+    if os.getenv("WORKSHOP_SIMULATE_ROOM_FAILURE") == "1":
         return {
-            "location": location,
-            "date": date,
-            "temperature_c": 17,
-            "rain_probability_pct": 80,
-            "wind": "strong",
-            "conditions": "showers",
+            "ok": False,
+            "error": "Room availability service is temporarily unavailable",
             "source": "UWA AI Club workshop simulator",
-            "is_live_weather": False,
+            "is_live_booking_data": False,
         }
-    if "friday" in day or "fri" in day:
+
+    size = max(1, int(group_size))
+    requested_time = time.strip().lower()
+    requested_day = date.strip().lower()
+    rooms = [
+        {"room": "Bayliss 2.24", "capacity": 8, "accessible": True, "available": "tue" in requested_day and ("3" in requested_time or "15" in requested_time)},
+        {"room": "Reid 1.43", "capacity": 6, "accessible": False, "available": True},
+        {"room": "Barry J Marshall 5.10", "capacity": 16, "accessible": True, "available": size >= 7},
+    ]
+    matches = [
+        room for room in rooms
+        if room["available"]
+        and room["capacity"] >= size
+        and (not accessibility_required or room["accessible"])
+    ]
+    if matches:
         return {
-            "location": location,
             "date": date,
-            "temperature_c": 21,
-            "rain_probability_pct": 25,
-            "wind": "light",
-            "conditions": "partly cloudy",
+            "time": time,
+            "duration_minutes": duration_minutes,
+            "group_size": size,
+            "accessibility_required": accessibility_required,
+            "matches": matches[:3],
             "source": "UWA AI Club workshop simulator",
-            "is_live_weather": False,
+            "is_live_booking_data": False,
         }
     return {
-        "location": location,
         "date": date,
-        "temperature_c": 20,
-        "rain_probability_pct": 40,
-        "wind": "moderate",
-        "conditions": "mixed",
+        "time": time,
+        "duration_minutes": duration_minutes,
+        "group_size": size,
+        "accessibility_required": accessibility_required,
+        "matches": [],
+        "suggestion": "Try a different time or reduce the required capacity",
         "source": "UWA AI Club workshop simulator",
-        "is_live_weather": False,
+        "is_live_booking_data": False,
     }
 
 
-@app.post("/api/agent/weather")
-def weather_agent(req: AgentRequest) -> JSONResponse:
+@app.post("/api/agent/study-session")
+def study_session_agent(req: AgentRequest) -> JSONResponse:
     """Run a genuine Claude tool-use loop with one workshop tool.
 
     The trace returned to the deck contains only observable events:
@@ -167,8 +192,9 @@ def weather_agent(req: AgentRequest) -> JSONResponse:
     """
     c = client()
     instructions = req.instructions.strip() or (
-        "You are a practical event-planning agent. If the user's decision depends on weather, "
-        "use the get_weather tool before recommending anything. Clearly label the weather result as workshop demo data."
+        "You coordinate university study sessions. If a recommendation depends on room availability, capacity "
+        "or accessibility, use find_study_room before recommending anything. Clearly label room results as "
+        "workshop simulation data and never claim that a room has been booked."
     )
 
     messages: list[dict[str, Any]] = [{"role": "user", "content": req.task}]
@@ -180,7 +206,7 @@ def weather_agent(req: AgentRequest) -> JSONResponse:
             model=MODEL,
             max_tokens=800,
             system=instructions,
-            tools=[WEATHER_TOOL],
+            tools=[STUDY_ROOM_TOOL],
             messages=messages,
         )
 
@@ -200,15 +226,18 @@ def weather_agent(req: AgentRequest) -> JSONResponse:
                     "name": block.name,
                     "input": tool_input,
                 })
-                if block.name != "get_weather":
+                if block.name != "find_study_room":
                     result: dict[str, Any] = {"error": f"Unknown tool: {block.name}"}
                     is_error = True
                 else:
-                    result = get_weather(
+                    result = find_study_room(
                         date=str(tool_input.get("date", "unspecified")),
-                        location=str(tool_input.get("location", "Perth")),
+                        time=str(tool_input.get("time", "unspecified")),
+                        group_size=int(tool_input.get("group_size", 1)),
+                        duration_minutes=int(tool_input.get("duration_minutes", 120)),
+                        accessibility_required=bool(tool_input.get("accessibility_required", False)),
                     )
-                    is_error = False
+                    is_error = not result.get("ok", True)
 
                 events.append({
                     "type": "result",

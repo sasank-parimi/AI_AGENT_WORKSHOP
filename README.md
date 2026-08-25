@@ -1,145 +1,82 @@
-# UWA AI Club — AI Agents Workshop V1
+# AI Agents for an ordinary student week
 
-A beginner-friendly, two-hour workshop designed around **interaction first** rather than slide-heavy lecturing.
+An interactive UWA AI Club workshop that teaches prompting, context, tools, agent loops, retrieval, orchestration, MCP and human approval through three recurring student stories.
 
-The learning spine is:
+- **Maya:** prioritising four assessments around work shifts.
+- **Noah:** coordinating an accessible group-project meeting.
+- **Priya:** retrieving unit material and reviewing her own essay outline.
 
-**prompt → context → tools → agent loop → multi-agent → RAG → MCP → Claude Managed Agents → system architecture**
+The presentation makes real Claude API calls and shows observable tool requests and results. All room, calendar, policy and action data is fictional workshop simulation data.
 
-## What is included
+## Project structure
 
-- `index.html` — built, self-contained interactive slide deck with the UWA AI Club palette, logo and Marv mascot embedded.
-- `AI_AGENTS_WORKSHOP.ipynb` — participant notebook. Real Claude API calls; tool schemas, loops and traces are prebuilt.
-- `workshopkit/` — the hidden plumbing for Claude calls, tool execution, agent traces, RAG and specialist-agent orchestration.
-- `data/` — workshop-only mock club policies and room information for the RAG exercise.
-- `instructor/AI_AGENTS_WORKSHOP_SOLUTION.ipynb` — filled example prompts for the instructor.
-- `instructor/MANAGED_AGENTS_DEMO.ipynb` — isolated Managed Agents demo.
-- `instructor/mcp_demo/` — current MCP Python SDK v2 workshop server.
-- `FACILITATOR_GUIDE.md` — timing, transitions and contingency cuts.
+- index.html — self-contained interactive presentation and presenter notes.
+- server.py — FastAPI server for the presentation and server-side Claude calls.
+- AI_AGENTS_WORKSHOP.ipynb — participant exercises matching the presentation.
+- workshopkit.py — small, inspectable notebook runtime and simulated tools.
+- data/ — fictional assessment, unit, calendar and room documents for retrieval.
+- FACILITATOR_GUIDE.md — 120-minute run sheet and teaching notes.
+- requirements-live.txt — dependencies for the live presentation.
+- requirements.txt — dependencies for the participant notebook.
 
+## Run the live presentation
 
-## Live Claude inside the HTML deck
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements-live.txt
+    cp .env.example .env
+    # Add a workshop-only ANTHROPIC_API_KEY to .env
+    python server.py
 
-The deck now supports **real API calls directly from the interactive slides**. Participants can type or edit prompts in the deck, press **ASK CLAUDE**, and watch the response stream into the slide. The first tool-use demo also runs a real Claude tool-selection loop and renders the observable tool request/result trace.
+Open http://localhost:8000.
 
-Do **not** open `index.html` directly if you want live calls. Run the small Python server so the Anthropic key stays server-side:
+The API key stays in Python. It is never included in browser JavaScript. The status label appears only on slides that make a live call.
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements-live.txt
-cp .env.example .env
-# edit .env and paste the workshop-only ANTHROPIC_API_KEY
-python server.py
-```
+Presentation controls:
 
-Then open:
+- Left/right arrows or Space — navigate.
+- Home / End — first or last slide.
+- F — fullscreen.
+- N — presenter notes.
+- Contents — overview navigator.
+- URL hash — deep-link to a presentation state, for example #20.
 
-```text
-http://localhost:8000
-```
+If the API is unavailable, navigation and non-API interactions still work. Live-call slides show an explicit offline state.
 
-The top-left status pill should read **LIVE CLAUDE · claude-sonnet-5**. If it says **LIVE API OFFLINE**, the rest of the deck still works but the live-generation controls will not.
+## Run the participant notebook
 
-### What is live in V2
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    jupyter lab AI_AGENTS_WORKSHOP.ipynb
 
-- **Cold open:** type any job and get a real Claude response.
-- **Prompt Builder:** toggle prompt ingredients, edit the assembled prompt, then run it against Claude.
-- **Prompt Surgery:** participants rewrite a weak prompt and compare actual outputs immediately.
-- **Tool-use trace:** edit the agent instructions/task and run a real Messages API tool loop. Claude decides whether to request `get_weather`; Python executes the workshop simulator and returns the tool result.
+The notebook requests the workshop API key through getpass() and imports the local workshopkit.py.
 
-The weather tool is intentionally deterministic workshop data, not a live forecast. This keeps the lesson focused on tool selection rather than another external API dependency.
+## Live API
 
-### Recommended workshop deployment
+### GET /api/health
 
-For a room of participants, the cleanest setup is to host `server.py` once and share the workshop URL. Your Anthropic key remains on the server, so students never need to see or paste it into the HTML deck. Use a workshop-specific key/spend limit and shut the server down after the event.
+Reports whether the live server is running, whether an API key is configured and which model is selected.
 
-### Deploy on Vercel
+### POST /api/claude/stream
 
-This repository is ready for Vercel's FastAPI runtime. Vercel detects the `app` exported by `server.py`; the presentation stays at `/`, and its existing same-origin API calls continue to use `/api/health`, `/api/claude/stream`, and `/api/agent/weather`.
+Streams visible model text. Request fields are prompt, optional system instructions and max_tokens.
 
-1. Push this folder to a GitHub repository.
-2. In Vercel, choose **Add New → Project** and import that repository.
-3. Keep the detected project settings and root directory unchanged.
-4. Add `ANTHROPIC_API_KEY` under **Settings → Environment Variables** for Production, Preview, and Development as needed.
-5. Optionally add `WORKSHOP_MODEL=claude-sonnet-5` and the two `WORKSHOP_MAX_*` guardrails shown in `.env.example`.
-6. Deploy, open the assigned URL, and confirm the top-left status pill says **LIVE CLAUDE · claude-sonnet-5**.
+### POST /api/agent/study-session
 
-Do not upload a populated `.env` file or expose the key in browser JavaScript. The included `.gitignore` excludes local environment files and Vercel's local project metadata.
+Runs a real Claude tool-selection loop with the deterministic find_study_room workshop tool. The request keeps the existing task and instructions fields.
 
-## Slide deck
+The response contains only observable user, tool, result, final and error events. Room availability is always labelled as simulated and the tool never books a room.
 
-For **static/fallback presentation mode**, open `index.html` directly in a browser; the non-API interactions still work and the supplied logo/mascot are inlined. For the intended **live Claude mode**, run `server.py` and open `http://localhost:8000`.
+Set WORKSHOP_SIMULATE_ROOM_FAILURE=1 to return a controlled room-service failure.
 
-Controls:
+## Deploy on Vercel
 
-- `←` / `→` — navigate
-- `Space` — next
-- `F` — fullscreen
-- `N` — presenter notes for the current slide
-- URL hash — deep-link to a slide, e.g. `index.html#20`
+The included vercel.json uses Vercel's FastAPI runtime. Add ANTHROPIC_API_KEY as a project environment variable and deploy the project root. Optionally set WORKSHOP_MODEL, WORKSHOP_MAX_PROMPT_CHARS and WORKSHOP_MAX_OUTPUT_TOKENS.
 
-### Rebuild after editing source
+Use a workshop-specific API key with appropriate spending limits and disable it after the event.
 
-```bash
-python3 build.py
-```
+## Design and accessibility
 
-Source layout:
+The deck uses a warm workshop-notebook visual system with editorial typography, varied compositions and restrained annotations. Local fonts are preferred from fonts/; the CSS includes readable system fallbacks.
 
-```text
-src/index.html
-src/css/
-src/js/
-src/slides/
-src/assets/
-build.py
-```
-
-The build script is Python stdlib only. It concatenates the CSS/JS/slides and base64-inlines the images into `index.html`.
-
-## Participant notebook setup
-
-From the repository root:
-
-```bash
-pip install -r requirements.txt
-jupyter lab AI_AGENTS_WORKSHOP.ipynb
-```
-
-The notebook asks for the workshop API key with `getpass()`, so the key is not written into the notebook file.
-
-The default model is set in one place through `WORKSHOP_MODEL` and currently defaults to `claude-sonnet-5`. If the workshop key has access to another model, change the setup cell or set the environment variable before import.
-
-## API design
-
-The core participant notebook uses the Claude **Messages API** and user-defined tools. Claude returns structured tool requests; the local workshop runtime executes the Python functions and returns tool results to Claude. The trace displays observable actions and results, not hidden chain-of-thought.
-
-The Managed Agents material is kept separate because it is currently a beta surface and is more likely to change than the core Messages API exercises.
-
-## MCP demo
-
-Current MCP Python SDK v2:
-
-```bash
-pip install "mcp[cli]>=2,<3"
-mcp dev instructor/mcp_demo/server.py
-```
-
-The server exposes workshop-only tools/resources/prompts and touches no real UWA systems.
-
-## Technical references checked for this V1 (25 Aug 2026)
-
-- Anthropic Prompting Best Practices: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
-- Anthropic Tool Use: https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview
-- Anthropic Building Effective Agents: https://www.anthropic.com/engineering/building-effective-agents
-- Anthropic Effective Context Engineering for AI Agents: https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
-- Claude Managed Agents Quickstart: https://platform.claude.com/docs/en/managed-agents/quickstart
-- Claude Managed Agents Overview: https://platform.claude.com/docs/en/managed-agents/overview
-- MCP Python SDK v2: https://github.com/modelcontextprotocol/python-sdk
-
-## Design references
-
-The source/build philosophy is intentionally influenced by the earlier UWA AI Club Local AI workshop: self-contained HTML, modular editable source, projector legibility, and interactions that encode a teaching point rather than decorate it.
-
-The visual system for this deck is original to this workshop and uses the supplied UWA AI Club logo and Marv artwork.
+The presentation supports keyboard-only navigation, visible focus states, reduced motion, responsive layouts and print output. Verify the final venue projector at 1366×768 and 1920×1080 before delivery.

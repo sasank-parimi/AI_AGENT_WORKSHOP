@@ -1,102 +1,92 @@
-# Facilitator Guide — AI Agents Workshop
+# Facilitator guide
 
 ## Workshop promise
 
-By the end, a beginner should be able to explain the difference between prompting, context, tools, agent loops, multi-agent orchestration, retrieval and MCP — and they should have personally run real Claude tool calls in the notebook.
+By the end, a beginner should be able to decide whether a student task needs a better prompt, better context, retrieval, a deterministic workflow, an agent, several agents or a human decision. They should also have run real model and tool calls without handing assessed thinking to the system.
 
-The room should **do something every 5–8 minutes**.
+The room should make a prediction, edit something, inspect a trace or discuss a decision every 5–8 minutes.
+
+## The three recurring stories
+
+- **Maya — deadline triage:** use for prompting, evaluation and context.
+- **Noah — group-project coordination:** use for tools, failures, agent loops and approval.
+- **Priya — research and revision:** use for retrieval, orchestration, cost and academic integrity.
+
+Do not introduce unrelated enterprise examples. When someone offers one, translate the underlying idea back into one of these student situations.
 
 ## 120-minute run sheet
 
-| Time | Segment | What the audience does |
+| Time | Segment | Audience activity |
 |---|---|---|
-| 0:00–0:05 | Cold open | Decide whether the first system actually acted; watch tools change the system |
-| 0:05–0:25 | Prompt engineering | Predict output changes; use prompt builder; 90-second Prompt Surgery |
-| 0:25–0:35 | Context engineering | Pack Marv's context; discuss high-signal vs noise |
-| 0:35–0:44 | First API call | Notebook Mission 2 |
-| 0:44–0:53 | One-tool agent | Notebook Mission 3 + inspect trace |
-| 0:53–1:05 | Toolbox agent | Notebook Mission 4 + compare neighbours' traces |
-| 1:05–1:14 | Dynamic path / failure | Mission 4B if time; discuss environmental feedback |
-| 1:14–1:20 | Workflow vs agent + human approval | Classify tasks and recap |
-| 1:20–1:33 | Multi-agent | Pattern visual + Notebook Mission 5 |
-| 1:33–1:40 | RAG | Retrieval visual + Notebook Mission 6 |
-| 1:40–1:48 | MCP | Integration pain → MCP → demo server |
-| 1:48–1:55 | Managed Agents | Presenter-only demo and approval concept |
-| 1:55–2:00 | Architecture challenge | Spin a brief, team sketch, reveal one possible answer |
+| 0:00–0:08 | Cold open and student stories | Inspect the live deadline response and name its assumptions |
+| 0:08–0:26 | Prompting | Build Maya's request, define success and complete prompt surgery |
+| 0:26–0:38 | Context | Choose what belongs on Maya's desk and discuss signal |
+| 0:38–0:48 | First notebook call | Complete Mission 1 |
+| 0:48–1:04 | Tools and trace | Run the study-room agent and explain each observable event |
+| 1:04–1:19 | Toolbox and failure | Complete Mission 2, compare traces and trigger the failure |
+| 1:19–1:30 | Workflow, agent and approval | Classify student tasks and resolve Noah's approval |
+| 1:30–1:45 | Orchestration | Explore patterns and complete Mission 3 |
+| 1:45–1:55 | Retrieval | Retrieve a policy passage and complete Mission 4 |
+| 1:55–2:00 | MCP and final design | Sketch Noah's smallest viable architecture |
 
-## Slides are states, not a lecture count
+## Key transitions
 
-The deck contains many short presentation states. Several are 20–40 second reveals, not conventional slides that require explanation. Do not attempt to give every slide equal time.
+### Prompt to context
 
-## Critical transitions
+“The request describes the job. Now we need to decide which information deserves to be on the desk while the model works.”
 
-### Prompt → Context
+### Context to tools
 
-Say: **“Prompt engineering is how we instruct the model. Context engineering is deciding what information deserves to be in the room while it works.”**
+“No amount of prompt detail can tell Noah whether a room is available next Tuesday. The system needs a way to check.”
 
-### Context → Agent
+### Tool to agent loop
 
-Do not define agents first. Let students see `instructions + context + model`, then add `tools + loop`, then reveal the word **agent**.
+After the live trace, point to the observable sequence: the model requested a structured call, Python executed the simulator, and the result returned before the final answer.
 
-### Tools → Agent loop
+### Single agent to orchestration
 
-After the first trace, emphasise that Claude did not execute the Python function. It emitted a structured request, the runtime executed it, and the result returned to context.
+Ask whether Priya's evidence search and rubric review are distinct enough to justify separate calls. Treat “one careful call” as a valid design answer.
 
-### Single agent → Multi-agent
+### Retrieval to MCP
 
-Create the limitation first: one agent is being asked to research, budget, analyse and write. Then decompose. Immediately add the warning that multi-agent systems introduce cost and coordination overhead.
+“Retrieval got the right text into context. MCP addresses a different problem: how a host discovers tools and resources from many services in a consistent way.”
 
-### RAG
+## Academic integrity language
 
-Say the acronym last. Start with a private club-policy question that Claude should not guess, then build the retrieval flow visually.
+Keep this boundary stable throughout the workshop:
 
-### MCP
+- The system may plan, explain, ask questions, retrieve permitted material and give feedback.
+- The student remains responsible for claims, interpretation and submitted prose.
+- The assistant must not invent circumstances, evidence, policy or citations.
+- Current unit and university rules take precedence over fictional workshop material.
 
-Create the integration mess first. Explain that MCP is a standards layer, not an intelligence layer.
+## Live presentation routine
 
-## If running behind schedule
+Before students arrive:
+
+1. Start server.py.
+2. Confirm the status label appears on a live slide and reports the expected model.
+3. Run the cold open, prompt builder and study-room agent once.
+4. Trigger WORKSHOP_SIMULATE_ROOM_FAILURE=1, verify the trace, then unset it.
+5. Test arrow keys, space, fullscreen, notes, contents, deep links and the approval interaction.
+6. Check the deck on the venue projector.
+
+For the live tool slide, first run the default instructions. Then weaken them and run again so the room sees that providing a tool does not guarantee appropriate use.
+
+## If the API is unavailable
+
+- Keep teaching from the editable prompts and prepared task text.
+- Read the expected observable sequence from the trace debrief slide.
+- Pair students around one working machine if only some calls fail.
+- Do not imply that a simulated room result is live university data.
+
+## If running behind
 
 Cut in this order:
 
-1. Mission 4B simulated tool failure (save ~5 min)
-2. Detailed multi-agent pattern click-through; show only router + orchestrator (save ~3 min)
-3. RAG direct retrieval cell; go straight to the agent (save ~2 min)
-4. Managed Agents live execution; use the prepared slide trace instead (save ~5 min)
+1. The second prompt-builder run.
+2. The controlled room-service failure.
+3. Detailed orchestration pattern comparisons; keep the evaluator example.
+4. The direct retrieval inspection before Mission 4.
 
-Do **not** cut the first tool-call mission, the toolbox mission, or the final architecture challenge. Those are the workshop's conceptual spine.
-
-## If API calls are slow
-
-- Pair students instead of waiting for every laptop.
-- Keep the instructor solution notebook open with pre-run outputs.
-- The HTML deck's agent traces are intentionally usable as a fallback explanation.
-- Avoid repeatedly running the multi-agent mission; it creates several model calls.
-
-## API key handling
-
-Use a workshop-specific key or controlled credential with budget/rate controls where possible. The participant notebook uses hidden `getpass()` input and never writes the key to disk.
-
-
-## Live deck API setup
-
-The prompt-engineering and first tool-use slides now make real Claude calls. Start the deck with `python server.py` rather than double-clicking `index.html`. Confirm the top-left badge reads **LIVE CLAUDE** before students arrive.
-
-The live flow is deliberately designed so participants edit **prompts and agent instructions**, while the infrastructure stays prebuilt:
-
-1. Cold open: let one audience member suggest a job and type it live.
-2. Prompt Builder: change one prompt ingredient at a time and re-run so the room can see causality.
-3. Prompt Surgery: ask 2–3 groups for prompts and run them back-to-back.
-4. Tool demo: first run the default task, then deliberately weaken the agent instructions and rerun to show that the same tool availability can produce different behaviour.
-
-If the API is slow or unavailable, continue presenting normally and use the prepared static visuals/notebook outputs.
-
-## Before the room arrives
-
-- Test `AI_AGENTS_WORKSHOP.ipynb` from a clean environment.
-- Confirm the workshop key can call the configured model.
-- Run Missions 3–6 once.
-- Open `index.html` and test fullscreen/keyboard navigation.
-- Run the MCP server in the Inspector if demonstrating it live.
-- Pre-create Managed Agent and Environment IDs and test the exact demo repository.
-- Have `instructor/AI_AGENTS_WORKSHOP_SOLUTION.ipynb` open as a fallback.
-- Replace the placeholder repo/resource link on the closing slide when the public repo is ready.
+Do not cut the first live call, the visible tool trace, the human approval decision or the final architecture challenge.
