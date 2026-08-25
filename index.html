@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI Agents Workshop — UWA AI Club</title>
+  <title>AI Agents Workshop, UWA AI Club</title>
   <style>
   :root {
   --bg: #10251c;
@@ -261,7 +261,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
     <div class="card soft live-panel">
       <div class="pill">LIVE CLAUDE RESPONSE</div>
       <pre class="code live-output fill" data-live-output>Press ASK CLAUDE to make a real Messages API call.</pre>
-      <div class="callout"><strong>QUESTION</strong><span>Did it actually organise anything — or did it only tell us what to do?</span></div>
+      <div class="callout"><strong>QUESTION</strong><span>Did it actually organise anything, or did it only tell us what to do?</span></div>
     </div>
   </div>
 </section>
@@ -308,7 +308,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
     <div class="card"><div class="pill">05</div><h3 style="margin-top:16px">Constraints</h3><p class="muted">Boundaries, scope and rules.</p></div>
     <div class="card yellow-edge"><div class="pill">06</div><h3 style="margin-top:16px">Output</h3><p class="muted">What should come back?</p></div>
   </div>
-  <div class="source-note">Anthropic: Prompting best practices — clear/direct instructions, context, examples, XML structure, roles, explicit output constraints.</div>
+  <div class="source-note">Anthropic: Prompting best practices, including clear instructions, context, examples, XML structure, roles and explicit output constraints.</div>
 </section>
 
 <section class="slide" data-section="prompt" data-notes="This is the main interactive. Toggle different prompt ingredients. Ask the audience to predict what each addition will change before clicking it.">
@@ -349,7 +349,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
       <div class="divider"></div>
       <p><span class="mint">Goal:</span> Get a student to register.</p>
       <p><span class="mint">Success:</span></p>
-      <div class="code">• under 120 words\n• event facts correct\n• single obvious CTA\n• beginner-friendly tone</div>
+      <div class="code">• under 120 words<br>• event facts correct<br>• single obvious CTA<br>• beginner-friendly tone</div>
     </div>
   </div>
   <p class="big-copy" style="margin-top:20px">Prompt engineering is much easier when the output is <span class="mint">testable.</span></p>
@@ -369,7 +369,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
     <div class="card soft live-panel">
       <div class="pill">LIVE OUTPUT</div>
       <pre class="code live-output fill" data-live-output>Rewrite the prompt on the left, then run it.</pre>
-      <div class="callout"><strong>DEBRIEF</strong><span>What changed in the response — and which part of your prompt caused it?</span></div>
+      <div class="callout"><strong>DEBRIEF</strong><span>What changed in the response, and which part of your prompt caused it?</span></div>
     </div>
   </div>
 </section>
@@ -380,9 +380,9 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <h2>Don't ask “is this a good prompt?”</h2>
   <p class="big-copy">Ask whether the prompt gives enough information to achieve a specific outcome.</p>
   <div class="grid-3 fill" style="align-content:center">
-    <div class="card"><h3>Prompt A</h3><div class="code">Clear task      ●\nUseful context  ○\nConstraints     ○\nOutput          ○</div></div>
-    <div class="card"><h3>Prompt B</h3><div class="code">Clear task      ●\nUseful context  ●\nConstraints     ○\nOutput          ●</div></div>
-    <div class="card yellow-edge"><h3>Prompt C</h3><div class="code">Clear task      ●\nUseful context  ●\nConstraints     ●\nOutput          ●</div></div>
+    <div class="card"><h3>Prompt A</h3><div class="code">Clear task      ●<br>Useful context  ○<br>Constraints     ○<br>Output          ○</div></div>
+    <div class="card"><h3>Prompt B</h3><div class="code">Clear task      ●<br>Useful context  ●<br>Constraints     ○<br>Output          ●</div></div>
+    <div class="card yellow-edge"><h3>Prompt C</h3><div class="code">Clear task      ●<br>Useful context  ●<br>Constraints     ●<br>Output          ●</div></div>
   </div>
   <div class="callout"><strong>IDEA</strong><span>Prompt engineering is experimental engineering: specify → test → inspect failure → iterate.</span></div>
 </section>
@@ -392,11 +392,11 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">PROMPT ENGINEERING // EXAMPLES</div>
   <h2>Sometimes explaining isn't enough. <span class="yellow">Show it.</span></h2>
   <div class="grid-2 fill">
-    <div class="card"><div class="pill">0 EXAMPLES</div><div class="code" style="margin-top:18px">Input: “Need help ASAP!!”\n\nOutput: inconsistent labels and formats...</div></div>
-    <div class="card yellow-edge"><div class="pill">3 GOOD EXAMPLES</div><div class="code" style="margin-top:18px">&lt;examples&gt;\n  &lt;example&gt;... → URGENT&lt;/example&gt;\n  &lt;example&gt;... → NORMAL&lt;/example&gt;\n  &lt;example&gt;... → LOW&lt;/example&gt;\n&lt;/examples&gt;</div></div>
+    <div class="card"><div class="pill">0 EXAMPLES</div><div class="code" style="margin-top:18px">Input: “Where can I submit my assignment?”<br><br>Output: inconsistent answer format...</div></div>
+    <div class="card yellow-edge"><div class="pill">3 GOOD EXAMPLES</div><div class="code" style="margin-top:18px">&lt;examples&gt;<br>  &lt;example&gt;Where can I submit my assignment? → Give the portal and a short next step.&lt;/example&gt;<br>  &lt;example&gt;How do I join the study group? → Give the channel and meeting time.&lt;/example&gt;<br>  &lt;example&gt;I need a quiet place to study. → Suggest a library or campus study space.&lt;/example&gt;<br>&lt;/examples&gt;</div></div>
   </div>
   <p class="big-copy" style="margin-top:20px">Examples reduce ambiguity about <span class="mint">format, tone and boundaries.</span></p>
-  <div class="source-note">Anthropic: “Use examples effectively” — relevant, diverse, structured examples; 3–5 examples suggested for best results.</div>
+  <div class="source-note">Anthropic: “Use examples effectively”, with relevant, diverse and structured examples; 3–5 examples suggested for best results.</div>
 </section>
 
 <section class="slide" data-section="prompt" data-notes="Emphasise that XML is not magic syntax. The teaching point is separation of instructions, context, examples and variable input.">
@@ -404,8 +404,8 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">PROMPT ENGINEERING // STRUCTURE</div>
   <h2>Complex prompt? Separate the pieces.</h2>
   <div class="grid-2 fill">
-    <div class="card soft"><div class="pill">BEFORE</div><div class="code" style="margin-top:16px">You are reviewing sponsorship requests and here's our policy and also make it short and here are some examples and the new request is...</div></div>
-    <div class="card yellow-edge"><div class="pill">AFTER</div><div class="code" style="margin-top:16px">&lt;context&gt;...&lt;/context&gt;\n\n&lt;instructions&gt;...&lt;/instructions&gt;\n\n&lt;examples&gt;...&lt;/examples&gt;\n\n&lt;input&gt;...&lt;/input&gt;</div></div>
+    <div class="card soft"><div class="pill">BEFORE</div><div class="code" style="margin-top:16px">You are booking a university study room and here are the room rules and make it short and here are some examples and the new request is...</div></div>
+    <div class="card yellow-edge"><div class="pill">AFTER</div><div class="code" style="margin-top:16px">&lt;context&gt;Campus rooms require a booking and have capacity limits.&lt;/context&gt;<br><br>&lt;instructions&gt;Recommend a compliant room in two sentences.&lt;/instructions&gt;<br><br>&lt;examples&gt;Library seminar room → suitable for 12 students.&lt;/examples&gt;<br><br>&lt;input&gt;Need a room for 10 students on Tuesday.&lt;/input&gt;</div></div>
   </div>
   <div class="callout"><strong>NOT MAGIC</strong><span>XML tags are useful because they create explicit boundaries in a complex prompt.</span></div>
   <div class="source-note">Anthropic: “Structure prompts with XML tags” for prompts mixing instructions, context, examples and variable inputs.</div>
@@ -456,12 +456,12 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
     </div>
     <div class="card">
       <div class="pill">CONTEXT ROT</div>
-      <div class="code" style="margin-top:24px">relevant\n+ stale\n+ duplicate\n+ irrelevant\n+ enormous\n+ conflicting</div>
+      <div class="code" style="margin-top:24px">relevant<br>+ stale<br>+ duplicate<br>+ irrelevant<br>+ enormous<br>+ conflicting</div>
       <div class="flow-arrow" style="text-align:center">↓</div><div class="node agent">MODEL</div>
     </div>
   </div>
   <p class="big-copy" style="margin-top:18px">The goal is not maximum context. It is <span class="mint">minimum high-signal context that reliably works.</span></p>
-  <div class="source-note">Anthropic engineering: Effective context engineering for AI agents — curate a high-signal working context; retrieve/disclose information as needed.</div>
+  <div class="source-note">Anthropic engineering: Effective context engineering for AI agents, curate a high-signal working context and retrieve information as needed.</div>
 </section>
 
 <section class="slide" data-section="context" data-notes="This is the bridge to tools and retrieval. Ask: instead of stuffing the entire drive into the prompt, what if Claude can search it when it needs something?">
@@ -506,7 +506,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
     <div class="node">RESULT<br><span class="muted small">returns to context</span></div>
   </div>
   <div class="callout"><strong>MENTAL MODEL</strong><span>An LLM using tools in a loop to accomplish a goal.</span></div>
-  <div class="source-note">Anthropic: tool use is a contract — Claude chooses a structured tool call; your app or Anthropic executes it; results flow back into the conversation.</div>
+  <div class="source-note">Anthropic: tool use is a contract. Claude chooses a structured tool call; your app or Anthropic executes it; results flow back into the conversation.</div>
 </section>
 
 <section class="slide" data-section="agents" data-notes="Switch to the notebook. This first mission is intentionally easy so everyone gets a live API result before dealing with tools.">
@@ -515,7 +515,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
     <div>
       <div class="eyebrow">NOTEBOOK // MISSION 2</div>
       <h2>Your first live model call.</h2>
-      <div class="code">SYSTEM_PROMPT = """\nYou are ...\n"""\n\nUSER_REQUEST = """\nHelp organise ...\n"""\n\nask_claude(SYSTEM_PROMPT, USER_REQUEST)</div>
+      <div class="code">SYSTEM_PROMPT = """<br>You are ...<br>"""<br><br>USER_REQUEST = """<br>Help organise ...<br>"""<br><br>ask_claude(SYSTEM_PROMPT, USER_REQUEST)</div>
       <p class="big-copy" style="margin-top:22px">You control the <span class="yellow">instructions.</span> The notebook handles the API plumbing.</p>
     </div>
     <div class="card center"><div class="pill">GOAL</div><div class="quote" style="margin-top:24px">Turn Claude into a useful event-planning assistant.</div></div>
@@ -580,8 +580,8 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">TOOLS // THE CONTRACT</div>
   <h2>A tool is an interface Claude has to understand.</h2>
   <div class="grid-2 fill">
-    <div class="card"><div class="pill">BAD CONTRACT</div><div class="code" style="margin-top:16px">def search(x):\n    ...</div><p class="muted">Search what? What is x? What comes back?</p></div>
-    <div class="card yellow-edge"><div class="pill">BETTER CONTRACT</div><div class="code" style="margin-top:16px">def search_events(\n  event_type: str,\n  date: str,\n  max_results: int\n):\n    """Find matching events."""</div></div>
+    <div class="card"><div class="pill">BAD CONTRACT</div><div class="code" style="margin-top:16px">def search(x):<br>    ...</div><p class="muted">Search what? What is x? What comes back?</p></div>
+    <div class="card yellow-edge"><div class="pill">BETTER CONTRACT</div><div class="code" style="margin-top:16px">def search_events(<br>  event_type: str,<br>  date: str,<br>  max_results: int<br>):<br>    """Find matching events."""</div></div>
   </div>
   <p class="big-copy" style="margin-top:18px">Clear tools reduce ambiguity in the agent's <span class="mint">action space.</span></p>
 </section>
@@ -591,12 +591,12 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">NOTEBOOK // MISSION 3</div>
   <h2>Give Marv a toolbox.</h2>
   <div class="grid-2 fill">
-    <div class="card soft"><div class="pill">PREBUILT TOOLS</div><div class="code" style="margin-top:16px">TOOLS = [\n  get_weather,\n  find_room,\n  calculate_budget,\n  search_events,\n  create_task\n]</div></div>
+    <div class="card soft"><div class="pill">PREBUILT TOOLS</div><div class="code" style="margin-top:16px">TOOLS = [<br>  get_weather,<br>  find_room,<br>  calculate_budget,<br>  search_events,<br>  create_task<br>]</div></div>
     <div class="card yellow-edge"><div class="pill">YOUR MISSION</div><div class="quote" style="font-size:clamp(28px,3vw,48px);margin-top:20px">Organise a 60-person beginner AI workshop next Friday with a $700 budget.</div><p class="muted">Write only the agent instructions. Watch what it chooses to do.</p></div>
   </div>
 </section>
 
-<section class="slide" data-section="agents" data-notes="Use real traces from the room if possible. The three examples here are placeholders to classify common failure modes.">
+<section class="slide" data-section="agents" data-notes="Use real traces from the room if possible. The three university event-planning scenarios classify common failure modes.">
   <div class="brand-mark" data-brand></div>
   <div class="eyebrow">COMPARE // SAME TOOLS, DIFFERENT AGENT</div>
   <h2>Why did they behave differently?</h2>
@@ -605,7 +605,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
     <div class="card"><div class="pill">AGENT B</div><h3 style="margin-top:16px">Passive</h3><p class="muted">Wrote suggestions instead of using available capabilities.</p></div>
     <div class="card yellow-edge"><div class="pill">AGENT C</div><h3 style="margin-top:16px">Selective</h3><p class="muted">Used the minimum tools needed to answer the goal.</p></div>
   </div>
-  <div class="callout"><strong>WHAT CHANGED?</strong><span>Instructions + context + tool descriptions — not the underlying capabilities.</span></div>
+  <div class="callout"><strong>WHAT CHANGED?</strong><span>Instructions + context + tool descriptions, not the underlying capabilities.</span></div>
 </section>
 
 <section class="slide" data-section="agents" data-notes="Show the pseudocode only after students have seen it happen. The loop should feel obvious by now.">
@@ -613,7 +613,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">THE AGENT LOOP</div>
   <h2>The core is surprisingly small.</h2>
   <div class="grid-2 fill" style="align-items:center">
-    <div class="code" style="font-size:clamp(17px,1.7vw,25px)">while not finished:\n    response = model(context, tools)\n\n    if response.requests_tool:\n        result = execute_tool()\n        context += result\n    else:\n        finished = True</div>
+    <div class="code" style="font-size:clamp(17px,1.7vw,25px)">while not finished:<br>    response = model(context, tools)<br><br>    if response.requests_tool:<br>        result = execute_tool()<br>        context += result<br>    else:<br>        finished = True</div>
     <div class="flow-stack">
       <div class="node agent">MODEL</div><div class="flow-arrow">↓</div><div class="node">DECIDE</div><div class="flow-arrow">↙ &nbsp; ↘</div><div class="pattern-row"><div class="node">ANSWER</div><div class="node tool">TOOL</div></div><div class="flow-arrow">↺</div>
     </div>
@@ -654,7 +654,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <h2>Now make the path genuinely dynamic.</h2>
   <div class="grid-2 fill">
     <div class="card yellow-edge"><div class="pill">MISSION</div><div class="quote" style="font-size:clamp(26px,3vw,46px);margin-top:20px">Choose a viable Careers Fair club activity using room capacity, weather, timing and budget.</div></div>
-    <div class="card"><div class="pill">WHY AN AGENT?</div><div class="code" style="margin-top:16px">check room\n↓\nroom too small\n↓\nfind alternative\n↓\nrecalculate budget\n↓\nweather changes plan\n↓\nrecommend</div></div>
+    <div class="card"><div class="pill">WHY AN AGENT?</div><div class="code" style="margin-top:16px">check room<br>↓<br>room too small<br>↓<br>find alternative<br>↓<br>recalculate budget<br>↓<br>weather changes plan<br>↓<br>recommend</div></div>
   </div>
 </section>
 
@@ -663,7 +663,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">AGENTS // FAILURE IS INPUT</div>
   <h2>What happens when the world says no?</h2>
   <div class="grid-2 fill" style="align-items:center">
-    <div class="card"><div class="code">find_room(...)\n\nERROR:\nBooking service unavailable</div></div>
+    <div class="card"><div class="code">find_room(...)<br><br>ERROR:<br>Booking service unavailable</div></div>
     <div class="col">
       <div class="step-card"><div class="step-num">?</div><span>Retry with a sensible limit?</span></div>
       <div class="step-card"><div class="step-num">?</div><span>Use another source?</span></div>
@@ -727,7 +727,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
     <div class="pattern-diagram" data-view="orchestrator"><div class="pattern-row"><div class="pattern-node yellow-edge">LEAD</div><div class="pattern-arrow">⇄</div><div class="col"><div class="pattern-node">WORKER</div><div class="pattern-node">WORKER</div><div class="pattern-node">WORKER</div></div></div><p class="big-copy center" style="margin:32px auto 0">The lead dynamically decides what work to delegate.</p></div>
     <div class="pattern-diagram" data-view="evaluator"><div class="pattern-row"><div class="pattern-node">GENERATE</div><div class="pattern-arrow">⇄</div><div class="pattern-node yellow-edge">CRITIQUE</div></div><p class="big-copy center" style="margin:32px auto 0">One component produces; another evaluates against explicit criteria.</p></div>
   </div>
-  <div class="source-note">Anthropic: Building Effective Agents — prompt chaining, routing, parallelization, orchestrator-workers and evaluator-optimizer.</div>
+  <div class="source-note">Anthropic: Building Effective Agents, including prompt chaining, routing, parallelization, orchestrator-workers and evaluator-optimizer.</div>
 </section>
 
 <section class="slide" data-section="agents" data-notes="Notebook Mission 5. Participants write the manager instructions; specialist agents and their tools are already set up.">
@@ -736,7 +736,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <h2>Build an orchestrator.</h2>
   <div class="grid-2 fill">
     <div class="card yellow-edge"><div class="pill">MISSION</div><div class="quote" style="font-size:clamp(26px,3vw,46px);margin-top:20px">Should UWA AI Club run an AI Hackathon, AI Careers Night or Agent Workshop next month?</div><p class="muted">Produce one recommendation.</p></div>
-    <div class="card"><div class="pill">SPECIALISTS READY</div><div class="code" style="margin-top:16px">research_agent\nbudget_agent\naudience_agent\n\n# You write:\nMANAGER_PROMPT = """\n...\n"""</div></div>
+    <div class="card"><div class="pill">SPECIALISTS READY</div><div class="code" style="margin-top:16px">research_agent<br>budget_agent<br>audience_agent<br><br># You write:<br>MANAGER_PROMPT = """<br>...<br>"""</div></div>
   </div>
 </section>
 
@@ -795,7 +795,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">NOTEBOOK // MISSION 6</div>
   <h2>Make your agent document-aware.</h2>
   <div class="grid-2 fill">
-    <div class="card"><div class="pill">FILES PROVIDED</div><div class="code" style="margin-top:16px">club_constitution.txt\nevent_policy.txt\nsponsorship_policy.txt\nroom_rules.txt</div></div>
+    <div class="card"><div class="pill">FILES PROVIDED</div><div class="code" style="margin-top:16px">club_constitution.txt<br>event_policy.txt<br>sponsorship_policy.txt<br>room_rules.txt</div></div>
     <div class="card yellow-edge"><div class="pill">PREBUILT TOOL</div><div class="code" style="margin-top:16px">search_club_docs(query)</div><p class="big-copy" style="margin-top:18px">Your agent decides <span class="yellow">when private knowledge is needed.</span></p></div>
   </div>
 </section>
@@ -833,7 +833,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">MCP // WORKSHOP SERVER</div>
   <h2>One tiny server. Four discoverable capabilities.</h2>
   <div class="grid-2 fill">
-    <div class="card yellow-edge"><div class="pill">uwa-ai-workshop</div><div class="code" style="margin-top:16px">get_event_schedule()\nfind_room()\nget_club_information()\ncreate_task()</div></div>
+    <div class="card yellow-edge"><div class="pill">uwa-ai-workshop</div><div class="code" style="margin-top:16px">get_event_schedule()<br>find_room()<br>get_club_information()<br>create_task()</div></div>
     <div class="card"><div class="pill">MCP HOST SEES</div><div class="flow-stack" style="margin-top:24px"><div class="node tool">TOOLS</div><div class="flow-arrow">+</div><div class="node">RESOURCES</div><div class="flow-arrow">+</div><div class="node">PROMPTS</div></div></div>
   </div>
   <p class="big-copy" style="margin-top:18px">The server doesn't “talk to the model.” It exposes capabilities to a host that does.</p>
@@ -858,7 +858,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   <div class="eyebrow">CLAUDE MANAGED AGENTS // 39</div>
   <h2>We've secretly been building infrastructure too.</h2>
   <div class="grid-2 fill">
-    <div class="card"><div class="pill">OUR NOTEBOOK HANDLES</div><div class="code" style="margin-top:16px">conversation state\nagent loop\ntool execution\nretries\ntrace rendering\nstopping rules</div></div>
+    <div class="card"><div class="pill">OUR NOTEBOOK HANDLES</div><div class="code" style="margin-top:16px">conversation state<br>agent loop<br>tool execution<br>retries<br>trace rendering<br>stopping rules</div></div>
     <div class="card yellow-edge center"><div class="quote">What if the runtime manages much of this for us?</div></div>
   </div>
 </section>
@@ -927,7 +927,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
     <div class="wheel"><div><div class="wheel-label">TWIST</div><div class="wheel-value">Human approval</div></div></div>
   </div>
   <div class="toolbar" style="justify-content:center;margin-top:18px"><button class="btn primary" data-spin>SPIN THE BRIEF</button></div>
-  <div class="callout" style="margin-top:18px"><strong>YOUR BRIEF</strong><span data-brief>Cybersecurity system that must detect — twist: human approval required.</span></div>
+  <div class="callout" style="margin-top:18px"><strong>YOUR BRIEF</strong><span data-brief>University event system that must organise, with human approval required.</span></div>
 </section>
 
 <section class="slide" data-section="mcp" data-notes="Give them 90 seconds. They should explicitly decide what stays deterministic and what is agentic.">
@@ -989,7 +989,7 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
   </div>
   <div class="pattern-row" style="margin:24px 0"><div class="pattern-node">KNOWLEDGE</div><div class="pattern-arrow">+</div><div class="pattern-node">AGENTS</div><div class="pattern-arrow">+</div><div class="pattern-node">MCP</div><div class="pattern-arrow">+</div><div class="pattern-node">HUMANS</div></div>
   <h1 style="font-size:clamp(50px,6.5vw,96px);margin-top:18px">Agents aren't magic.</h1>
-  <p class="big-copy">They're models, context, tools and loops — <span class="yellow">composed well.</span></p>
+  <p class="big-copy">They're models, context, tools and loops, <span class="yellow">composed well.</span></p>
 </section>
 
 <section class="slide center" data-section="mcp" data-notes="Leave this up for Q&A. Replace the placeholder links/QRs before the event.">
@@ -1094,14 +1094,16 @@ function initPromptBuilder(){
     success: 'Success means: the email is under 120 words, all event details are correct, and the CTA is obvious.',
     task: 'Write a registration email for a beginner AI Agents workshop.',
     context: 'Audience: UWA students, many with no agent-building experience. Event: 2 hours, hands-on, Jupyter notebooks provided.',
-    examples: '<examples>\n<example>Short, energetic event copy with a single clear CTA.</example>\n</examples>',
+    examples: `<examples>
+  <example>Invite UWA students to a free study-skills session with one clear registration link.</example>
+  </examples>`,
     constraints: 'Keep the tone welcoming and practical. Avoid unexplained jargon. Do not invent event details.',
     output: 'Return: subject line + email body only.'
   };
   function setPrompt(value){ if('value' in promptOut) promptOut.value=value; else promptOut.textContent=value; }
   function update(){
     const active = parts.filter(p=>p.classList.contains('on')).map(p=>p.dataset.part);
-    setPrompt(active.length ? active.map(k=>snippets[k]).join('\n\n') : 'Write an email about my AI event.');
+    setPrompt(active.length ? active.map(k=>snippets[k]).join(String.fromCharCode(10, 10)) : 'Write an email about my university event.');
     const score = Math.min(100, 18 + active.length*13);
     quality.style.width = `${score}%`;
     qualityLabel.textContent = active.length <= 1 ? 'vague' : active.length <= 4 ? 'much clearer' : 'testable specification';
@@ -1257,7 +1259,7 @@ function initPermission(){
   const p=q('[data-permission]'); if(!p) return;
   qa('button',p).forEach(btn=>btn.addEventListener('click',()=>{
     p.classList.add('resolved');
-    q('[data-permission-status]',p).textContent = btn.dataset.decision==='allow' ? 'Approved — tool execution continues' : 'Denied — agent must choose another path';
+    q('[data-permission-status]',p).textContent = btn.dataset.decision==='allow' ? 'Approved, tool execution continues' : 'Denied, agent must choose another path';
     qa('button',p).forEach(b=>b.disabled=true);
   }));
 }
@@ -1271,7 +1273,7 @@ function initWheels(){
   q('[data-spin]',root.closest('.slide')).addEventListener('click',()=>{
     const vals=[pick(domain),pick(mission),pick(twist)];
     qa('.wheel-value',root).forEach((el,i)=>{el.animate([{transform:'translateY(-8px)',opacity:.2},{transform:'none',opacity:1}],{duration:280});el.textContent=vals[i];});
-    const brief=q('[data-brief]',root.closest('.slide')); brief.innerHTML=`<strong>${vals[0]}</strong> system that must <strong>${vals[1].toLowerCase()}</strong> — twist: <strong>${vals[2].toLowerCase()}</strong>.`;
+    const brief=q('[data-brief]',root.closest('.slide')); brief.innerHTML=`<strong>${vals[0]}</strong> system that must <strong>${vals[1].toLowerCase()}</strong>, with human approval required for <strong>${vals[2].toLowerCase()}</strong>.`;
   });
 }
 
