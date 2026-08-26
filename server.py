@@ -39,7 +39,7 @@ MODEL = os.getenv("WORKSHOP_MODEL", "claude-sonnet-5")
 MAX_PROMPT_CHARS = int(os.getenv("WORKSHOP_MAX_PROMPT_CHARS", "12000"))
 MAX_OUTPUT_TOKENS = int(os.getenv("WORKSHOP_MAX_OUTPUT_TOKENS", "1200"))
 
-app = FastAPI(title="UWA AI Club — Live Agents Workshop")
+app = FastAPI(title="AI Agents Workshop: Live Server")
 
 
 class ClaudeRequest(BaseModel):
@@ -258,7 +258,7 @@ def authentication_exception_handler(_, __: AuthenticationError):
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
-    print("\nUWA AI Club — Live AI Agents Workshop")
+    print("\nAI Agents Workshop: Live Server")
     print(f"Model: {MODEL}")
     print(f"API key configured: {'yes' if api_key() else 'NO'} ({credential_source()})")
     print(f"Open: http://localhost:{port}\n")

@@ -1,4 +1,4 @@
-Sample student calendar — current workshop week
+Sample student calendar: current workshop week
 
 This document contains fictional workshop data.
 
@@ -14,17 +14,18 @@ Wednesday
 - 8:30–10:30 available for study
 - 11:00–1:00 classes
 - 2:00–4:00 available for study
-- CITS2200 problem set due at 5:00 pm
+- ACCT1101 problem set due at 5:00 pm
 
 Thursday
 - Classes 11:00–3:00
 - Work shift 5:00–10:00
+- MGMT2002 case analysis due at 5:00 pm
 
 Friday
 - 9:00–12:00 available for study
-- ECON1101 quiz at 1:00 pm
+- MKTG1101 quiz at 1:00 pm
 
 Sunday
 - 9:00–12:00 available for study
-- COMM1001 group slides due at 6:00 pm
+- BUSN1001 group slides due at 6:00 pm
 - Afternoon reserved for rest

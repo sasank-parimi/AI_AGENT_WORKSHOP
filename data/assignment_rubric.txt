@@ -1,12 +1,12 @@
-CITS2200 algorithms problem set — sample rubric
+MGMT2002 leadership case analysis: sample rubric
 
 This is fictional workshop material, not an official UWA rubric.
 
-- Selects an algorithm that matches the graph conditions.
-- Explains why the algorithm is appropriate.
-- States relevant assumptions and edge cases.
-- Analyses time and space complexity using the representation given.
-- Tests the solution with a small example.
-- Communicates reasoning clearly without relying on unexplained code output.
+- Identifies the leadership theory that is actually relevant to the case.
+- Applies the theory to specific details in the case, not just the topic in general.
+- Considers at least one alternative explanation or approach.
+- States assumptions where the case is ambiguous.
+- References course concepts and sources appropriately.
+- Communicates reasoning clearly, in the student's own words.
 
-The Student Agent may ask questions, explain course concepts and review a student's own draft against these criteria. It must not produce a submission-ready solution.
+The agent may ask questions, explain course concepts and review a student's own draft against these criteria. It must not produce a submission-ready case analysis.

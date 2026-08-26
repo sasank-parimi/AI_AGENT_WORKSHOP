@@ -3,28 +3,28 @@
   "source": "fictional workshop deadline data",
   "deadlines": [
     {
-      "unit_code": "CITS2200",
-      "assessment": "Algorithms problem set",
+      "unit_code": "ACCT1101",
+      "assessment": "Financial accounting problem set",
       "due": "2026-09-16T17:00:00+08:00",
       "weight_percent": 20,
       "estimated_hours_remaining": 4.5
     },
     {
-      "unit_code": "HIST2001",
-      "assessment": "Research essay",
+      "unit_code": "MGMT2002",
+      "assessment": "Leadership case analysis",
       "due": "2026-09-17T17:00:00+08:00",
       "weight_percent": 40,
       "estimated_hours_remaining": 7
     },
     {
-      "unit_code": "ECON1101",
+      "unit_code": "MKTG1101",
       "assessment": "Online quiz",
       "due": "2026-09-19T13:00:00+08:00",
       "weight_percent": 15,
       "estimated_hours_remaining": 3
     },
     {
-      "unit_code": "COMM1001",
+      "unit_code": "BUSN1001",
       "assessment": "Group presentation slides",
       "due": "2026-09-20T18:00:00+08:00",
       "weight_percent": 25,

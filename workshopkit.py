@@ -1,9 +1,11 @@
 """Inspectable runtime for the UWA AI Agents student workshop.
 
-The notebook builds one Student Agent and progressively gives it planning,
-retrieval, revision and specialist capabilities. Every tool call and result is
-returned as an observable event. Hidden chain-of-thought is never requested or
-displayed. All student records and actions are deterministic workshop data.
+The notebook builds three independent agents: a Tutor, a Flashcard Generator
+and a Study Planner. Each one is fully scaffolded with tools and fictional
+course data, so participants focus on writing the instructions. Every tool
+call and result is returned as an observable event. Hidden chain-of-thought is
+never requested or displayed. All student records and actions are
+deterministic workshop data.
 """
 from __future__ import annotations
 
@@ -222,6 +224,7 @@ PLANNER_TOOLS = [
 COURSE_DOCUMENTS = (
     "unit_outline.txt",
     "lecture_04_notes.txt",
+    "lecture_05_notes.txt",
     "assignment_rubric.txt",
     "assessment_policy.txt",
     "student_calendar.txt",
@@ -273,47 +276,47 @@ def _get_mastery_record(args: dict[str, Any]) -> dict[str, Any]:
     return {"ok": True, **data, "topics": topics}
 
 
-QUIZ_BANK: dict[str, list[dict[str, str]]] = {
-    "graph traversal": [
-        {"question": "When does breadth-first search guarantee a shortest path?", "check_for": "An unweighted graph, with distance measured in edges."},
-        {"question": "What does O(V + E) assume about the graph representation?", "check_for": "An adjacency-list representation."},
+FLASHCARD_BANK: dict[str, list[dict[str, str]]] = {
+    "leadership styles": [
+        {"front": "What does situational leadership say a leader should adjust?", "back": "The style used, based on a follower's readiness: their competence and confidence for the task."},
+        {"front": "When does a transactional approach make the most sense?", "back": "For routine, well-defined work where the exchange of effort for reward is clear."},
     ],
-    "shortest paths": [
-        {"question": "Why can Dijkstra's algorithm fail with a negative edge?", "check_for": "Its greedy settled choice may later be improved."},
-        {"question": "Which algorithm would you choose for an unweighted shortest-path problem, and why?", "check_for": "Breadth-first search because it explores by edge distance."},
+    "organisational culture": [
+        {"front": "What are artifacts in organisational culture?", "back": "The visible, audible parts of a culture: dress code, office layout, how meetings run."},
+        {"front": "Why are basic assumptions the hardest layer of culture to shift?", "back": "People usually aren't consciously aware they hold them, so they're rarely said out loud."},
     ],
-    "dynamic programming": [
-        {"question": "What two properties suggest a dynamic-programming approach?", "check_for": "Overlapping subproblems and optimal substructure."},
-        {"question": "What should a state definition make explicit?", "check_for": "The information needed to describe a subproblem."},
+    "team dynamics": [
+        {"front": "What happens during the storming stage of team development?", "back": "Disagreement surfaces as the team works out roles, expectations and how to handle conflict."},
+        {"front": "What can push a team back to an earlier stage?", "back": "A change in membership, or a task that turns out to be harder than expected."},
     ],
 }
 
 
-def _generate_quiz(args: dict[str, Any]) -> dict[str, Any]:
+def _generate_flashcards(args: dict[str, Any]) -> dict[str, Any]:
     topic = str(args.get("topic", "")).strip().lower()
     excerpt = str(args.get("source_excerpt", "")).strip()
     if not excerpt:
-        return {"ok": False, "error": "Retrieve a course passage before generating a quiz"}
-    questions = next((items for key, items in QUIZ_BANK.items() if key in topic or topic in key), None)
-    if not questions:
-        return {"ok": False, "error": f"No supplied quiz bank for topic: {topic}"}
+        return {"ok": False, "error": "Retrieve a course passage before generating flashcards"}
+    cards = next((items for key, items in FLASHCARD_BANK.items() if key in topic or topic in key), None)
+    if not cards:
+        return {"ok": False, "error": f"No supplied flashcard bank for topic: {topic}"}
     grounding_terms = {
-        "graph traversal": ("breadth-first", "graph traversal", "adjacency"),
-        "shortest paths": ("dijkstra", "shortest path", "edge weight"),
-        "dynamic programming": ("dynamic programming", "subproblem", "optimal substructure"),
+        "leadership styles": ("situational leadership", "transformational", "transactional"),
+        "organisational culture": ("organisational culture", "artifacts", "espoused values", "basic assumptions"),
+        "team dynamics": ("team dynamics", "tuckman", "forming", "storming", "norming", "performing"),
     }
-    matched_topic = next(key for key in QUIZ_BANK if key in topic or topic in key)
+    matched_topic = next(key for key in FLASHCARD_BANK if key in topic or topic in key)
     if not any(term in excerpt.lower() for term in grounding_terms[matched_topic]):
         return {
             "ok": False,
-            "error": f"The retrieved excerpt does not support a quiz about {matched_topic}",
+            "error": f"The retrieved excerpt does not support flashcards about {matched_topic}",
         }
-    count = max(1, min(len(questions), int(args.get("count", 2))))
+    count = max(1, min(len(cards), int(args.get("count", 2))))
     return {
         "ok": True,
         "topic": topic,
-        "questions": questions[:count],
-        "status": "formative_practice_only",
+        "cards": cards[:count],
+        "status": "self_study_only",
         "grounded_in_supplied_excerpt": True,
     }
 
@@ -343,9 +346,9 @@ get_mastery_record = Tool(
     _get_mastery_record,
 )
 
-generate_quiz = Tool(
-    "generate_quiz",
-    "Generate formative questions from a retrieved course passage. This must not create assessed answers.",
+generate_flashcards = Tool(
+    "generate_flashcards",
+    "Generate front/back flashcards from a retrieved course passage. This must not create assessed answers.",
     {
         "type": "object",
         "properties": {
@@ -355,11 +358,11 @@ generate_quiz = Tool(
         },
         "required": ["topic", "source_excerpt"],
     },
-    _generate_quiz,
+    _generate_flashcards,
 )
 
-STUDY_UPGRADE_TOOLS = [search_course_notes, get_mastery_record, generate_quiz]
-STUDENT_AGENT_TOOLS = PLANNER_TOOLS + STUDY_UPGRADE_TOOLS
+TUTOR_TOOLS = [search_course_notes]
+FLASHCARD_TOOLS = [search_course_notes, get_mastery_record, generate_flashcards]
 
 
 def run_agent(
@@ -437,14 +440,19 @@ def run_agent(
     return {"ok": False, "model": DEFAULT_MODEL, "events": events}
 
 
-def run_student_planner(instructions: str, task: str) -> dict[str, Any]:
-    """Run Mission 1 with the five planning tools."""
+def run_study_planner(instructions: str, task: str) -> dict[str, Any]:
+    """Run the Study Planner Agent with the five planning tools."""
     return run_agent(instructions, task, tools=PLANNER_TOOLS, max_steps=7, max_tokens=1000)
 
 
-def run_revision_upgrade(instructions: str, task: str) -> dict[str, Any]:
-    """Run the same Student Agent with planning, retrieval and quiz tools."""
-    return run_agent(instructions, task, tools=STUDENT_AGENT_TOOLS, max_steps=8, max_tokens=1000)
+def run_tutor_agent(instructions: str, task: str) -> dict[str, Any]:
+    """Run the Tutor Agent, which retrieves supplied unit material before answering."""
+    return run_agent(instructions, task, tools=TUTOR_TOOLS, max_steps=6, max_tokens=900)
+
+
+def run_flashcard_agent(instructions: str, task: str) -> dict[str, Any]:
+    """Run the Flashcard Generator Agent: check mastery, retrieve, then generate cards."""
+    return run_agent(instructions, task, tools=FLASHCARD_TOOLS, max_steps=7, max_tokens=900)
 
 
 def show_trace(result: dict[str, Any], title: str = "OBSERVABLE TRACE") -> None:

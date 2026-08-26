@@ -1,21 +1,21 @@
-# Build one Student Agent
+# AI Agents Workshop
 
-An interactive UWA AI Club workshop that teaches CRAFT prompting, context engineering, tools, agent loops, retrieval, specialist delegation, MCP and human approval by progressively upgrading one Student Agent.
+An interactive beginner workshop that teaches CRAFT prompting, context engineering, tools, agent loops, retrieval, multi-agent systems, MCP and human approval, then has participants build three agents of their own: a Tutor, a Flashcard Generator and a Study Planner.
 
-The Student Agent begins as a weekly planner using fictional deadlines, calendar entries, current progress and available study hours. It then gains private course retrieval, mastery-aware revision, formative quizzes and Researcher, Planner and Reviewer specialists.
+Each agent is fully scaffolded with tools and fictional commerce-unit course data (Leadership and Organisational Behaviour, Financial Accounting, Marketing, Business Communication), so participants mainly write the CRAFT instructions and watch the agent's tool calls in an observable trace.
 
 The presentation makes real Claude API calls and shows observable tool requests and results. All calendar, deadline, progress, course-document and action data is fictional workshop simulation data.
 
 ## Project structure
 
-- index.html — self-contained interactive presentation.
-- server.py — FastAPI server for the presentation and server-side Claude calls.
-- AI_AGENTS_WORKSHOP.ipynb — participant exercises matching the presentation.
-- workshopkit.py — small, inspectable notebook runtime and simulated tools.
-- data/ — fictional deadlines, calendar, progress, course notes, rubric and mastery data.
-- FACILITATOR_GUIDE.md — 120-minute run sheet and teaching notes.
-- requirements-live.txt — dependencies for the live presentation.
-- requirements.txt — dependencies for the participant notebook.
+- index.html: self-contained interactive presentation.
+- server.py: FastAPI server for the presentation and server-side Claude calls.
+- AI_AGENTS_WORKSHOP.ipynb: participant exercises matching the presentation.
+- workshopkit.py: small, inspectable notebook runtime and simulated tools.
+- data/: fictional deadlines, calendar, progress, course notes, rubric and mastery data for the workshop's commerce units.
+- FACILITATOR_GUIDE.md: run sheet and teaching notes.
+- requirements-live.txt: dependencies for the live presentation.
+- requirements.txt: dependencies for the participant notebook.
 
 ## Run the live presentation
 
@@ -34,11 +34,11 @@ For a deployed website, `.env` is intentionally ignored and is not uploaded. Set
 
 Presentation controls:
 
-- Left/right arrows or Space — navigate.
-- Home / End — first or last slide.
-- F — fullscreen.
-- Contents — overview navigator.
-- URL hash — deep-link to a presentation state, for example #20.
+- Left/right arrows or Space: navigate.
+- Home / End: first or last slide.
+- F: fullscreen.
+- Contents: overview navigator.
+- URL hash: deep-link to a presentation state, for example #20.
 
 If the API is unavailable, navigation and non-API interactions still work. Live-call slides show an explicit offline state.
 
