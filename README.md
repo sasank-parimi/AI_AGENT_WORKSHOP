@@ -1,81 +1,89 @@
-# AI Agents Workshop
+# AI Agent Research Lab
 
-An interactive beginner workshop that teaches CRAFT prompting, context engineering, tools, agent loops, retrieval, multi-agent systems, MCP and human approval, then has participants build three agents of their own: a Tutor, a Flashcard Generator and a Study Planner.
+A two-hour beginner workshop built around one coherent project: research NVIDIA with a live web-search agent, turn the verified research into a one-page investor briefing, then evaluate and improve both CRAFT prompts.
 
-Each agent is fully scaffolded with tools and fictional commerce-unit course data (Leadership and Organisational Behaviour, Financial Accounting, Marketing, Business Communication), so participants mainly write the CRAFT instructions and watch the agent's tool calls in an observable trace.
+The workshop deliberately distinguishes two system shapes:
 
-The presentation makes real Claude API calls and shows observable tool requests and results. All calendar, deadline, progress, course-document and action data is fictional workshop simulation data.
+- **Research Agent:** Claude may choose bounded live web searches, inspect sources and continue until it can answer.
+- **Briefing Editor:** one tool-free generation call transforms only the verified research. It is not presented as an autonomous agent.
+
+This is an educational research exercise, not financial advice. It produces no recommendation, price target, personalised advice or transaction.
 
 ## Project structure
 
-- index.html: self-contained interactive presentation.
-- server.py: FastAPI server for the presentation and server-side Claude calls.
-- AI_AGENTS_WORKSHOP.ipynb: participant exercises matching the presentation.
-- workshopkit.py: small, inspectable notebook runtime and simulated tools.
-- data/: fictional deadlines, calendar, progress, course notes, rubric and mastery data for the workshop's commerce units.
-- FACILITATOR_GUIDE.md: run sheet and teaching notes.
-- requirements-live.txt: dependencies for the live presentation.
-- requirements.txt: dependencies for the participant notebook.
+- `index.html`: interactive research-lab presentation.
+- `server.py`: FastAPI server for browser calls and the research endpoint.
+- `AI_AGENTS_WORKSHOP.ipynb`: participant build with two learner-owned CRAFT functions.
+- `workshopkit.py`: inspectable live-search, citation, fallback and briefing helpers.
+- `data/nvidia_research_fallback.md`: dated continuity snapshot used only if live research fails.
+- `FACILITATOR_GUIDE.md`: exact 120-minute run sheet and teaching cues.
+- `tests/test_workshop.py`: deck, notebook, endpoint and runtime tests.
 
-## Run the live presentation
+## Run the live deck
 
-    python3 -m venv .venv
-    source .venv/bin/activate
-    pip install -r requirements-live.txt
-    cp .env.example .env
-    # Add a workshop-only ANTHROPIC_API_KEY to .env
-    python server.py
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-live.txt
+cp .env.example .env
+# Add a workshop-only ANTHROPIC_API_KEY to .env
+python server.py
+```
 
-Open http://localhost:8000.
+Open `http://localhost:8000`. The key remains in Python and is never sent to browser JavaScript. The status badge distinguishes a ready API from fallback mode or a rejected key.
 
-The root `.env` is loaded by the participant notebook and by `server.py` only when the website runs locally. The API key stays in Python and is never included in browser JavaScript. Editing `.env` is picked up on the next local API request.
+Controls: arrows or Space navigate, Home/End jump, F enters fullscreen, and Contents opens the workshop map.
 
-For a deployed website, `.env` is intentionally ignored and is not uploaded. Set a valid Anthropic `ANTHROPIC_API_KEY` in the hosting provider's environment settings, then redeploy. The live-slide status checks whether Anthropic accepts that credential; a non-empty but invalid key is shown as **API KEY REJECTED**.
+## Run the notebook
 
-Presentation controls:
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+jupyter lab AI_AGENTS_WORKSHOP.ipynb
+```
 
-- Left/right arrows or Space: navigate.
-- Home / End: first or last slide.
-- F: fullscreen.
-- Contents: overview navigator.
-- URL hash: deep-link to a presentation state, for example #20.
+The notebook loads `ANTHROPIC_API_KEY` from `.env`; if missing, it asks through `getpass()` without writing the key into the notebook. Learners edit only `build_research_prompt()` and `build_briefing_prompt(research)`.
 
-If the API is unavailable, navigation and non-API interactions still work. Live-call slides show an explicit offline state.
-
-## Run the participant notebook
-
-    source .venv/bin/activate
-    pip install -r requirements.txt
-    jupyter lab AI_AGENTS_WORKSHOP.ipynb
-
-The notebook loads `ANTHROPIC_API_KEY` from the root `.env`. If it is missing, the setup cell requests it through `getpass()` instead. It then imports the local `workshopkit.py`.
+Each stage follows the same learning loop: run, score five visible criteria, change one CRAFT component, and rerun.
 
 ## Live API
 
-### GET /api/health
+### `GET /api/health`
 
-Reports whether the live server is running, whether an API key is configured and which model is selected.
+Reports configuration, credential source, selected model and the search cap. `?validate=true` checks whether Anthropic accepts the configured credential.
 
-### POST /api/claude/stream
+### `POST /api/claude/stream`
 
-Streams visible model text. Request fields are prompt, optional system instructions and max_tokens.
+Streams visible text from one non-agentic generation call. Fields: `prompt`, optional `system`, and optional `max_tokens`.
 
-### POST /api/agent/study-session
+### `POST /api/agent/research`
 
-Runs a real Claude tool-selection loop with deterministic Student Planner tools: `get_deadlines`, `get_calendar`, `get_current_progress`, `estimate_available_hours` and approval-gated `save_study_plan`. The request retains the `task` and `instructions` fields.
+Input:
 
-The response contains only observable user, tool, result, final and error events. Workshop tools never modify a real LMS, calendar or student record.
+```json
+{
+  "task": "research question",
+  "instructions": "CRAFT system prompt",
+  "max_searches": 3
+}
+```
 
-Set `WORKSHOP_SIMULATE_PLANNER_FAILURE=1` for a controlled planning-data failure or `WORKSHOP_SIMULATE_RETRIEVAL_FAILURE=1` for a controlled course-search failure.
+The bounded maximum is five. Output includes `ok`, `model`, observable `events`, deduplicated `sources`, `usage`, `stop_reason`, `text`, and `fallback_used`. Events are limited to user input, web searches, sources, visible final text, usage and errors. Hidden reasoning is never requested or returned.
 
-## Deploy on Vercel
+## Search cost and fallback
 
-The included vercel.json uses Vercel's FastAPI runtime. Add ANTHROPIC_API_KEY as a project environment variable and deploy the project root. Optionally set WORKSHOP_MODEL, WORKSHOP_MAX_PROMPT_CHARS and WORKSHOP_MAX_OUTPUT_TOKENS.
+Anthropic web search adds per-search charges plus ordinary token usage. The workshop defaults to at most three searches per research run and never accepts more than five.
 
-Use a workshop-specific API key with appropriate spending limits and disable it after the event.
+If credentials, connectivity, search or a long-running turn fails, the runtime loads `data/nvidia_research_fallback.md`. The deck and notebook label it **DATED CLASSROOM FALLBACK - NOT LIVE RESEARCH**. It preserves the exercise flow but must not be described as current evidence.
 
-## Design and accessibility
+Use a workshop-specific API key with spending limits and disable it after the event.
 
-The deck uses a warm workshop-notebook visual system with editorial typography, varied compositions and restrained annotations. Local fonts are preferred from fonts/; the CSS includes readable system fallbacks.
+## Validation and deployment
 
-The presentation supports keyboard-only navigation, visible focus states, reduced motion, responsive layouts and print output. Verify the final venue projector at 1366×768 and 1920×1080 before delivery.
+Run:
+
+```bash
+.venv/bin/python -m unittest discover -s tests -v
+```
+
+The existing `vercel.json` deploys the FastAPI project. Hosted deployments need `ANTHROPIC_API_KEY` and optionally `WORKSHOP_MODEL`, `WORKSHOP_MAX_PROMPT_CHARS`, and `WORKSHOP_MAX_OUTPUT_TOKENS` in the host environment. Verify projector layouts at 1366×768 and 1920×1080 before delivery.

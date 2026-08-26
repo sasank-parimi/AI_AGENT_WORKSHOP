@@ -1,9 +1,0 @@
-{
-  "source": "fictional workshop progress data",
-  "progress": [
-    {"unit_code": "ACCT1101", "assessment": "Financial accounting problem set", "percent_complete": 25, "blocker": "depreciation and adjusting entries questions"},
-    {"unit_code": "MGMT2002", "assessment": "Leadership case analysis", "percent_complete": 55, "blocker": "evidence for the second section"},
-    {"unit_code": "MKTG1101", "assessment": "Online quiz", "percent_complete": 10, "blocker": "two lecture topics not revised"},
-    {"unit_code": "BUSN1001", "assessment": "Group presentation slides", "percent_complete": 65, "blocker": "waiting for one teammate's chart"}
-  ]
-}

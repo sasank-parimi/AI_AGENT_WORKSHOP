@@ -1,326 +1,250 @@
 from __future__ import annotations
 
-import json
-import os
-import re
 import ast
+import json
+import re
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import workshopkit
 import server
-from server import health
+import workshopkit
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class Block:
+    def __init__(self, block_type: str, **values) -> None:
+        self.type = block_type
+        for key, value in values.items():
+            setattr(self, key, value)
+
+    def model_dump(self, exclude_none: bool = True) -> dict:
+        return {key: value for key, value in vars(self).items() if not exclude_none or value is not None}
+
+
+class Usage:
+    def __init__(self, searches: int = 0) -> None:
+        self.input_tokens = 120
+        self.output_tokens = 340
+        self.server_tool_use = {"web_search_requests": searches}
+
+    def model_dump(self, exclude_none: bool = True) -> dict:
+        return vars(self)
+
+
+class Response:
+    def __init__(self, content, stop_reason="end_turn", searches=0) -> None:
+        self.content = content
+        self.stop_reason = stop_reason
+        self.usage = Usage(searches)
+
+
+class FakeMessages:
+    def __init__(self, responses) -> None:
+        self.responses = list(responses)
+        self.calls = []
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        return self.responses.pop(0)
+
+
+def fake_client(*responses):
+    return type("Client", (), {"messages": FakeMessages(responses)})()
+
+
+def research_response(stop_reason="end_turn"):
+    citation = {
+        "type": "web_search_result_location",
+        "title": "NVIDIA annual report",
+        "url": "https://example.com/nvidia-10k",
+        "page_age": "2026-08-20",
+    }
+    return Response(
+        [
+            Block("server_tool_use", name="web_search", input={"query": "NVIDIA latest 10-K risks"}),
+            Block(
+                "web_search_tool_result",
+                content=[{"type": "web_search_result", "title": "NVIDIA annual report", "url": "https://example.com/nvidia-10k", "page_age": "2026-08-20"}],
+            ),
+            Block("text", text="## Executive summary\nEvidence-backed result.", citations=[citation]),
+        ],
+        stop_reason=stop_reason,
+        searches=1,
+    )
 
 
 class DeckTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.html = (ROOT / "index.html").read_text(encoding="utf-8")
-        cls.deck = cls.html.split('<main class="deck notebook-deck" id="deck">', 1)[1].split("</main>", 1)[0]
+        cls.deck = cls.html.split('<main class="deck" id="deck">', 1)[1].split("</main>", 1)[0]
         cls.titles = re.findall(r'data-title="([^"]+)"', cls.deck)
 
-    def test_deck_has_thirty_two_purposeful_states(self) -> None:
-        slides = re.findall(r'<section class="slide[^>]*>', self.deck)
-        self.assertEqual(len(slides), 32)
-        self.assertEqual(len(slides), len(self.titles))
+    def test_deck_is_a_tight_research_lab(self) -> None:
+        self.assertEqual(len(re.findall(r'<section class="slide', self.deck)), 24)
+        self.assertEqual(self.titles[:4], ["AI Agent Research Lab", "The mission", "Classify the system", "One coherent pipeline"])
+        self.assertEqual(self.titles[-2:], ["What you can now explain", "Research you can defend"])
 
-    def test_opening_matches_the_build_story(self) -> None:
-        self.assertEqual(
-            self.titles[:4],
-            ["AI Agents Workshop", "What is AI", "Ask it and hope", "Chatbot or agent"],
-        )
-        self.assertIn("AI AGENTS", self.deck)
-        self.assertIn("Build an agent you can actually keep using", self.deck)
-        self.assertIn("What is AI?", self.deck)
-        for capability in (
-            "Plan my week",
-            "Search my notes",
-            "Quiz me",
-            "Review my work",
-            "Research unfamiliar topics",
-            "Use tools instead of guessing",
-            "Connect to services",
+    def test_story_is_one_nvidia_pipeline(self) -> None:
+        for phrase in (
+            "RESEARCH AGENT",
+            "VERIFIED RESEARCH",
+            "BRIEFING EDITOR",
+            "What could drive or derail NVIDIA",
+            "Two stages, one evidence trail",
         ):
-            self.assertIn(capability, self.deck)
+            self.assertIn(phrase, self.deck)
+        for removed in ("Tutor Agent", "Flashcard Agent", "Study Planner", "student deadlines", "mastery record"):
+            self.assertNotIn(removed.lower(), self.html.lower())
 
-    def test_craft_is_progressive_and_reused_for_agents(self) -> None:
-        for step, label in enumerate(("Context", "Request", "Approach", "Format", "Test"), 1):
-            self.assertIn(f'data-craft-step="{step}"', self.deck)
-            self.assertIn(label, self.deck)
-        self.assertIn("initCraftBuilder", self.html)
-        self.assertIn("CRAFT</strong>", self.deck)
-        self.assertIn("CRAFT-based agent instructions", self.deck)
-        self.assertNotIn("RECIPE", self.html)
+    def test_craft_and_api_anatomy_are_interactive(self) -> None:
+        for letter, label in zip("CRAFT", ("Context", "Request", "Approach", "Format", "Test")):
+            self.assertIn(f">{letter}</b><h3>{label}</h3>", self.deck)
+        for field in ("model", "system", "messages", "tools", "max_tokens"):
+            self.assertIn(f'data-field="{field}"', self.deck)
+        self.assertIn("initCraft", self.html)
+        self.assertIn("initRequest", self.html)
 
-    def test_prompt_challenge_offers_two_scenarios(self) -> None:
-        slide = self.deck.split('data-title="Prompt challenge"', 1)[1].split("</section>", 1)[0]
-        self.assertIn("data-scenario-picker", slide)
-        self.assertEqual(slide.count("data-scenario="), 2)
-        self.assertIn("Leadership case study", slide)
-        self.assertIn("Organisational behaviour group task", slide)
-        self.assertIn("initScenarioPicker", self.html)
-
-    def test_context_notes_demonstrate_three_states(self) -> None:
-        slide = self.deck.split('data-title="Context picker"', 1)[1].split("</section>", 1)[0]
-        for note in ("correct", "bad", "overload"):
-            self.assertIn(f'data-context-note="{note}"', slide)
-
-    def test_no_stray_fictional_personas_or_old_domain_terms(self) -> None:
-        for name in ("Maya", "Noah", "Priya", "Aisha"):
-            self.assertNotIn(name, self.html)
-        for removed in ("cits2200", "hist2001", "econ1101", "comm1001", "dijkstra", "graph traversal", "dynamic programming"):
-            self.assertNotIn(removed, self.html.lower())
-
-    def test_chapter_progression_never_moves_backwards(self) -> None:
-        sections = re.findall(r'<section class="slide[^>]*data-section="([^"]+)"', self.deck)
-        order = {name: index for index, name in enumerate(("ai", "prompt", "craft", "context", "agents", "build", "systems", "next"))}
-        self.assertTrue(all(order[left] <= order[right] for left, right in zip(sections, sections[1:])))
-
-    def test_context_slider_drives_one_real_call(self) -> None:
-        slide = self.deck.split('data-title="Focused or overloaded"', 1)[1].split("</section>", 1)[0]
-        self.assertEqual(slide.count("data-live-claude"), 1)
-        self.assertIn("data-context-slider", slide)
-        self.assertIn("Run with this context", slide)
-        self.assertIn("initContextSlider", self.html)
-        self.assertIn("minimum useful context", self.deck)
-
-    def test_student_planner_tools_and_trace_are_visible(self) -> None:
-        for tool in (
-            "get_deadlines()",
-            "get_calendar()",
-            "get_current_progress()",
-            "estimate_available_hours()",
-            "save_study_plan()",
+    def test_requested_interactions_exist(self) -> None:
+        for marker in (
+            "data-classifier",
+            "data-source-sort",
+            "data-live-research",
+            "data-trail",
+            "data-checklist",
+            'class="compare"',
         ):
-            self.assertIn(tool, self.deck)
-        self.assertIn("/api/agent/study-session", self.html)
-        self.assertIn("data-agent-trace", self.deck)
-        self.assertIn("hidden chain-of-thought", self.deck)
+            self.assertIn(marker, self.deck)
 
-    def test_notebook_handoff_lists_three_agents(self) -> None:
-        slide = self.deck.split('data-title="Build your own agents"', 1)[1].split("</section>", 1)[0]
-        self.assertIn("Tutor Agent", slide)
-        self.assertIn("Flashcard Agent", slide)
-        self.assertIn("Study Planner Agent", slide)
-        self.assertIn("generate_flashcards", slide)
-        self.assertIn("AI_AGENTS_WORKSHOP.ipynb", slide)
+    def test_live_research_uses_new_endpoint_and_structured_events(self) -> None:
+        self.assertIn("/api/agent/research", self.html)
+        for event in ("search", "source", "final", "usage", "error"):
+            self.assertIn(f"kind==='{event}'" if event in {"source", "search", "usage"} else event, self.html)
+        self.assertIn("max_searches:3", self.html)
+        self.assertNotIn("/api/agent/study-session", self.html)
 
-    def test_retrieval_systems_mcp_and_handoff_are_coherent(self) -> None:
-        expected = (
-            "Your agent does not know your unit",
-            "Retrieval-Augmented Generation",
-            "RESEARCHER",
-            "PLANNER",
-            "REVIEWER",
-            "Multi-agent systems",
-            "MCP standardises discovery",
-            "Claude can run the agent loop for you",
-            "Make your agent yours",
-            "Frameworks package ideas",
-            "LIVE DEMOS",
-        )
-        for text in expected:
-            self.assertIn(text, self.deck)
-        self.assertEqual(self.titles[-3:], ["Make your agent yours", "Next steps", "Live demos"])
-
-    def test_live_calls_never_fail_silently(self) -> None:
-        for message in (
-            "Connecting to Claude…",
-            "Claude returned an empty response. Check the API status and try again.",
-            "Generation stopped before a response arrived.",
-            "API key rejected",
-            "API error",
+    def test_finance_boundaries_and_fallback_are_explicit(self) -> None:
+        for phrase in (
+            "No recommendation or price target",
+            "No personalised advice",
+            "DECORATIVE ONLY · NO MARKET DATA",
+            "Dated fallback loaded",
         ):
-            self.assertIn(message, self.html)
-        self.assertIn("/api/health?validate=true", self.html)
-        self.assertIn("/api/claude/stream", self.html)
+            self.assertIn(phrase.lower(), self.html.lower())
 
-    def test_accessible_navigation_and_no_speaker_notes(self) -> None:
-        for removed in ("data-notes=", "notesPanel", "toggleNotes", "presenter notes"):
-            self.assertNotIn(removed, self.html)
-        self.assertIn("aria-live=\"polite\"", self.deck)
-        self.assertIn("focus-visible", self.html)
-        self.assertIn("prefers-reduced-motion", self.html)
-        self.assertIn("@media print", self.html)
-        self.assertIn("requestFullscreen", self.html)
-        self.assertIn("overviewPanel", self.html)
+    def test_accessibility_navigation_and_responsive_rules_remain(self) -> None:
+        for text in ("aria-live=\"polite\"", "focus-visible", "prefers-reduced-motion", "@media print", "requestFullscreen", "overviewList"):
+            self.assertIn(text, self.html)
 
-    def test_no_em_dashes_anywhere_in_the_deck(self) -> None:
-        self.assertNotIn("—", self.html)
+    def test_no_api_key_is_embedded_in_public_artifacts(self) -> None:
+        notebook_text = (ROOT / "AI_AGENTS_WORKSHOP.ipynb").read_text(encoding="utf-8")
+        self.assertNotRegex(self.html + notebook_text, r"sk-ant-[A-Za-z0-9_-]{12,}")
+        self.assertNotIn("your_workshop_key_here\nANTHROPIC", notebook_text)
 
-    def test_notebook_builds_three_independent_agents(self) -> None:
-        notebook = json.loads((ROOT / "AI_AGENTS_WORKSHOP.ipynb").read_text(encoding="utf-8"))
-        source = "\n".join("".join(cell.get("source", [])) for cell in notebook["cells"])
-        self.assertIn("Build three agents", source)
-        self.assertIn("Agent 1: Personalised Tutor Agent", source)
-        self.assertIn("Agent 2: Flashcard Generator Agent", source)
-        self.assertIn("Agent 3: Study Planner Agent", source)
-        self.assertIn("TUTOR_INSTRUCTIONS", source)
-        self.assertIn("FLASHCARD_INSTRUCTIONS", source)
-        self.assertIn("PLANNER_INSTRUCTIONS", source)
-        self.assertIn("run_tutor_agent", source)
-        self.assertIn("run_flashcard_agent", source)
-        self.assertIn("run_study_planner", source)
-        self.assertIn("load_dotenv('.env', override=True)", source)
-        self.assertNotIn("—", source)
-        for name in ("Maya", "Noah", "Priya", "Aisha"):
-            self.assertNotIn(name, source)
-        for removed in ("cits2200", "hist2001", "econ1101", "comm1001", "dijkstra"):
-            self.assertNotIn(removed, source.lower())
 
-        for cell in notebook["cells"]:
+class NotebookTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.notebook = json.loads((ROOT / "AI_AGENTS_WORKSHOP.ipynb").read_text(encoding="utf-8"))
+        cls.source = "\n".join("".join(cell.get("source", [])) for cell in cls.notebook["cells"])
+
+    def test_notebook_is_linear_and_owns_two_prompt_functions(self) -> None:
+        self.assertIn("NVIDIA Research Lab", self.source)
+        self.assertEqual(self.source.count("def build_research_prompt"), 1)
+        self.assertEqual(self.source.count("def build_briefing_prompt"), 1)
+        for helper in ("run_research_agent", "run_briefing_editor", "show_result", "score_output"):
+            self.assertIn(f"def {helper}", self.source)
+        for removed in ("run_tutor_agent", "run_flashcard_agent", "run_study_planner"):
+            self.assertNotIn(removed, self.source)
+
+    def test_notebook_shows_env_and_clean_api_request(self) -> None:
+        self.assertIn("load_dotenv('.env', override=True)", self.source)
+        self.assertIn("getpass('Anthropic API key: ')", self.source)
+        self.assertIn("client = Anthropic", self.source)
+        for field in ("model=MODEL", "max_tokens=1800", "system=system_prompt", "messages=messages", "tools=[WEB_SEARCH]"):
+            self.assertIn(field, self.source)
+
+    def test_notebook_requires_two_evaluation_cycles(self) -> None:
+        for name in ("research_v1", "research_v2", "briefing_v1", "briefing_v2", "RESEARCH_CHECKLIST", "BRIEFING_CHECKLIST"):
+            self.assertIn(name, self.source)
+        self.assertGreaterEqual(self.source.count("score_output("), 5)
+
+    def test_all_python_cells_parse(self) -> None:
+        for cell in self.notebook["cells"]:
             if cell.get("cell_type") != "code":
                 continue
-            python_source = "\n".join(
-                line for line in "".join(cell.get("source", [])).splitlines()
-                if not line.lstrip().startswith("%")
-            )
+            source = "".join(cell.get("source", []))
+            python_source = "\n".join(line for line in source.splitlines() if not line.lstrip().startswith("%"))
             ast.parse(python_source)
 
-    def test_health_explains_credential_source(self) -> None:
-        result = health(validate=False)
-        self.assertIn(result["credential_source"], ("local .env", "host environment"))
-        self.assertIn("authenticated", result)
 
-
-class StudentAgentToolTests(unittest.TestCase):
-    def tearDown(self) -> None:
-        os.environ.pop("WORKSHOP_SIMULATE_PLANNER_FAILURE", None)
-        os.environ.pop("WORKSHOP_SIMULATE_RETRIEVAL_FAILURE", None)
-
-    def test_planner_tool_contracts_are_complete(self) -> None:
-        self.assertEqual(
-            [tool.name for tool in workshopkit.PLANNER_TOOLS],
-            [
-                "get_deadlines",
-                "get_calendar",
-                "get_current_progress",
-                "estimate_available_hours",
-                "save_study_plan",
-            ],
-        )
-
-    def test_deadlines_progress_calendar_and_capacity_are_consistent(self) -> None:
-        deadlines = workshopkit.get_deadlines.execute({})
-        progress = workshopkit.get_current_progress.execute({})
-        calendar = workshopkit.get_calendar.execute({})
-        capacity = workshopkit.estimate_available_hours.execute({"buffer_hours": 2})
-        self.assertEqual(len(deadlines["deadlines"]), 4)
-        self.assertEqual(len(progress["progress"]), 4)
-        self.assertEqual(calendar["week"], capacity["week"])
-        self.assertGreater(capacity["available_hours"], capacity["plannable_hours"])
-        self.assertEqual(capacity["recommended_buffer_hours"], 2)
-        self.assertFalse(deadlines["is_live_lms_data"])
-        self.assertFalse(calendar["is_live_calendar_data"])
-
-    def test_unit_filters_are_deterministic(self) -> None:
-        deadlines = workshopkit.get_deadlines.execute({"unit_code": "mgmt2002"})
-        progress = workshopkit.get_current_progress.execute({"unit_code": "MGMT2002"})
-        self.assertEqual([item["unit_code"] for item in deadlines["deadlines"]], ["MGMT2002"])
-        self.assertEqual([item["unit_code"] for item in progress["progress"]], ["MGMT2002"])
-
-    def test_save_requires_approval(self) -> None:
-        plan = [{"day": "Monday", "time": "08:00-09:30", "focus": "MGMT2002"}]
-        preview = workshopkit.save_study_plan.execute({"plan": plan})
-        self.assertEqual(preview["status"], "approval_required")
-        self.assertFalse(preview["is_real_calendar_action"])
-        self.assertNotIn("confirmed", workshopkit.save_study_plan.input_schema["properties"])
-
-    def test_planner_failure_is_observable(self) -> None:
-        os.environ["WORKSHOP_SIMULATE_PLANNER_FAILURE"] = "1"
-        result = workshopkit.get_deadlines.execute({})
-        self.assertFalse(result["ok"])
-        self.assertIn("unavailable", result["error"])
-
-    def test_course_retrieval_names_the_source(self) -> None:
-        result = workshopkit.search_course_notes.execute(
-            {"query": "situational leadership readiness", "unit_code": "MGMT2002", "top_k": 3}
-        )
-        self.assertTrue(result["results"])
-        self.assertEqual(result["results"][0]["source"], "lecture_04_notes.txt")
-        self.assertIn("situational leadership", result["results"][0]["text"].lower())
-
-    def test_flashcards_are_grounded(self) -> None:
-        mastery = workshopkit.get_mastery_record.execute({})
-        self.assertEqual(mastery["topics"]["leadership styles"], 4)
-        no_source = workshopkit.generate_flashcards.execute({"topic": "team dynamics", "source_excerpt": ""})
-        wrong_source = workshopkit.generate_flashcards.execute(
-            {"topic": "team dynamics", "source_excerpt": "Situational leadership adjusts style to readiness."}
-        )
-        cards = workshopkit.generate_flashcards.execute(
-            {
-                "topic": "leadership styles",
-                "source_excerpt": "Situational leadership adjusts style to a follower's readiness. Transformational and transactional leadership differ.",
-                "count": 2,
-            }
-        )
-        self.assertFalse(no_source["ok"])
-        self.assertFalse(wrong_source["ok"])
-        self.assertTrue(cards["grounded_in_supplied_excerpt"])
-        self.assertEqual(cards["status"], "self_study_only")
-        self.assertEqual(len(cards["cards"]), 2)
-        self.assertIn("front", cards["cards"][0])
-        self.assertIn("back", cards["cards"][0])
-
-    def test_retrieval_failure_is_observable(self) -> None:
-        os.environ["WORKSHOP_SIMULATE_RETRIEVAL_FAILURE"] = "1"
-        result = workshopkit.search_course_notes.execute({"query": "leadership"})
-        self.assertFalse(result["ok"])
-        self.assertIn("unavailable", result["error"])
-
-    def test_study_planner_wrapper_uses_planner_tools(self) -> None:
-        with patch.object(workshopkit, "run_agent", return_value={"ok": True, "events": []}) as run_mock:
-            result = workshopkit.run_study_planner("instructions", "task")
+class ResearchRuntimeTests(unittest.TestCase):
+    def test_extracts_search_sources_text_and_usage(self) -> None:
+        api = fake_client(research_response())
+        result = workshopkit.run_research_agent("CRAFT instructions", "Research NVIDIA", client=api)
         self.assertTrue(result["ok"])
-        self.assertEqual(run_mock.call_args.kwargs["tools"], workshopkit.PLANNER_TOOLS)
+        self.assertFalse(result["fallback_used"])
+        self.assertIn("Evidence-backed result", result["text"])
+        self.assertEqual(result["sources"][0]["url"], "https://example.com/nvidia-10k")
+        self.assertEqual(result["usage"]["web_search_requests"], 1)
+        self.assertEqual([event["type"] for event in result["events"]], ["user", "search", "source", "final", "usage"])
 
-    def test_tutor_and_flashcard_wrappers_use_the_expected_tools(self) -> None:
-        with patch.object(workshopkit, "run_agent", return_value={"ok": True, "events": []}) as run_mock:
-            workshopkit.run_tutor_agent("instructions", "task")
-            self.assertEqual(run_mock.call_args.kwargs["tools"], workshopkit.TUTOR_TOOLS)
-            workshopkit.run_flashcard_agent("instructions", "task")
-            self.assertEqual(run_mock.call_args.kwargs["tools"], workshopkit.FLASHCARD_TOOLS)
+    def test_search_is_bounded_in_request(self) -> None:
+        api = fake_client(research_response())
+        workshopkit.run_research_agent("instructions", "task", max_searches=99, client=api)
+        self.assertEqual(api.messages.calls[0]["tools"][0]["max_uses"], workshopkit.MAX_SEARCHES)
 
-    def test_manager_uses_the_specialists(self) -> None:
-        with patch.object(workshopkit, "run_agent", return_value={"ok": True, "events": []}) as run_mock:
-            workshopkit.run_manager("instructions", "task")
-        self.assertEqual(run_mock.call_args.kwargs["tools"], workshopkit.SPECIALISTS)
-        self.assertEqual([tool.name for tool in workshopkit.SPECIALISTS], ["researcher", "planner", "reviewer"])
+    def test_pause_turn_is_continued(self) -> None:
+        first = Response([Block("text", text="Partial", citations=[])], stop_reason="pause_turn")
+        second = research_response()
+        api = fake_client(first, second)
+        result = workshopkit.run_research_agent("instructions", "task", client=api)
+        self.assertEqual(len(api.messages.calls), 2)
+        self.assertEqual(len(api.messages.calls[1]["messages"]), 2)
+        self.assertIn("Partial", result["text"])
 
-    def test_live_endpoint_executes_a_planner_tool_and_returns_the_trace(self) -> None:
-        class Block:
-            def __init__(self, block_type: str, **values) -> None:
-                self.type = block_type
-                for key, value in values.items():
-                    setattr(self, key, value)
+    def test_failures_and_empty_output_load_labelled_fallback(self) -> None:
+        failing = type("Failing", (), {"messages": type("Messages", (), {"create": lambda *_a, **_k: (_ for _ in ()).throw(ConnectionError())})()})()
+        failed = workshopkit.run_research_agent("instructions", "task", client=failing)
+        empty = workshopkit.run_research_agent("instructions", "task", client=fake_client(Response([], searches=0)))
+        for result in (failed, empty):
+            self.assertTrue(result["fallback_used"])
+            self.assertIn("DATED CLASSROOM FALLBACK - NOT LIVE RESEARCH", result["text"])
+            self.assertEqual(result["stop_reason"], "fallback")
 
-        class FakeMessages:
-            def __init__(self) -> None:
-                self.calls = 0
+    def test_briefing_is_tool_free_and_preserves_sources(self) -> None:
+        response = Response([Block("text", text="# Neutral watchlist briefing", citations=[])])
+        api = fake_client(response)
+        research = {"text": "Verified evidence", "sources": [{"title": "10-K", "url": "https://example.com"}], "fallback_used": False}
+        result = workshopkit.run_briefing_editor("editor instructions", research, client=api)
+        request = api.messages.calls[0]
+        self.assertNotIn("tools", request)
+        self.assertEqual(result["sources"], research["sources"])
+        self.assertIn("Verified evidence", request["messages"][0]["content"])
 
-            def create(self, **_) -> object:
-                self.calls += 1
-                if self.calls == 1:
-                    return type("Response", (), {
-                        "content": [Block("tool_use", id="tool-1", name="get_deadlines", input={})]
-                    })()
-                return type("Response", (), {
-                    "content": [Block("text", text="Start with the earliest unfinished deadline.")]
-                })()
+    def test_fallback_file_is_dated_and_safe(self) -> None:
+        text = workshopkit.FALLBACK_PATH.read_text(encoding="utf-8")
+        self.assertIn("26 August 2026", text)
+        self.assertIn("NOT LIVE RESEARCH", text)
+        self.assertIn("not investment advice", text.lower())
 
-        fake_client = type("Client", (), {"messages": FakeMessages()})()
-        with patch.object(server, "client", return_value=fake_client):
-            response = server.study_session_agent(
-                server.AgentRequest(task="Plan my week", instructions="Inspect deadlines before planning.")
-            )
+
+class ServerTests(unittest.TestCase):
+    def test_health_exposes_search_cap_and_credential_source(self) -> None:
+        result = server.health(validate=False)
+        self.assertEqual(result["web_search_max"], 5)
+        self.assertIn(result["credential_source"], ("local .env", "host environment"))
+
+    def test_research_endpoint_forwards_structured_request(self) -> None:
+        expected = {"ok": True, "model": "model", "events": [], "sources": [], "usage": {}, "fallback_used": False}
+        with patch.object(server, "api_key", return_value=""), patch.object(workshopkit, "run_research_agent", return_value=expected) as run_mock:
+            response = server.research_agent(server.ResearchRequest(task="task", instructions="instructions", max_searches=2))
         body = json.loads(response.body)
-        self.assertTrue(body["ok"])
-        self.assertEqual(body["tool_calls"], 1)
-        self.assertEqual([event["type"] for event in body["events"]], ["user", "tool", "result", "final"])
-        self.assertEqual(body["events"][1]["name"], "get_deadlines")
+        self.assertEqual(body, expected)
+        self.assertEqual(run_mock.call_args.args[:2], ("instructions", "task"))
+        self.assertEqual(run_mock.call_args.kwargs["max_searches"], 2)
 
 
 if __name__ == "__main__":
