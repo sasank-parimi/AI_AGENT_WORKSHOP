@@ -22,9 +22,9 @@ class DeckTests(unittest.TestCase):
         cls.deck = cls.html.split('<main class="deck notebook-deck" id="deck">', 1)[1].split("</main>", 1)[0]
         cls.titles = re.findall(r'data-title="([^"]+)"', cls.deck)
 
-    def test_deck_has_thirty_two_purposeful_states(self) -> None:
+    def test_deck_has_thirty_one_purposeful_states(self) -> None:
         slides = re.findall(r'<section class="slide[^>]*>', self.deck)
-        self.assertEqual(len(slides), 32)
+        self.assertEqual(len(slides), 31)
         self.assertEqual(len(slides), len(self.titles))
 
     def test_opening_matches_the_build_story(self) -> None:
@@ -63,31 +63,6 @@ class DeckTests(unittest.TestCase):
         self.assertNotIn("data-live-claude", slide)
         self.assertNotIn("data-live-run", slide)
         self.assertNotIn("data-live-output", slide)
-        for forbidden in ("do not ask questions", "don't ask questions", "ask for missing information"):
-            self.assertNotIn(forbidden, slide.lower())
-
-    def test_prompt_challenge_is_complete_bounded_perth_research(self) -> None:
-        slide = self.deck.split('data-title="Prompt challenge"', 1)[1].split("</section>", 1)[0]
-        for detail in (
-            "5 September 2026",
-            "Perth Station",
-            "two adults",
-            "10:00",
-            "18:00",
-            "AU$120",
-            "no individual walk longer than 15 minutes",
-            "vegetarian lunch",
-            "three main activities",
-            "indoor weather backup",
-            "up to three web searches",
-            "official venue, operator, transport or booking sources",
-        ):
-            self.assertIn(detail, slide)
-        self.assertIn("data-live-web-research", slide)
-        self.assertIn("/api/agent/web-research", self.html)
-        self.assertIn("usage", slide.lower())
-        for state in ("AUTHENTICATION FAILURE", "RATE LIMIT", "EMPTY OUTPUT", "STOPPED"):
-            self.assertIn(state, self.html)
         for forbidden in ("do not ask questions", "don't ask questions", "ask for missing information"):
             self.assertNotIn(forbidden, slide.lower())
 
@@ -137,16 +112,16 @@ class DeckTests(unittest.TestCase):
         self.assertIn("NVIDIA is the capstone task, not the whole workshop", slide)
         self.assertIn("AI_AGENTS_WORKSHOP.ipynb", slide)
 
-    def test_api_anatomy_and_four_live_experiences_are_structured(self) -> None:
+    def test_api_anatomy_and_three_live_experiences_are_structured(self) -> None:
         slide = self.deck.split('data-title="API anatomy"', 1)[1].split("</section>", 1)[0]
         for field in ("model", "system", "messages", "tools", "max_tokens"):
             self.assertIn(f'data-api-field="{field}"', slide)
         self.assertIn("initApiAnatomy", self.html)
         self.assertEqual(self.deck.count("data-live-claude"), 2)
-        self.assertEqual(self.deck.count("data-live-web-research"), 1)
+        self.assertEqual(self.deck.count("data-live-web-research"), 0)
         self.assertEqual(self.deck.count("data-live-agent"), 1)
-        self.assertGreaterEqual(self.deck.count('class="contract-strip"'), 5)
-        self.assertIn("normaliseWebEvents", self.html)
+        self.assertGreaterEqual(self.deck.count('class="contract-strip"'), 4)
+        self.assertNotIn('data-title="Prompt challenge"', self.deck)
 
     def test_retrieval_systems_mcp_and_handoff_are_coherent(self) -> None:
         expected = (
@@ -208,7 +183,7 @@ class DeckTests(unittest.TestCase):
             self.assertIn(message, self.html)
         self.assertIn("/api/health?validate=true", self.html)
         self.assertIn("/api/claude/stream", self.html)
-        self.assertIn("/api/agent/web-research", self.html)
+        self.assertNotIn("/api/agent/web-research", self.html)
 
     def test_accessible_navigation_and_no_speaker_notes(self) -> None:
         for removed in ("data-notes=", "notesPanel", "toggleNotes", "presenter notes"):

@@ -23,8 +23,8 @@ CRAFT means Context, Request, Approach, Format and constraints, and Test.
 | Time | Slides/segment | Audience action |
 |---|---|---|
 | 0:00–0:07 | AI, vague request, chatbot or agent | Predict what Claude must guess; classify the interaction |
-| 0:07–0:16 | CRAFT and live build | Add CRAFT layers and run the complete version |
-| 0:16–0:23 | Perth web-research challenge and structure | Inspect the complete brief; predict which current claims need sources; run the bounded search |
+| 0:07–0:16 | CRAFT and prompt workshop | Add CRAFT layers to the slide 3 prompt without another model call |
+| 0:16–0:23 | Examples, structure and prompt takeaway | Compare a representative example with clearly separated prompt sections |
 | 0:23–0:29 | Prompt versus context and picker | Select useful context, then reveal correct, bad and overloaded presets |
 | 0:29–0:35 | Focused or overloaded | Drag the context slider and run one contrasting call |
 | 0:35–0:42 | API anatomy | Assemble model, system, messages, tools and max tokens |
@@ -46,15 +46,14 @@ The advanced tail is deliberately rapid because the workshop has already demonst
 
 ## Live-call routine
 
-The deck contains four live model experiences and one local prompt-building exercise:
+The deck contains three live model experiences and one local prompt-building exercise:
 
 1. vague baseline through `/api/claude/stream`;
 2. slide 3 prompt rebuilt locally with CRAFT, without a model call;
-3. Perth activity research through `/api/agent/web-research`;
-4. focused/overloaded context through `/api/claude/stream`;
-5. Student Planner through `/api/agent/study-session`.
+3. focused/overloaded context through `/api/claude/stream`;
+4. Student Planner through `/api/agent/study-session`.
 
-Each workbench exposes the goal, system instructions, context, tools and success-test status. Slide 6 carries forward the editable request from slide 3 so learners can change the prompt with CRAFT without generating another response. Slide 7 deliberately uses a different, fully specified Perth task so learners can see bounded search, sources and usage. Run the baseline, complete the local CRAFT edit, run the Perth search, one context call and Student Planner. Treat an extra API rerun as optional if time is tight.
+Each workbench exposes the goal, system instructions, context, tools and success-test status. Slide 6 carries forward the editable request from slide 3 so learners can change the prompt with CRAFT without generating another response. Run the baseline, complete the local CRAFT edit, one context call and Student Planner. Treat an extra API rerun as optional if time is tight.
 
 Never describe observable traces as hidden reasoning. Discuss user goals, searches, tool requests, tool results, sources, final responses, stop reasons and usage only.
 
@@ -80,7 +79,7 @@ Never describe observable traces as hidden reasoning. Discuss user goals, search
 
 1. Start `server.py` and open the HTTP URL rather than the HTML file directly.
 2. Confirm `/api/health?validate=true` reports the intended model and accepted credential.
-3. Run all three prompt/context workbenches, the Perth web-research challenge and the Student Planner.
+3. Run both prompt/context workbenches and the Student Planner.
 4. Verify planner results contain fictional deadlines, calendar, progress and capacity.
 5. Run both notebook stages from a clean kernel.
 6. Remove the key temporarily and confirm the NVIDIA research stage visibly loads the dated fallback; then restore the key.

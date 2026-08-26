@@ -46,7 +46,7 @@
 <main class="deck notebook-deck" id="deck">
 <section class="slide cover-slide" data-section="ai" data-title="AI Agents Workshop">
   <div class="cover-rule"></div>
-  <div class="cover-copy"><div class="wordmark">AI Agents Workshop</div><h1>AI AGENTS<br>WORKSHOP</h1><p class="lede">From prompt engineering to a research agent you build yourself.</p><div class="tool-stamps"><span>two-stage capstone</span><span>four live model experiences</span><span>visible tool traces</span></div></div>
+  <div class="cover-copy"><div class="wordmark">AI Agents Workshop</div><h1>AI AGENTS<br>WORKSHOP</h1><p class="lede">From prompt engineering to a research agent you build yourself.</p><div class="tool-stamps"><span>two-stage capstone</span><span>three live model experiences</span><span>visible tool traces</span></div></div>
   <div class="cover-footer">Use ← → or space to move · F for fullscreen · Contents for the workshop map</div>
 </section>
 
@@ -83,20 +83,6 @@
     <div class="prompt-parts" role="group" aria-label="CRAFT progression"><button type="button" class="prompt-part" data-craft-step="1"><b>C · Context</b>Add the facts Claude would otherwise guess</button><button type="button" class="prompt-part" data-craft-step="2"><b>R · Request</b>State the exact planning outcome</button><button type="button" class="prompt-part" data-craft-step="3"><b>A · Approach</b>Explain how to prioritise the work</button><button type="button" class="prompt-part" data-craft-step="4"><b>F · Format</b>Choose the shape and boundaries</button><button type="button" class="prompt-part" data-craft-step="5"><b>T · Test</b>Define what a useful result must satisfy</button></div>
     <div class="paper"><label>Your evolving prompt</label><textarea class="live-textarea" data-craft-output aria-describedby="craftEditingNote"></textarea><div class="output-quality"><span data-craft-label>Slide 3 request</span><div class="quality-bar"><div class="quality-fill" data-craft-fill></div></div><span data-craft-count>0 / 5</span></div><p class="body-note" id="craftEditingNote">The buttons add a CRAFT scaffold. Edit the bracketed parts yourself; this slide does not call Claude.</p></div>
   </div>
-</section>
-
-<section class="slide workspace-slide" data-section="craft" data-title="Prompt challenge">
-  <header class="slide-heading"><span class="chapter-label">A different task · live web research</span><h2>Build a current Perth Saturday plan from a complete brief</h2></header>
-  <div class="contract-strip"><span>GOAL · feasible day plan</span><span>SYSTEM · source discipline</span><span>CONTEXT · date, people, time and preferences</span><span class="tool">TOOLS · bounded web search</span><span>SUCCESS TEST · cost + travel + opening status</span></div>
-  <div class="live-grid" data-live-web-research>
-    <div class="paper live-panel"><label>CRAFT research instructions</label><textarea class="live-textarea agent-input" data-web-instructions>C: Plan for Saturday 5 September 2026 in central Perth using current public information. The supplied brief fixes the people, time, budget, transport, walking, food and weather requirements.
-R: Research and assemble a feasible itinerary with three main activities and one indoor weather backup.
-A: Use up to three web searches. Prefer official venue, operator, transport or booking sources. Verify Saturday opening status, current price and practical travel time; label anything that cannot be confirmed.
-F: Return a table with time, activity, location, transport, estimated cost for two, confirmed opening status and source. Then show the total cost, budget check, travel-feasibility check and indoor backup.
-T: The plan stays within AU$120, runs from 10:00 to 18:00, starts and finishes at Perth Station, uses no car, keeps each walk to 15 minutes or less, includes a vegetarian lunch, and links evidence for current claims.</textarea><label>Complete weekend brief</label><textarea class="live-textarea agent-input" data-web-task>Build a Saturday plan for two adults on 5 September 2026. Start at Perth Station at 10:00 and finish there by 18:00. The total budget is AU$120 for both people. Use public transport and walking only, with no individual walk longer than 15 minutes. Include three main activities, a vegetarian lunch and one indoor weather backup.</textarea><div class="live-controls"><button type="button" class="btn primary" data-web-run>Research the plan</button><button type="button" class="btn" data-web-stop disabled>Stop</button><span class="live-state" data-web-state role="status">Ready</span></div></div>
-    <div class="trace" data-web-trace aria-live="polite"><div class="trace-event">Search queries, sources, visible itinerary and usage will appear here.</div></div>
-  </div>
-  <aside class="question-note">Which current claims need evidence before you would use this plan?</aside>
 </section>
 
 <section class="slide comparison-slide" data-section="craft" data-title="Examples and structure">
@@ -304,7 +290,7 @@ function showSlide(index,pushHash=true){
   });
   q('#slideNum').textContent=`${String(current+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
   q('#topProgress').style.width=`${((current+1)/slides.length)*100}%`;
-  document.body.classList.toggle('live-demo',Boolean(active.querySelector('[data-live-claude],[data-live-agent],[data-live-web-research]')));
+  document.body.classList.toggle('live-demo',Boolean(active.querySelector('[data-live-claude],[data-live-agent]')));
   if(pushHash)history.replaceState(null,'',`#${current+1}`);
 }
 function initNavigation(){
@@ -486,44 +472,6 @@ function initApiAnatomy(){
   }));
 }
 
-function renderWebTrace(root,events){
-  root.innerHTML=events.map(event=>{
-    const kind=event.type||'event';
-    if(kind==='search')return `<div class="trace-event search"><b>WEB SEARCH</b><br>${escapeHtml(event.query||'')}</div>`;
-    if(kind==='source')return `<div class="trace-event source"><b>SOURCE</b><br>${escapeHtml(event.title||event.url||'Source')}<br><a href="${escapeHtml(event.url||'#')}" target="_blank" rel="noreferrer">${escapeHtml(event.url||'')}</a> · ${escapeHtml(event.date||'Date not supplied')}</div>`;
-    if(kind==='usage')return `<div class="trace-event usage"><b>USAGE · ${escapeHtml(event.stop_reason||'')}</b><br>${escapeHtml(event.web_search_requests||0)} searches · ${escapeHtml(event.input_tokens||0)} input · ${escapeHtml(event.output_tokens||0)} output tokens</div>`;
-    const message=String(event.message||'').toLowerCase();
-    const errorTitle=message.includes('authentication')?'AUTHENTICATION FAILURE':message.includes('ratelimit')||message.includes('rate limit')?'RATE LIMIT':message.includes('no visible text')?'EMPTY OUTPUT':'SEARCH NOTICE';
-    const title=kind==='user'?'COMPLETE BRIEF':kind==='final'?(event.label||'FINAL ITINERARY'):kind==='error'?errorTitle:'EVENT';
-    return `<div class="trace-event ${kind==='error'?'error':''}"><b>${escapeHtml(title)}</b><br><span style="white-space:pre-wrap">${escapeHtml(event.text||event.message||'')}</span></div>`;
-  }).join('');
-}
-
-function normaliseWebEvents(data,task){
-  const events=Array.isArray(data.events)?[...data.events]:[];
-  if(!events.some(event=>event.type==='user')&&task)events.unshift({type:'user',text:task});
-  if(!events.some(event=>event.type==='source'))(Array.isArray(data.sources)?data.sources:[]).forEach(source=>events.push({type:'source',...source}));
-  if(!events.some(event=>event.type==='final')&&String(data.text||'').trim())events.push({type:'final',text:data.text,label:data.fallback_used?'DATED CLASSROOM FALLBACK - NOT LIVE RESEARCH':'FINAL ITINERARY'});
-  if(!events.some(event=>event.type==='usage')&&data.usage)events.push({type:'usage',...data.usage,stop_reason:data.stop_reason||''});
-  if(!events.some(event=>String(event.text||event.message||event.url||event.query||'').trim()))events.push({type:'error',message:'The research endpoint returned no visible result. Please try again.'});
-  return events;
-}
-
-async function runLiveWebResearch(root){
-  const task=q('[data-web-task]',root)?.value.trim(),instructions=q('[data-web-instructions]',root)?.value.trim(),state=q('[data-web-state]',root),run=q('[data-web-run]',root),stop=q('[data-web-stop]',root),trace=q('[data-web-trace]',root);
-  if(!task||!instructions){state.textContent='Complete the brief first';state.className='live-state error';return}
-  const controller=new AbortController();root._webController=controller;
-  run.disabled=true;if(stop)stop.disabled=false;state.textContent='Researching current options…';state.className='live-state running';trace.classList.remove('fallback');trace.innerHTML='<div class="trace-event search"><b>CONNECTING</b><br>Preparing bounded web research…</div>';
-  try{
-    const response=await fetch('/api/agent/web-research',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task,instructions,max_searches:3}),signal:controller.signal});
-    const raw=await response.text();let data;try{data=JSON.parse(raw)}catch(_){throw new Error(raw||`HTTP ${response.status}`)}if(!response.ok||data.ok===false)throw new Error(data.detail||data.error||`HTTP ${response.status}`);
-    renderWebTrace(trace,normaliseWebEvents(data,task));trace.classList.toggle('fallback',Boolean(data.fallback_used));state.textContent=data.fallback_used?'Dated fallback loaded':'Research complete';state.className=data.fallback_used?'live-state':'live-state ok';
-  }catch(error){if(error.name==='AbortError'){trace.innerHTML='<div class="trace-event"><b>STOPPED</b><br>The browser stopped waiting for the research response.</div>';state.textContent='Stopped';state.className='live-state'}else{trace.innerHTML=`<div class="trace-event error"><b>API ERROR</b><br>${escapeHtml(String(error.message||error))}</div>`;state.textContent='API error';state.className='live-state error'}}
-  finally{run.disabled=false;if(stop)stop.disabled=true;root._webController=null}
-}
-
-function initLiveWebResearch(){qa('[data-live-web-research]').forEach(root=>{q('[data-web-run]',root)?.addEventListener('click',()=>runLiveWebResearch(root));q('[data-web-stop]',root)?.addEventListener('click',()=>root._webController?.abort())})}
-
 function renderAgentTrace(root,events){
   root.innerHTML=events.map(event=>{
     const cls=event.type==='result'?'result':event.type==='error'?'error':'';
@@ -565,7 +513,7 @@ function initInteractions(){
   const design=q('[data-agent-design]');if(design)qa('[data-agent-choice]',design).forEach(button=>button.addEventListener('click',()=>{qa('[data-agent-choice]',design).forEach(item=>item.classList.toggle('selected',item===button));q('[data-agent-design-title]',design).textContent=button.dataset.agentChoice}));
 }
 
-function initAll(){buildChrome();initNavigation();initOverview();initCraftBuilder();initScenarioPicker();initLiveClaude();initLiveAgent();initLiveWebResearch();initContextPicker();initContextSlider();initApiAnatomy();initInteractions();checkApi()}
+function initAll(){buildChrome();initNavigation();initOverview();initCraftBuilder();initScenarioPicker();initLiveClaude();initLiveAgent();initContextPicker();initContextSlider();initApiAnatomy();initInteractions();checkApi()}
 document.addEventListener('DOMContentLoaded',initAll);
 </script>
 </body>
