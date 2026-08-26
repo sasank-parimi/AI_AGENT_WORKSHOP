@@ -1,8 +1,9 @@
-"""Small, inspectable runtime for the AI Agents student workshop.
+"""Inspectable runtime for the UWA AI Agents student workshop.
 
-The helpers deliberately expose observable messages, tool requests, tool
-results and final answers. They never request or display hidden reasoning.
-All campus data and actions in this module are deterministic simulations.
+The notebook builds one Student Agent and progressively gives it planning,
+retrieval, revision and specialist capabilities. Every tool call and result is
+returned as an observable event. Hidden chain-of-thought is never requested or
+displayed. All student records and actions are deterministic workshop data.
 """
 from __future__ import annotations
 
@@ -32,7 +33,7 @@ def _client() -> Anthropic:
 
 
 def ask_claude(system: str, prompt: str, max_tokens: int = 900) -> str:
-    """Make one model call and return visible text."""
+    """Make one model call and return only its visible text."""
     response = _client().messages.create(
         model=DEFAULT_MODEL,
         max_tokens=max_tokens,
@@ -60,350 +61,291 @@ class Tool:
         return self.handler(arguments)
 
 
-def _find_study_room(args: dict[str, Any]) -> dict[str, Any]:
-    if os.getenv("WORKSHOP_SIMULATE_ROOM_FAILURE") == "1":
+def _read_json(filename: str) -> dict[str, Any]:
+    return json.loads((DATA_DIR / filename).read_text(encoding="utf-8"))
+
+
+def _planner_failure(tool_name: str) -> dict[str, Any] | None:
+    if os.getenv("WORKSHOP_SIMULATE_PLANNER_FAILURE") == "1":
         return {
             "ok": False,
-            "error": "Room availability service is temporarily unavailable",
+            "error": f"{tool_name} is temporarily unavailable",
             "source": "workshop simulator",
-            "is_live_booking_data": False,
         }
-    date = str(args.get("date", "unspecified"))
-    time = str(args.get("time", "unspecified"))
-    group_size = max(1, int(args.get("group_size", 1)))
-    duration = int(args.get("duration_minutes", 120))
-    accessible = bool(args.get("accessibility_required", False))
-    day = date.lower()
-    start = time.lower()
-    rooms = [
-        {"room": "Bayliss 2.24", "capacity": 8, "accessible": True, "available": "tue" in day and ("3" in start or "15" in start)},
-        {"room": "Reid 1.43", "capacity": 6, "accessible": False, "available": True},
-        {"room": "Barry J Marshall 5.10", "capacity": 16, "accessible": True, "available": group_size >= 7},
-    ]
-    matches = [
-        room for room in rooms
-        if room["available"]
-        and room["capacity"] >= group_size
-        and (not accessible or room["accessible"])
-    ]
+    return None
+
+
+def _get_deadlines(args: dict[str, Any]) -> dict[str, Any]:
+    failure = _planner_failure("Deadline service")
+    if failure:
+        return failure
+    data = _read_json("student_deadlines.json")
+    unit_code = str(args.get("unit_code", "")).strip().upper()
+    deadlines = data["deadlines"]
+    if unit_code:
+        deadlines = [item for item in deadlines if item["unit_code"] == unit_code]
     return {
         "ok": True,
-        "date": date,
-        "time": time,
-        "duration_minutes": duration,
-        "group_size": group_size,
-        "accessibility_required": accessible,
-        "matches": matches,
-        "source": "workshop simulator",
-        "is_live_booking_data": False,
+        "as_of": data["as_of"],
+        "deadlines": deadlines,
+        "source": data["source"],
+        "is_live_lms_data": False,
     }
 
 
-def _check_group_availability(args: dict[str, Any]) -> dict[str, Any]:
-    options = args.get("options") or ["Tuesday 15:00", "Wednesday 11:00", "Friday 15:00"]
+def _get_calendar(args: dict[str, Any]) -> dict[str, Any]:
+    failure = _planner_failure("Calendar service")
+    if failure:
+        return failure
+    data = _read_json("student_calendar.json")
+    return {"ok": True, **data, "is_live_calendar_data": False}
+
+
+def _get_current_progress(args: dict[str, Any]) -> dict[str, Any]:
+    failure = _planner_failure("Progress service")
+    if failure:
+        return failure
+    data = _read_json("student_progress.json")
+    unit_code = str(args.get("unit_code", "")).strip().upper()
+    progress = data["progress"]
+    if unit_code:
+        progress = [item for item in progress if item["unit_code"] == unit_code]
     return {
         "ok": True,
-        "group_size": 5,
-        "available_for_everyone": [option for option in options if "Tuesday" in option or "15:00" in option][:2],
-        "source": "fictional group calendars",
-        "is_live_calendar_data": False,
+        "progress": progress,
+        "source": data["source"],
+        "is_live_progress_data": False,
     }
 
 
-def _create_group_task(args: dict[str, Any]) -> dict[str, Any]:
+def _estimate_available_hours(args: dict[str, Any]) -> dict[str, Any]:
+    failure = _planner_failure("Availability estimator")
+    if failure:
+        return failure
+    calendar = _read_json("student_calendar.json")
+    reserve = max(0.0, float(args.get("buffer_hours", 2)))
+    total = sum(float(block["hours"]) for block in calendar["available_blocks"])
     return {
         "ok": True,
-        "status": "draft_only",
-        "task": str(args.get("task", "Untitled task")),
-        "owner": str(args.get("owner", "unassigned")),
-        "due": str(args.get("due", "not set")),
-        "requires_student_confirmation": True,
+        "week": calendar["week"],
+        "available_hours": total,
+        "recommended_buffer_hours": reserve,
+        "plannable_hours": max(0.0, total - reserve),
+        "available_blocks": calendar["available_blocks"],
+        "protected_time": calendar["protected_time"],
+        "source": "calculated from fictional workshop calendar data",
     }
 
 
-def _draft_calendar_invite(args: dict[str, Any]) -> dict[str, Any]:
+def _save_study_plan(args: dict[str, Any]) -> dict[str, Any]:
+    plan = args.get("plan")
+    if not plan:
+        return {"ok": False, "error": "A proposed plan is required"}
     return {
         "ok": True,
-        "status": "draft_only",
-        "title": str(args.get("title", "Group study session")),
-        "date": str(args.get("date", "unspecified")),
-        "time": str(args.get("time", "unspecified")),
-        "room": str(args.get("room", "not selected")),
-        "requires_student_approval_before_sending": True,
+        "status": "approval_required",
+        "preview": plan,
+        "message": "The plan has not been saved. Approval must come from the student outside the model-controlled tool call.",
+        "is_real_calendar_action": False,
     }
 
 
-find_study_room = Tool(
-    "find_study_room",
-    "Find simulated study rooms that meet a requested time, capacity and accessibility need. This does not book a room.",
+get_deadlines = Tool(
+    "get_deadlines",
+    "Read the student's fictional assessment deadlines. Use this before prioritising study work; do not guess dates or weights.",
+    {
+        "type": "object",
+        "properties": {"unit_code": {"type": "string", "description": "Optional unit-code filter"}},
+    },
+    _get_deadlines,
+)
+
+get_calendar = Tool(
+    "get_calendar",
+    "Read fixed commitments, available study blocks and protected time from the student's fictional calendar.",
     {
         "type": "object",
         "properties": {
-            "date": {"type": "string"},
-            "time": {"type": "string"},
-            "duration_minutes": {"type": "integer", "default": 120},
-            "group_size": {"type": "integer"},
-            "accessibility_required": {"type": "boolean", "default": False},
+            "start_date": {"type": "string"},
+            "end_date": {"type": "string"},
         },
-        "required": ["date", "time", "group_size"],
     },
-    _find_study_room,
+    _get_calendar,
 )
 
-check_group_availability = Tool(
-    "check_group_availability",
-    "Compare fictional group calendars and return times that work for everyone.",
+get_current_progress = Tool(
+    "get_current_progress",
+    "Read the student's fictional completion estimates and blockers. Use this to avoid treating every deadline as equally unfinished.",
     {
         "type": "object",
-        "properties": {"options": {"type": "array", "items": {"type": "string"}}},
-        "required": ["options"],
+        "properties": {"unit_code": {"type": "string", "description": "Optional unit-code filter"}},
     },
-    _check_group_availability,
+    _get_current_progress,
 )
 
-create_group_task = Tool(
-    "create_group_task",
-    "Prepare a group task as a draft. The student must confirm before it is shared.",
+estimate_available_hours = Tool(
+    "estimate_available_hours",
+    "Calculate realistic study capacity from the fictional calendar while reserving buffer and protected time.",
     {
         "type": "object",
         "properties": {
-            "task": {"type": "string"},
-            "owner": {"type": "string"},
-            "due": {"type": "string"},
+            "start_date": {"type": "string"},
+            "end_date": {"type": "string"},
+            "buffer_hours": {"type": "number", "default": 2},
         },
-        "required": ["task"],
     },
-    _create_group_task,
+    _estimate_available_hours,
 )
 
-draft_calendar_invite = Tool(
-    "draft_calendar_invite",
-    "Prepare, but do not send, a calendar invitation for the group.",
+save_study_plan = Tool(
+    "save_study_plan",
+    "Preview a study plan and request student approval. This tool never treats a model-provided argument as human approval and does not modify a real calendar.",
     {
         "type": "object",
         "properties": {
-            "title": {"type": "string"},
-            "date": {"type": "string"},
-            "time": {"type": "string"},
-            "room": {"type": "string"},
+            "plan": {"type": "array", "items": {"type": "object"}},
         },
-        "required": ["title", "date", "time"],
+        "required": ["plan"],
     },
-    _draft_calendar_invite,
+    _save_study_plan,
 )
 
-BASIC_TOOLS = [
-    check_group_availability,
-    find_study_room,
-    create_group_task,
-    draft_calendar_invite,
+PLANNER_TOOLS = [
+    get_deadlines,
+    get_calendar,
+    get_current_progress,
+    estimate_available_hours,
+    save_study_plan,
 ]
 
 
-LEADERSHIP_NOTES = DATA_DIR / "leadership_revision_notes.txt"
-LEADERSHIP_MASTERY = DATA_DIR / "leadership_mastery.json"
+COURSE_DOCUMENTS = (
+    "unit_outline.txt",
+    "lecture_04_notes.txt",
+    "assignment_rubric.txt",
+    "assessment_policy.txt",
+    "student_calendar.txt",
+)
 
 
-def _normalise_leadership_topic(value: Any) -> str:
-    text = str(value or "").strip().lower().replace("_", " ")
-    aliases = {
-        "motivation": "motivation",
-        "situational": "situational leadership",
-        "situational leadership": "situational leadership",
-        "psychological safety": "psychological safety",
-        "safety": "psychological safety",
-    }
-    return aliases.get(text, text)
-
-
-def _get_mastery_record(args: dict[str, Any]) -> dict[str, Any]:
-    if os.getenv("WORKSHOP_SIMULATE_STUDY_DATA_FAILURE") == "1":
-        return {
-            "ok": False,
-            "error": "Mastery record is temporarily unavailable",
-            "source": "workshop simulator",
-        }
-    data = json.loads(LEADERSHIP_MASTERY.read_text(encoding="utf-8"))
-    profile = str(args.get("profile", "mixed")).strip().lower()
-    scores = data["profiles"].get(profile)
-    if scores is None:
-        return {
-            "ok": False,
-            "error": f"Unknown mastery profile: {profile}",
-            "available_profiles": sorted(data["profiles"]),
-        }
-    topic = _normalise_leadership_topic(args.get("topic"))
-    if topic:
-        if topic not in scores:
-            return {"ok": False, "error": f"Unknown leadership topic: {topic}"}
-        scores = {topic: scores[topic]}
-    return {
-        "ok": True,
-        "student": data["student"],
-        "unit": data["unit"],
-        "profile": profile,
-        "scores": scores,
-        "scale": data["scale"],
-        "source": data["source"],
-    }
-
-
-def _leadership_search(args: dict[str, Any]) -> dict[str, Any]:
-    if os.getenv("WORKSHOP_SIMULATE_STUDY_DATA_FAILURE") == "1":
-        return {
-            "ok": False,
-            "error": "Leadership notes search is temporarily unavailable",
-            "source": "workshop simulator",
-        }
+def _search_course_notes(args: dict[str, Any]) -> dict[str, Any]:
+    if os.getenv("WORKSHOP_SIMULATE_RETRIEVAL_FAILURE") == "1":
+        return {"ok": False, "error": "Course-document search is temporarily unavailable"}
     query = str(args.get("query", "")).strip()
-    top_k = max(1, min(3, int(args.get("top_k", 2))))
-    text = LEADERSHIP_NOTES.read_text(encoding="utf-8")
-    headings = list(re.finditer(r"^## (.+)$", text, flags=re.MULTILINE))
-    terms = set(re.findall(r"[a-z0-9]+", query.lower()))
-    results = []
-    for index, heading in enumerate(headings):
-        end = headings[index + 1].start() if index + 1 < len(headings) else len(text)
-        section = heading.group(1).strip()
-        passage = text[heading.end():end].strip()
-        words = set(re.findall(r"[a-z0-9]+", f"{section} {passage}".lower()))
-        score = len(terms & words)
-        if score:
-            results.append({"section": section, "score": score, "text": passage})
-    results.sort(key=lambda item: (-item["score"], item["section"]))
+    top_k = max(1, min(5, int(args.get("top_k", 3))))
+    unit_code = str(args.get("unit_code", "")).strip().upper()
+    terms = set(re.findall(r"[a-z0-9]+", f"{query} {unit_code}".lower()))
+    results: list[dict[str, Any]] = []
+    for filename in COURSE_DOCUMENTS:
+        text = (DATA_DIR / filename).read_text(encoding="utf-8")
+        sections = re.split(r"\n\s*\n", text)
+        for index, passage in enumerate(sections):
+            words = set(re.findall(r"[a-z0-9]+", passage.lower()))
+            score = len(terms & words)
+            if score:
+                results.append({
+                    "source": filename,
+                    "passage": index + 1,
+                    "score": score,
+                    "text": passage.strip(),
+                })
+    results.sort(key=lambda item: (-item["score"], item["source"], item["passage"]))
     return {
         "ok": True,
         "query": query,
+        "unit_code": unit_code or None,
         "results": results[:top_k],
-        "source": LEADERSHIP_NOTES.name,
-        "is_official_course_material": False,
+        "source_scope": "fictional workshop documents",
     }
 
 
-_STUDY_BANK: dict[str, dict[str, Any]] = {
-    "motivation": {
-        "section": "Motivation",
-        "flashcards": [
-            {"front": "What distinguishes intrinsic from extrinsic motivation?", "back": "Intrinsic motivation comes from the activity itself; extrinsic motivation is driven by a separable outcome."},
-            {"front": "Which three needs are central to self-determination theory?", "back": "Autonomy, competence and relatedness."},
-            {"front": "What three judgments connect effort to motivation in expectancy theory?", "back": "Effort can improve performance, performance can produce an outcome, and the outcome is valued."},
-            {"front": "Why might a valued reward still fail to motivate?", "back": "Motivation can remain low when the effort-to-performance or performance-to-outcome link is weak."},
-        ],
-        "questions": [
-            {"question": "A team values a bonus but believes workload makes the target impossible. Which part of expectancy theory is weakest?", "check_for": "The effort-to-performance judgment."},
-            {"question": "Give one management action that supports autonomy without removing expectations.", "check_for": "Meaningful choice combined with clear expectations."},
-        ],
-    },
-    "situational leadership": {
-        "section": "Situational leadership",
-        "flashcards": [
-            {"front": "What should a leader diagnose before adapting their approach?", "back": "The specific task plus the person’s current capability and confidence."},
-            {"front": "Why is readiness not a permanent label?", "back": "Capability and confidence can vary across tasks and change over time."},
-            {"front": "What two dimensions are balanced in situational leadership?", "back": "Direction and support."},
-        ],
-        "questions": [
-            {"question": "A capable employee is confident in routine work but new to client negotiation. How should the leader’s approach change for that task?", "check_for": "More task-specific direction while preserving appropriate autonomy and support."},
-            {"question": "What evidence would you seek before deciding that someone needs more direction?", "check_for": "Task-specific capability and confidence rather than a fixed personality label."},
-        ],
-    },
-    "psychological safety": {
-        "section": "Psychological safety",
-        "flashcards": [
-            {"front": "What is psychological safety?", "back": "A shared belief that interpersonal risks can be taken without humiliation or punishment."},
-            {"front": "Does psychological safety mean lowering standards?", "back": "No. A team can combine safety for speaking up with clear accountability and quality standards."},
-            {"front": "Name two leader behaviours that support psychological safety.", "back": "Examples include acknowledging uncertainty, inviting dissent and responding constructively to bad news."},
-        ],
-        "questions": [
-            {"question": "A manager says mistakes are unacceptable, so team members hide problems. What leadership behaviour could change the pattern?", "check_for": "A constructive response to bad news while keeping accountability clear."},
-            {"question": "How can a team encourage dissent without allowing decisions to stall indefinitely?", "check_for": "Separate safe contribution from final accountability and decision rules."},
-        ],
-    },
+def _get_mastery_record(args: dict[str, Any]) -> dict[str, Any]:
+    if os.getenv("WORKSHOP_SIMULATE_RETRIEVAL_FAILURE") == "1":
+        return {"ok": False, "error": "Mastery record is temporarily unavailable"}
+    data = _read_json("mastery_record.json")
+    topic = str(args.get("topic", "")).strip().lower()
+    topics = data["topics"]
+    if topic:
+        matches = {name: score for name, score in topics.items() if topic in name or name in topic}
+        if not matches:
+            return {"ok": False, "error": f"No mastery record for topic: {topic}"}
+        topics = matches
+    return {"ok": True, **data, "topics": topics}
+
+
+QUIZ_BANK: dict[str, list[dict[str, str]]] = {
+    "graph traversal": [
+        {"question": "When does breadth-first search guarantee a shortest path?", "check_for": "An unweighted graph, with distance measured in edges."},
+        {"question": "What does O(V + E) assume about the graph representation?", "check_for": "An adjacency-list representation."},
+    ],
+    "shortest paths": [
+        {"question": "Why can Dijkstra's algorithm fail with a negative edge?", "check_for": "Its greedy settled choice may later be improved."},
+        {"question": "Which algorithm would you choose for an unweighted shortest-path problem, and why?", "check_for": "Breadth-first search because it explores by edge distance."},
+    ],
+    "dynamic programming": [
+        {"question": "What two properties suggest a dynamic-programming approach?", "check_for": "Overlapping subproblems and optimal substructure."},
+        {"question": "What should a state definition make explicit?", "check_for": "The information needed to describe a subproblem."},
+    ],
 }
 
 
-def _draft_flashcards(args: dict[str, Any]) -> dict[str, Any]:
-    topic = _normalise_leadership_topic(args.get("topic"))
-    source_excerpt = str(args.get("source_excerpt", "")).strip()
-    if not source_excerpt:
-        return {"ok": False, "error": "A retrieved source excerpt is required before drafting flashcards"}
-    bank = _STUDY_BANK.get(topic)
-    if bank is None:
-        return {"ok": False, "error": f"No supplied flashcard material for: {topic}"}
-    count = max(1, min(len(bank["flashcards"]), int(args.get("count", 3))))
-    return {
-        "ok": True,
-        "topic": topic,
-        "cards": bank["flashcards"][:count],
-        "source": LEADERSHIP_NOTES.name,
-        "source_section": bank["section"],
-        "status": "draft_for_student_review",
+def _generate_quiz(args: dict[str, Any]) -> dict[str, Any]:
+    topic = str(args.get("topic", "")).strip().lower()
+    excerpt = str(args.get("source_excerpt", "")).strip()
+    if not excerpt:
+        return {"ok": False, "error": "Retrieve a course passage before generating a quiz"}
+    questions = next((items for key, items in QUIZ_BANK.items() if key in topic or topic in key), None)
+    if not questions:
+        return {"ok": False, "error": f"No supplied quiz bank for topic: {topic}"}
+    grounding_terms = {
+        "graph traversal": ("breadth-first", "graph traversal", "adjacency"),
+        "shortest paths": ("dijkstra", "shortest path", "edge weight"),
+        "dynamic programming": ("dynamic programming", "subproblem", "optimal substructure"),
     }
-
-
-def _draft_practice_questions(args: dict[str, Any]) -> dict[str, Any]:
-    topic = _normalise_leadership_topic(args.get("topic"))
-    source_excerpt = str(args.get("source_excerpt", "")).strip()
-    if not source_excerpt:
-        return {"ok": False, "error": "A retrieved source excerpt is required before drafting practice questions"}
-    bank = _STUDY_BANK.get(topic)
-    if bank is None:
-        return {"ok": False, "error": f"No supplied practice material for: {topic}"}
-    count = max(1, min(len(bank["questions"]), int(args.get("count", 2))))
+    matched_topic = next(key for key in QUIZ_BANK if key in topic or topic in key)
+    if not any(term in excerpt.lower() for term in grounding_terms[matched_topic]):
+        return {
+            "ok": False,
+            "error": f"The retrieved excerpt does not support a quiz about {matched_topic}",
+        }
+    count = max(1, min(len(questions), int(args.get("count", 2))))
     return {
         "ok": True,
         "topic": topic,
-        "questions": bank["questions"][:count],
-        "source": LEADERSHIP_NOTES.name,
-        "source_section": bank["section"],
+        "questions": questions[:count],
         "status": "formative_practice_only",
+        "grounded_in_supplied_excerpt": True,
     }
 
 
-get_mastery_record = Tool(
-    "get_mastery_record",
-    "Read Aisha's fictional topic mastery scores. Use this before choosing the kind of revision support.",
-    {
-        "type": "object",
-        "properties": {
-            "profile": {"type": "string", "enum": ["weak", "mixed", "strong"]},
-            "topic": {"type": "string"},
-        },
-        "required": ["profile"],
-    },
-    _get_mastery_record,
-)
-
-search_leadership_notes = Tool(
-    "search_leadership_notes",
-    "Search the supplied fictional Leadership in Organisations notes and return source-labelled passages.",
+search_course_notes = Tool(
+    "search_course_notes",
+    "Search supplied fictional unit documents and return source-labelled passages. Use this before answering unit-specific questions.",
     {
         "type": "object",
         "properties": {
             "query": {"type": "string"},
-            "top_k": {"type": "integer", "default": 2},
+            "unit_code": {"type": "string"},
+            "top_k": {"type": "integer", "default": 3},
         },
         "required": ["query"],
     },
-    _leadership_search,
+    _search_course_notes,
 )
 
-draft_flashcards = Tool(
-    "draft_flashcards",
-    "Draft short, source-grounded flashcards from a retrieved leadership-notes passage.",
+get_mastery_record = Tool(
+    "get_mastery_record",
+    "Read the student's fictional topic-mastery record so revision can focus on weaker topics.",
     {
         "type": "object",
-        "properties": {
-            "topic": {"type": "string"},
-            "source_excerpt": {"type": "string"},
-            "count": {"type": "integer", "default": 3},
-        },
-        "required": ["topic", "source_excerpt"],
+        "properties": {"topic": {"type": "string", "description": "Optional topic filter"}},
     },
-    _draft_flashcards,
+    _get_mastery_record,
 )
 
-draft_practice_questions = Tool(
-    "draft_practice_questions",
-    "Draft formative application questions from a retrieved leadership-notes passage.",
+generate_quiz = Tool(
+    "generate_quiz",
+    "Generate formative questions from a retrieved course passage. This must not create assessed answers.",
     {
         "type": "object",
         "properties": {
@@ -413,28 +355,26 @@ draft_practice_questions = Tool(
         },
         "required": ["topic", "source_excerpt"],
     },
-    _draft_practice_questions,
+    _generate_quiz,
 )
 
-STUDY_COACH_TOOLS = [
-    get_mastery_record,
-    search_leadership_notes,
-    draft_flashcards,
-    draft_practice_questions,
-]
+STUDY_UPGRADE_TOOLS = [search_course_notes, get_mastery_record, generate_quiz]
+STUDENT_AGENT_TOOLS = PLANNER_TOOLS + STUDY_UPGRADE_TOOLS
 
 
 def run_agent(
     instructions: str,
     task: str,
     tools: list[Tool] | None = None,
-    max_steps: int = 6,
-    max_tokens: int = 800,
+    max_steps: int = 7,
+    max_tokens: int = 900,
 ) -> dict[str, Any]:
     """Run a transparent tool-use loop and return observable events."""
+    if not instructions.strip() or not task.strip():
+        raise ValueError("instructions and task are required")
     tools = tools or []
-    messages: list[dict[str, Any]] = [{"role": "user", "content": task}]
-    events: list[dict[str, Any]] = [{"type": "user", "text": task}]
+    messages: list[dict[str, Any]] = [{"role": "user", "content": task.strip()}]
+    events: list[dict[str, Any]] = [{"type": "user", "text": task.strip()}]
     definitions = [tool.api_definition() for tool in tools]
     by_name = {tool.name: tool for tool in tools}
 
@@ -471,7 +411,12 @@ def run_agent(
                         result = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
                         is_error = True
                 events.append({"type": "result", "name": block.name, "result": result})
-                assistant_blocks.append({"type": "tool_use", "id": block.id, "name": block.name, "input": arguments})
+                assistant_blocks.append({
+                    "type": "tool_use",
+                    "id": block.id,
+                    "name": block.name,
+                    "input": arguments,
+                })
                 tool_results.append({
                     "type": "tool_result",
                     "tool_use_id": block.id,
@@ -492,62 +437,26 @@ def run_agent(
     return {"ok": False, "model": DEFAULT_MODEL, "events": events}
 
 
-def run_study_coach(
-    instructions: str,
-    task: str,
-    quality_prompt: str,
-    max_steps: int = 8,
-) -> dict[str, Any]:
-    """Run the adaptive study coach and append an observable quality review."""
-    if not instructions.strip() or not task.strip() or not quality_prompt.strip():
-        raise ValueError("instructions, task and quality_prompt are all required")
-    result = run_agent(
-        instructions,
-        task,
-        tools=STUDY_COACH_TOOLS,
-        max_steps=max_steps,
-        max_tokens=1000,
-    )
-    result = {**result, "events": list(result.get("events", []))}
-    if not result.get("ok"):
-        return result
-    final_text = next(
-        (
-            event.get("text", "")
-            for event in reversed(result["events"])
-            if event.get("type") == "final"
-        ),
-        "",
-    )
-    if not final_text.strip():
-        result["ok"] = False
-        result["events"].append({"type": "error", "message": "The study coach returned no study pack to review."})
-        return result
-    try:
-        review = ask_claude(
-            "Review a formative study pack against the student's explicit quality criteria. "
-            "Return PASS or REVISE followed by concise, observable reasons. Do not rewrite "
-            "the pack, reveal hidden reasoning or create assessed work.",
-            f"Quality criteria:\n{quality_prompt.strip()}\n\nStudy pack:\n{final_text}",
-            max_tokens=500,
-        )
-    except Exception as exc:
-        result["ok"] = False
-        result["quality_check"] = None
-        result["events"].append({
-            "type": "error",
-            "message": f"Quality check failed: {type(exc).__name__}: {exc}",
-        })
-        return result
-    result["quality_check"] = review
-    result["events"].append({"type": "quality", "text": review})
-    return result
+def run_student_planner(instructions: str, task: str) -> dict[str, Any]:
+    """Run Mission 1 with the five planning tools."""
+    return run_agent(instructions, task, tools=PLANNER_TOOLS, max_steps=7, max_tokens=1000)
+
+
+def run_revision_upgrade(instructions: str, task: str) -> dict[str, Any]:
+    """Run the same Student Agent with planning, retrieval and quiz tools."""
+    return run_agent(instructions, task, tools=STUDENT_AGENT_TOOLS, max_steps=8, max_tokens=1000)
 
 
 def show_trace(result: dict[str, Any], title: str = "OBSERVABLE TRACE") -> None:
     print(f"\n{title}")
     print("-" * len(title))
-    labels = {"user": "USER", "tool": "TOOL REQUEST", "result": "TOOL RESULT", "final": "FINAL", "quality": "QUALITY CHECK", "error": "ERROR"}
+    labels = {
+        "user": "USER",
+        "tool": "TOOL REQUEST",
+        "result": "TOOL RESULT",
+        "final": "FINAL",
+        "error": "ERROR",
+    }
     for event in result.get("events", []):
         kind = event.get("type", "event")
         print(f"\n[{labels.get(kind, kind.upper())}]")
@@ -559,49 +468,17 @@ def show_trace(result: dict[str, Any], title: str = "OBSERVABLE TRACE") -> None:
             print(event.get("text") or event.get("message") or "")
 
 
-def _document_search(args: dict[str, Any]) -> dict[str, Any]:
-    query = str(args.get("query", "")).strip()
-    top_k = max(1, min(5, int(args.get("top_k", 3))))
-    terms = set(re.findall(r"[a-z0-9]+", query.lower()))
-    hits = []
-    for path in sorted(DATA_DIR.glob("*.txt")):
-        if path.name == LEADERSHIP_NOTES.name:
-            continue
-        text = path.read_text(encoding="utf-8")
-        words = set(re.findall(r"[a-z0-9]+", text.lower()))
-        score = len(terms & words)
-        if score:
-            hits.append({"source": path.name, "score": score, "text": text[:1800]})
-    hits.sort(key=lambda item: (-item["score"], item["source"]))
-    return {"query": query, "results": hits[:top_k]}
-
-
-search_student_docs = Tool(
-    "search_student_docs",
-    "Search fictional assessment, unit, calendar and room documents. Use this for private workshop knowledge and cite returned filenames.",
-    {
-        "type": "object",
-        "properties": {
-            "query": {"type": "string"},
-            "top_k": {"type": "integer", "default": 3},
-        },
-        "required": ["query"],
-    },
-    _document_search,
-)
-
-
 def _specialist(name: str, purpose: str) -> Tool:
     def call(args: dict[str, Any]) -> dict[str, Any]:
         material = str(args.get("material", ""))
         question = str(args.get("question", ""))
-        text = ask_claude(
-            f"You are the {name} in a student revision workflow. {purpose} "
-            "Support the student's thinking and never write assessed work for submission.",
-            f"Student question:\n{question}\n\nStudent-provided material:\n{material}",
+        response = ask_claude(
+            f"You are the {name} specialist supporting one Student Agent. {purpose} "
+            "Use only supplied material, name uncertainty and never produce assessed work for submission.",
+            f"Student question:\n{question}\n\nSupplied material:\n{material}",
             max_tokens=700,
         )
-        return {"specialist": name, "response": text}
+        return {"ok": True, "specialist": name, "response": response}
 
     return Tool(
         name,
@@ -618,16 +495,25 @@ def _specialist(name: str, purpose: str) -> Tool:
     )
 
 
-evidence_retriever = _specialist(
-    "evidence_retriever",
-    "Identify which supplied passages are relevant and distinguish evidence from interpretation.",
+researcher = _specialist(
+    "researcher",
+    "Compare supplied sources, identify evidence and gaps, and suggest useful next searches without inventing citations.",
 )
-rubric_reviewer = _specialist(
-    "rubric_reviewer",
-    "Evaluate the student's outline against explicit rubric criteria and return questions for revision.",
+planner = _specialist(
+    "planner",
+    "Turn known deadlines, progress and capacity into a realistic sequence of student-owned next steps.",
 )
-SPECIALISTS = [evidence_retriever, rubric_reviewer]
+reviewer = _specialist(
+    "reviewer",
+    "Evaluate a student's own draft or plan against explicit criteria and return revision questions.",
+)
+SPECIALISTS = [researcher, planner, reviewer]
 
 
-def run_manager(instructions: str, task: str, max_steps: int = 6) -> dict[str, Any]:
-    return run_agent(instructions, task, tools=SPECIALISTS, max_steps=max_steps)
+def run_manager(instructions: str, task: str, max_steps: int = 7) -> dict[str, Any]:
+    """Let the Student Agent delegate only when specialist work is justified."""
+    return run_agent(instructions, task, tools=SPECIALISTS, max_steps=max_steps, max_tokens=1000)
+
+
+# A readable alias for the retrieval exercise.
+search_student_docs = search_course_notes

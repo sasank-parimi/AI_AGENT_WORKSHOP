@@ -3,12 +3,14 @@ from __future__ import annotations
 import json
 import os
 import re
+import ast
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 import workshopkit
-from server import find_study_room, health
+import server
+from server import health
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -20,95 +22,131 @@ class DeckTests(unittest.TestCase):
         cls.deck = cls.html.split('<main class="deck notebook-deck" id="deck">', 1)[1].split("</main>", 1)[0]
         cls.titles = re.findall(r'data-title="([^"]+)"', cls.deck)
 
-    def test_deck_has_forty_two_titled_states(self) -> None:
+    def test_deck_has_thirty_one_purposeful_states(self) -> None:
         slides = re.findall(r'<section class="slide[^>]*>', self.deck)
-        self.assertEqual(len(slides), 42)
+        self.assertEqual(len(slides), 31)
         self.assertEqual(len(slides), len(self.titles))
 
-    def test_opening_and_revised_sequence(self) -> None:
-        self.assertEqual(self.titles[:2], ["AI Agent Workshop", "What is AI?"])
-        self.assertIn("AI AGENT WORKSHOP", self.deck)
-        self.assertIn('What <span class="question-emphasis">IS</span> AI?', self.deck)
-        self.assertLess(self.titles.index("RECIPE prompt framework"), self.titles.index("Prompt builder"))
-        self.assertLess(self.titles.index("The loop"), self.titles.index("Build an adaptive revision coach"))
-        self.assertIn("What changes when the model sees an example?", self.deck)
-        self.assertIn("Context engineering", self.titles)
-        self.assertIn("Working context", self.titles)
+    def test_opening_matches_the_build_story(self) -> None:
+        self.assertEqual(
+            self.titles[:4],
+            ["AI Agents", "What you are building", "Live baseline", "Chatbot or agent"],
+        )
+        self.assertIn("AI AGENTS", self.deck)
+        self.assertIn("Build an AI assistant you can actually keep using", self.deck)
+        for capability in (
+            "Plan my week",
+            "Search my notes",
+            "Quiz me",
+            "Review my work",
+            "Research unfamiliar topics",
+            "Use tools instead of guessing",
+            "Connect to services",
+        ):
+            self.assertIn(capability, self.deck)
 
-    def test_recipe_is_clickable_and_clearly_attributed(self) -> None:
-        for ingredient in ("role", "examples", "context", "instructions", "parameters", "examine"):
-            self.assertIn(f'data-recipe="{ingredient}"', self.deck)
-        self.assertIn("initRecipeFramework", self.html)
-        self.assertIn("workshop mnemonic, not an official Anthropic acronym", self.deck)
+    def test_craft_is_progressive_and_reused_for_agents(self) -> None:
+        for step, label in enumerate(("Context", "Request", "Approach", "Format", "Test"), 1):
+            self.assertIn(f'data-craft-step="{step}"', self.deck)
+            self.assertIn(label, self.deck)
+        self.assertIn("initCraftBuilder", self.html)
+        self.assertIn("CRAFT</strong>", self.deck)
+        self.assertIn("CRAFT-based agent instructions", self.deck)
+        self.assertNotIn("RECIPE", self.html)
 
-    def test_audience_deck_contains_no_speaker_notes(self) -> None:
-        for removed in ("data-notes=", "notesPanel", "toggleNotes", "presenter notes", "legacyDeck"):
-            self.assertNotIn(removed, self.html)
-
-    def test_student_scenarios_remain_authentic_and_linked(self) -> None:
+    def test_one_student_agent_replaces_named_personas(self) -> None:
+        self.assertGreaterEqual(self.deck.count("Student Agent"), 12)
         for name in ("Maya", "Noah", "Priya", "Aisha"):
-            self.assertIn(name, self.deck)
-        for unrelated in ("cybersecurity", "recruitment", "startup", "weather", "Jira"):
-            self.assertNotIn(unrelated.lower(), self.deck.lower())
-        self.assertNotIn("Claude Projects", self.deck)
-        self.assertNotIn("scheduled task", self.deck.lower())
+            self.assertNotIn(name, self.html)
+        for removed in ("find_study_room", "room booking", "Leadership in Organisations"):
+            self.assertNotIn(removed.lower(), self.html.lower())
 
     def test_chapter_progression_never_moves_backwards(self) -> None:
         sections = re.findall(r'<section class="slide[^>]*data-section="([^"]+)"', self.deck)
-        order = {name: index for index, name in enumerate(("prompt", "context", "tools", "agents", "knowledge", "mcp"))}
+        order = {name: index for index, name in enumerate(("why", "craft", "context", "build", "knowledge", "mcp", "make", "next"))}
         self.assertTrue(all(order[left] <= order[right] for left, right in zip(sections, sections[1:])))
 
-    def test_live_interfaces_and_observable_trace_are_present(self) -> None:
-        self.assertIn("/api/claude/stream", self.html)
+    def test_context_comparison_uses_two_real_calls(self) -> None:
+        slide = self.deck.split('data-title="Focused or overloaded"', 1)[1].split("</section>", 1)[0]
+        self.assertEqual(slide.count("data-live-claude"), 2)
+        self.assertIn("Run with focused context", slide)
+        self.assertIn("Run with everything", slide)
+        self.assertIn("minimum useful context", self.deck)
+
+    def test_student_planner_tools_and_trace_are_visible(self) -> None:
+        for tool in (
+            "get_deadlines()",
+            "get_calendar()",
+            "get_current_progress()",
+            "estimate_available_hours()",
+            "save_study_plan()",
+        ):
+            self.assertIn(tool, self.deck)
         self.assertIn("/api/agent/study-session", self.html)
         self.assertIn("data-agent-trace", self.deck)
         self.assertIn("hidden chain-of-thought", self.deck)
-        self.assertIn("/api/health?validate=true", self.html)
-        self.assertIn("API KEY REJECTED", self.html)
 
-    def test_slide_eight_is_a_source_grounded_research_activity(self) -> None:
-        prompt_builder = self.deck.split('data-title="Prompt builder"', 1)[1].split("</section>", 1)[0]
-        self.assertIn("Build Priya’s research request", prompt_builder)
-        self.assertIn("Your task: create an evidence map", prompt_builder)
-        self.assertIn("Claude’s research output", prompt_builder)
-        self.assertIn('type="button" class="btn primary" data-live-run', prompt_builder)
-        self.assertIn('data-live-output aria-live="polite"', prompt_builder)
-        self.assertIn('data-live-state role="status" aria-live="polite"', prompt_builder)
-        for ingredient in ("role", "examples", "context", "instructions", "parameters", "examine"):
-            self.assertIn(f'data-part="{ingredient}"', prompt_builder)
+    def test_retrieval_specialists_mcp_and_handoff_are_coherent(self) -> None:
+        expected = (
+            "Your Student Agent does not know your unit",
+            "Retrieval-Augmented Generation",
+            "RESEARCHER",
+            "PLANNER",
+            "REVIEWER",
+            "MCP standardises discovery",
+            "Make your Student Agent yours",
+            "Frameworks package ideas",
+            "LIVE DEMOS",
+        )
+        for text in expected:
+            self.assertIn(text, self.deck)
+        self.assertEqual(self.titles[-3:], ["Make your Student Agent yours", "Next steps", "Live demos"])
 
-        for source_text in (
-            "Source A — fictional lecture summary",
-            "Source B — fictional reading excerpt",
-            "Finding | Source support | Confidence or limitation | Useful next search",
-        ):
-            self.assertIn(source_text, self.html)
-        self.assertIn("Never claim to have searched the web", prompt_builder)
-        self.assertIn("Do not invent citations", self.html)
-
-    def test_live_stream_never_fails_silently(self) -> None:
+    def test_live_calls_never_fail_silently(self) -> None:
         for message in (
             "Connecting to Claude…",
             "Claude returned an empty response. Check the API status and try again.",
             "Generation stopped before a response arrived.",
             "API key rejected",
+            "API error",
         ):
             self.assertIn(message, self.html)
-        self.assertIn("if(!res.body)", self.html)
-        self.assertIn("[Workshop API error:", self.html)
+        self.assertIn("/api/health?validate=true", self.html)
+        self.assertIn("/api/claude/stream", self.html)
 
-    def test_notebook_is_valid_and_uses_three_prompt_study_build(self) -> None:
+    def test_accessible_navigation_and_no_speaker_notes(self) -> None:
+        for removed in ("data-notes=", "notesPanel", "toggleNotes", "presenter notes"):
+            self.assertNotIn(removed, self.html)
+        self.assertIn("aria-live=\"polite\"", self.deck)
+        self.assertIn("focus-visible", self.html)
+        self.assertIn("prefers-reduced-motion", self.html)
+        self.assertIn("@media print", self.html)
+        self.assertIn("requestFullscreen", self.html)
+        self.assertIn("overviewPanel", self.html)
+
+    def test_notebook_uses_the_same_evolving_agent(self) -> None:
         notebook = json.loads((ROOT / "AI_AGENTS_WORKSHOP.ipynb").read_text(encoding="utf-8"))
         source = "\n".join("".join(cell.get("source", [])) for cell in notebook["cells"])
-        self.assertIn("load_dotenv('.env', override=True)", source)
-        self.assertIn("from workshopkit import *", source)
-        self.assertIn("Leadership in Organisations", source)
+        self.assertIn("Build one Student Agent", source)
+        self.assertIn("Mission 1 — Build the Student Planner", source)
+        self.assertIn("Mission 2 — Upgrade the same agent", source)
+        self.assertIn("Mission 3 — Let the Student Agent delegate", source)
         self.assertIn("AGENT_INSTRUCTIONS", source)
-        self.assertIn("STUDENT_REQUEST", source)
-        self.assertIn("QUALITY_PROMPT", source)
-        self.assertIn("run_study_coach", source)
-        self.assertNotIn("NOAH_INSTRUCTIONS", source)
-        self.assertNotIn("MAYA_REQUEST", source)
+        self.assertIn("run_student_planner", source)
+        self.assertIn("run_revision_upgrade", source)
+        self.assertIn("run_manager", source)
+        self.assertIn("load_dotenv('.env', override=True)", source)
+        for name in ("Maya", "Noah", "Priya", "Aisha", "Leadership in Organisations"):
+            self.assertNotIn(name, source)
+
+        for cell in notebook["cells"]:
+            if cell.get("cell_type") != "code":
+                continue
+            python_source = "\n".join(
+                line for line in "".join(cell.get("source", [])).splitlines()
+                if not line.lstrip().startswith("%")
+            )
+            ast.parse(python_source)
 
     def test_health_explains_credential_source(self) -> None:
         result = health(validate=False)
@@ -116,111 +154,129 @@ class DeckTests(unittest.TestCase):
         self.assertIn("authenticated", result)
 
 
-class SimulatedToolTests(unittest.TestCase):
+class StudentAgentToolTests(unittest.TestCase):
     def tearDown(self) -> None:
-        os.environ.pop("WORKSHOP_SIMULATE_ROOM_FAILURE", None)
-        os.environ.pop("WORKSHOP_SIMULATE_STUDY_DATA_FAILURE", None)
+        os.environ.pop("WORKSHOP_SIMULATE_PLANNER_FAILURE", None)
+        os.environ.pop("WORKSHOP_SIMULATE_RETRIEVAL_FAILURE", None)
 
-    def test_accessible_room_match(self) -> None:
-        result = find_study_room(
-            date="next Tuesday",
-            time="15:00",
-            group_size=5,
-            duration_minutes=120,
-            accessibility_required=True,
+    def test_planner_tool_contracts_are_complete(self) -> None:
+        self.assertEqual(
+            [tool.name for tool in workshopkit.PLANNER_TOOLS],
+            [
+                "get_deadlines",
+                "get_calendar",
+                "get_current_progress",
+                "estimate_available_hours",
+                "save_study_plan",
+            ],
         )
-        self.assertFalse(result["is_live_booking_data"])
-        self.assertEqual(result["matches"][0]["room"], "Bayliss 2.24")
-        self.assertTrue(result["matches"][0]["accessible"])
 
-    def test_no_match_is_explicit(self) -> None:
-        result = find_study_room(
-            date="Monday",
-            time="09:00",
-            group_size=30,
-            accessibility_required=True,
-        )
-        self.assertEqual(result["matches"], [])
-        self.assertIn("suggestion", result)
+    def test_deadlines_progress_calendar_and_capacity_are_consistent(self) -> None:
+        deadlines = workshopkit.get_deadlines.execute({})
+        progress = workshopkit.get_current_progress.execute({})
+        calendar = workshopkit.get_calendar.execute({})
+        capacity = workshopkit.estimate_available_hours.execute({"buffer_hours": 2})
+        self.assertEqual(len(deadlines["deadlines"]), 4)
+        self.assertEqual(len(progress["progress"]), 4)
+        self.assertEqual(calendar["week"], capacity["week"])
+        self.assertGreater(capacity["available_hours"], capacity["plannable_hours"])
+        self.assertEqual(capacity["recommended_buffer_hours"], 2)
+        self.assertFalse(deadlines["is_live_lms_data"])
+        self.assertFalse(calendar["is_live_calendar_data"])
 
-    def test_room_failure_is_observable(self) -> None:
-        os.environ["WORKSHOP_SIMULATE_ROOM_FAILURE"] = "1"
-        result = workshopkit.find_study_room.execute(
-            {"date": "Tuesday", "time": "15:00", "group_size": 5}
-        )
+    def test_unit_filters_are_deterministic(self) -> None:
+        deadlines = workshopkit.get_deadlines.execute({"unit_code": "cits2200"})
+        progress = workshopkit.get_current_progress.execute({"unit_code": "CITS2200"})
+        self.assertEqual([item["unit_code"] for item in deadlines["deadlines"]], ["CITS2200"])
+        self.assertEqual([item["unit_code"] for item in progress["progress"]], ["CITS2200"])
+
+    def test_save_requires_approval(self) -> None:
+        plan = [{"day": "Monday", "time": "08:00–09:30", "focus": "CITS2200"}]
+        preview = workshopkit.save_study_plan.execute({"plan": plan})
+        self.assertEqual(preview["status"], "approval_required")
+        self.assertFalse(preview["is_real_calendar_action"])
+        self.assertNotIn("confirmed", workshopkit.save_study_plan.input_schema["properties"])
+
+    def test_planner_failure_is_observable(self) -> None:
+        os.environ["WORKSHOP_SIMULATE_PLANNER_FAILURE"] = "1"
+        result = workshopkit.get_deadlines.execute({})
         self.assertFalse(result["ok"])
         self.assertIn("unavailable", result["error"])
 
-    def test_weak_mixed_and_strong_mastery_profiles(self) -> None:
-        profiles = {
-            name: workshopkit.get_mastery_record.execute({"profile": name})
-            for name in ("weak", "mixed", "strong")
-        }
-        self.assertLess(profiles["weak"]["scores"]["motivation"], profiles["strong"]["scores"]["motivation"])
-        self.assertEqual(profiles["mixed"]["scores"]["psychological safety"], 5)
-        self.assertEqual(profiles["mixed"]["source"], "fictional workshop mastery data")
-
-    def test_study_data_failure_is_observable(self) -> None:
-        os.environ["WORKSHOP_SIMULATE_STUDY_DATA_FAILURE"] = "1"
-        mastery = workshopkit.get_mastery_record.execute({"profile": "mixed"})
-        search = workshopkit.search_leadership_notes.execute({"query": "motivation"})
-        self.assertFalse(mastery["ok"])
-        self.assertFalse(search["ok"])
-        self.assertIn("unavailable", mastery["error"])
-
-    def test_leadership_search_and_study_tools_are_grounded(self) -> None:
-        search = workshopkit.search_leadership_notes.execute({"query": "motivation autonomy competence"})
-        self.assertTrue(search["results"])
-        self.assertEqual(search["source"], "leadership_revision_notes.txt")
-        excerpt = search["results"][0]["text"]
-        cards = workshopkit.draft_flashcards.execute({"topic": "motivation", "source_excerpt": excerpt, "count": 3})
-        questions = workshopkit.draft_practice_questions.execute({"topic": "motivation", "source_excerpt": excerpt})
-        self.assertEqual(cards["source_section"], "Motivation")
-        self.assertEqual(len(cards["cards"]), 3)
-        self.assertEqual(questions["status"], "formative_practice_only")
-        self.assertTrue(questions["questions"])
-
-    def test_study_generation_requires_retrieval(self) -> None:
-        cards = workshopkit.draft_flashcards.execute({"topic": "motivation", "source_excerpt": ""})
-        self.assertFalse(cards["ok"])
-        self.assertIn("retrieved source", cards["error"])
-
-    def test_run_study_coach_appends_quality_event(self) -> None:
-        agent_result = {
-            "ok": True,
-            "model": "test-model",
-            "events": [
-                {"type": "user", "text": "Study motivation"},
-                {"type": "final", "text": "A source-grounded study pack"},
-            ],
-        }
-        with patch.object(workshopkit, "run_agent", return_value=agent_result) as run_mock, patch.object(
-            workshopkit, "ask_claude", return_value="PASS — grounded and appropriately scoped"
-        ):
-            result = workshopkit.run_study_coach("instructions", "task", "quality criteria")
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["events"][-1]["type"], "quality")
-        self.assertEqual(run_mock.call_args.kwargs["tools"], workshopkit.STUDY_COACH_TOOLS)
-
-    def test_quality_check_failure_is_observable(self) -> None:
-        agent_result = {
-            "ok": True,
-            "model": "test-model",
-            "events": [{"type": "final", "text": "Study pack"}],
-        }
-        with patch.object(workshopkit, "run_agent", return_value=agent_result), patch.object(
-            workshopkit, "ask_claude", side_effect=RuntimeError("simulated evaluator failure")
-        ):
-            result = workshopkit.run_study_coach("instructions", "task", "quality criteria")
-        self.assertFalse(result["ok"])
-        self.assertIn("Quality check failed", result["events"][-1]["message"])
-
-    def test_retrieval_names_sources(self) -> None:
-        result = workshopkit.search_student_docs.execute(
-            {"query": "extension before deadline", "top_k": 2}
+    def test_course_retrieval_names_the_source(self) -> None:
+        result = workshopkit.search_course_notes.execute(
+            {"query": "Dijkstra non-negative edge weights", "unit_code": "CITS2200", "top_k": 2}
         )
         self.assertTrue(result["results"])
-        self.assertEqual(result["results"][0]["source"], "assessment_policy.txt")
+        self.assertEqual(result["results"][0]["source"], "lecture_04_notes.txt")
+        self.assertIn("non-negative", result["results"][0]["text"])
+
+    def test_revision_tools_are_grounded(self) -> None:
+        mastery = workshopkit.get_mastery_record.execute({})
+        self.assertEqual(mastery["topics"]["dynamic programming"], 1)
+        no_source = workshopkit.generate_quiz.execute({"topic": "shortest paths", "source_excerpt": ""})
+        wrong_source = workshopkit.generate_quiz.execute(
+            {"topic": "dynamic programming", "source_excerpt": "Dijkstra requires non-negative weights"}
+        )
+        quiz = workshopkit.generate_quiz.execute(
+            {"topic": "shortest paths", "source_excerpt": "Dijkstra requires non-negative weights", "count": 2}
+        )
+        self.assertFalse(no_source["ok"])
+        self.assertFalse(wrong_source["ok"])
+        self.assertTrue(quiz["grounded_in_supplied_excerpt"])
+        self.assertEqual(quiz["status"], "formative_practice_only")
+
+    def test_retrieval_failure_is_observable(self) -> None:
+        os.environ["WORKSHOP_SIMULATE_RETRIEVAL_FAILURE"] = "1"
+        result = workshopkit.search_course_notes.execute({"query": "Dijkstra"})
+        self.assertFalse(result["ok"])
+        self.assertIn("unavailable", result["error"])
+
+    def test_student_planner_wrapper_uses_planner_tools(self) -> None:
+        with patch.object(workshopkit, "run_agent", return_value={"ok": True, "events": []}) as run_mock:
+            result = workshopkit.run_student_planner("instructions", "task")
+        self.assertTrue(result["ok"])
+        self.assertEqual(run_mock.call_args.kwargs["tools"], workshopkit.PLANNER_TOOLS)
+
+    def test_revision_upgrade_and_manager_use_the_expected_tools(self) -> None:
+        with patch.object(workshopkit, "run_agent", return_value={"ok": True, "events": []}) as run_mock:
+            workshopkit.run_revision_upgrade("instructions", "task")
+            self.assertEqual(run_mock.call_args.kwargs["tools"], workshopkit.STUDENT_AGENT_TOOLS)
+            workshopkit.run_manager("instructions", "task")
+            self.assertEqual(run_mock.call_args.kwargs["tools"], workshopkit.SPECIALISTS)
+        self.assertEqual([tool.name for tool in workshopkit.SPECIALISTS], ["researcher", "planner", "reviewer"])
+
+    def test_live_endpoint_executes_a_planner_tool_and_returns_the_trace(self) -> None:
+        class Block:
+            def __init__(self, block_type: str, **values) -> None:
+                self.type = block_type
+                for key, value in values.items():
+                    setattr(self, key, value)
+
+        class FakeMessages:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def create(self, **_) -> object:
+                self.calls += 1
+                if self.calls == 1:
+                    return type("Response", (), {
+                        "content": [Block("tool_use", id="tool-1", name="get_deadlines", input={})]
+                    })()
+                return type("Response", (), {
+                    "content": [Block("text", text="Start with the earliest unfinished deadline.")]
+                })()
+
+        fake_client = type("Client", (), {"messages": FakeMessages()})()
+        with patch.object(server, "client", return_value=fake_client):
+            response = server.study_session_agent(
+                server.AgentRequest(task="Plan my week", instructions="Inspect deadlines before planning.")
+            )
+        body = json.loads(response.body)
+        self.assertTrue(body["ok"])
+        self.assertEqual(body["tool_calls"], 1)
+        self.assertEqual([event["type"] for event in body["events"]], ["user", "tool", "result", "final"])
+        self.assertEqual(body["events"][1]["name"], "get_deadlines")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,12 @@
+CITS2200 algorithms problem set — sample rubric
+
+This is fictional workshop material, not an official UWA rubric.
+
+- Selects an algorithm that matches the graph conditions.
+- Explains why the algorithm is appropriate.
+- States relevant assumptions and edge cases.
+- Analyses time and space complexity using the representation given.
+- Tests the solution with a small example.
+- Communicates reasoning clearly without relying on unexplained code output.
+
+The Student Agent may ask questions, explain course concepts and review a student's own draft against these criteria. It must not produce a submission-ready solution.

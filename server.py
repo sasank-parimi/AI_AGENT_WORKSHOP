@@ -3,7 +3,7 @@
 Why this exists:
 - The browser slide deck can make real Claude API calls.
 - The Anthropic API key remains on the Python server, not in front-end JavaScript.
-- One endpoint demonstrates a real Claude tool-use loop using a workshop-only study-room simulator.
+- One endpoint demonstrates a real Claude tool-use loop using deterministic student-planning data.
 
 Run:
     pip install -r requirements-live.txt
@@ -26,6 +26,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 import uvicorn
+
+from workshopkit import PLANNER_TOOLS
 
 ROOT = Path(__file__).resolve().parent
 # A local .env is the source of truth for notebooks and local presentation
@@ -147,109 +149,33 @@ def claude_stream(req: ClaudeRequest) -> StreamingResponse:
     )
 
 
-STUDY_ROOM_TOOL = {
-    "name": "find_study_room",
-    "description": (
-        "Find simulated university study-room availability for a group. Use this tool when a recommendation "
-        "depends on whether a room fits the requested time, group size or accessibility needs. "
-        "Results are workshop simulation data, not live university bookings."
-    ),
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "date": {"type": "string", "description": "Requested date or day, for example next Tuesday"},
-            "time": {"type": "string", "description": "Requested start time, for example 15:00"},
-            "duration_minutes": {"type": "integer", "description": "Requested duration in minutes", "default": 120},
-            "group_size": {"type": "integer", "description": "Number of students who need seats"},
-            "accessibility_required": {
-                "type": "boolean",
-                "description": "Whether step-free access and an accessible route are required",
-                "default": False,
-            },
-        },
-        "required": ["date", "time", "group_size"],
-    },
-}
-
-
-def find_study_room(
-    date: str,
-    time: str,
-    group_size: int,
-    duration_minutes: int = 120,
-    accessibility_required: bool = False,
-) -> dict[str, Any]:
-    """Return deterministic room data so the lesson does not depend on a campus booking system."""
-    if os.getenv("WORKSHOP_SIMULATE_ROOM_FAILURE") == "1":
-        return {
-            "ok": False,
-            "error": "Room availability service is temporarily unavailable",
-            "source": "UWA AI Club workshop simulator",
-            "is_live_booking_data": False,
-        }
-
-    size = max(1, int(group_size))
-    requested_time = time.strip().lower()
-    requested_day = date.strip().lower()
-    rooms = [
-        {"room": "Bayliss 2.24", "capacity": 8, "accessible": True, "available": "tue" in requested_day and ("3" in requested_time or "15" in requested_time)},
-        {"room": "Reid 1.43", "capacity": 6, "accessible": False, "available": True},
-        {"room": "Barry J Marshall 5.10", "capacity": 16, "accessible": True, "available": size >= 7},
-    ]
-    matches = [
-        room for room in rooms
-        if room["available"]
-        and room["capacity"] >= size
-        and (not accessibility_required or room["accessible"])
-    ]
-    if matches:
-        return {
-            "date": date,
-            "time": time,
-            "duration_minutes": duration_minutes,
-            "group_size": size,
-            "accessibility_required": accessibility_required,
-            "matches": matches[:3],
-            "source": "UWA AI Club workshop simulator",
-            "is_live_booking_data": False,
-        }
-    return {
-        "date": date,
-        "time": time,
-        "duration_minutes": duration_minutes,
-        "group_size": size,
-        "accessibility_required": accessibility_required,
-        "matches": [],
-        "suggestion": "Try a different time or reduce the required capacity",
-        "source": "UWA AI Club workshop simulator",
-        "is_live_booking_data": False,
-    }
-
-
 @app.post("/api/agent/study-session")
 def study_session_agent(req: AgentRequest) -> JSONResponse:
-    """Run a genuine Claude tool-use loop with one workshop tool.
+    """Run a genuine Student Agent loop with deterministic planning tools.
 
     The trace returned to the deck contains only observable events:
     user task, tool requests, tool results and final answer.
     """
     c = client()
     instructions = req.instructions.strip() or (
-        "You coordinate university study sessions. If a recommendation depends on room availability, capacity "
-        "or accessibility, use find_study_room before recommending anything. Clearly label room results as "
-        "workshop simulation data and never claim that a room has been booked."
+        "You are a Student Planning Agent. Inspect deadlines, calendar, current progress and available hours "
+        "before prioritising the week. Protect rest and include buffer. Do not invent student data or assessed "
+        "content. Never save a plan or create calendar blocks without explicit student approval."
     )
 
     messages: list[dict[str, Any]] = [{"role": "user", "content": req.task}]
     events: list[dict[str, Any]] = [{"type": "user", "text": req.task}]
     tool_calls = 0
 
-    for _ in range(4):
+    definitions = [tool.api_definition() for tool in PLANNER_TOOLS]
+    tools_by_name = {tool.name: tool for tool in PLANNER_TOOLS}
+
+    for _ in range(7):
         response = c.messages.create(
             model=MODEL,
-            max_tokens=800,
+            max_tokens=1000,
             system=instructions,
-            tools=[STUDY_ROOM_TOOL],
+            tools=definitions,
             messages=messages,
         )
 
@@ -269,18 +195,17 @@ def study_session_agent(req: AgentRequest) -> JSONResponse:
                     "name": block.name,
                     "input": tool_input,
                 })
-                if block.name != "find_study_room":
-                    result: dict[str, Any] = {"error": f"Unknown tool: {block.name}"}
+                tool = tools_by_name.get(block.name)
+                if tool is None:
+                    result: dict[str, Any] = {"ok": False, "error": f"Unknown tool: {block.name}"}
                     is_error = True
                 else:
-                    result = find_study_room(
-                        date=str(tool_input.get("date", "unspecified")),
-                        time=str(tool_input.get("time", "unspecified")),
-                        group_size=int(tool_input.get("group_size", 1)),
-                        duration_minutes=int(tool_input.get("duration_minutes", 120)),
-                        accessibility_required=bool(tool_input.get("accessibility_required", False)),
-                    )
-                    is_error = not result.get("ok", True)
+                    try:
+                        result = tool.execute(tool_input)
+                        is_error = isinstance(result, dict) and result.get("ok") is False
+                    except Exception as exc:
+                        result = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+                        is_error = True
 
                 events.append({
                     "type": "result",
@@ -309,7 +234,7 @@ def study_session_agent(req: AgentRequest) -> JSONResponse:
         events.append({"type": "final", "text": final_text or "Claude completed without visible text."})
         return JSONResponse({"ok": True, "model": MODEL, "tool_calls": tool_calls, "events": events})
 
-    events.append({"type": "error", "message": "Agent stopped after the workshop safety limit of 4 model turns."})
+    events.append({"type": "error", "message": "Agent stopped after the workshop safety limit of 7 model turns."})
     return JSONResponse({"ok": False, "model": MODEL, "tool_calls": tool_calls, "events": events}, status_code=500)
 
 

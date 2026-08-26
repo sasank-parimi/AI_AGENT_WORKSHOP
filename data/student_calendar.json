@@ -1,0 +1,25 @@
+{
+  "week": "2026-09-14 to 2026-09-20",
+  "source": "fictional workshop calendar data",
+  "fixed_commitments": [
+    {"day": "Monday", "time": "10:00–14:00", "label": "classes"},
+    {"day": "Tuesday", "time": "17:00–22:00", "label": "part-time shift"},
+    {"day": "Wednesday", "time": "11:00–13:00", "label": "classes"},
+    {"day": "Thursday", "time": "09:00–15:00", "label": "classes"},
+    {"day": "Thursday", "time": "17:00–22:00", "label": "part-time shift"},
+    {"day": "Friday", "time": "13:00–14:00", "label": "quiz"}
+  ],
+  "available_blocks": [
+    {"day": "Monday", "time": "08:00–09:30", "hours": 1.5},
+    {"day": "Monday", "time": "15:00–17:00", "hours": 2},
+    {"day": "Tuesday", "time": "09:00–12:00", "hours": 3},
+    {"day": "Wednesday", "time": "08:30–10:30", "hours": 2},
+    {"day": "Wednesday", "time": "14:00–16:00", "hours": 2},
+    {"day": "Friday", "time": "09:00–12:00", "hours": 3},
+    {"day": "Sunday", "time": "09:00–12:00", "hours": 3}
+  ],
+  "protected_time": [
+    {"day": "Saturday", "label": "family commitment"},
+    {"day": "Sunday", "time": "after 12:00", "label": "rest"}
+  ]
+}

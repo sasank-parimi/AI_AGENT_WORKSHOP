@@ -1,18 +1,17 @@
-Sample unit outline — HIST2001
+Sample unit outline — CITS2200 Data Structures and Algorithms
 
 This document is fictional workshop material and is not official UWA course information.
 
 Assessment
-- Research essay: 1,500 words, due Wednesday 17 September at 5:00 pm, worth 40%.
-- Tutorial contribution: weekly, worth 10%.
+- Algorithms problem set: due Wednesday 16 September at 5:00 pm, worth 20%.
+- Programming project: due later in semester, worth 30%.
 - Final examination: during the examination period, worth 50%.
 
-Research essay rubric
-- Presents a defensible argument that answers the question.
-- Uses relevant evidence from unit readings and lectures.
-- Distinguishes evidence from the student's interpretation.
-- Cites sources consistently.
-- Communicates clearly within the word limit.
+Learning outcomes
+- Select data structures and algorithms that fit a problem's constraints.
+- Explain correctness using the terminology introduced in lectures.
+- Analyse time and space complexity.
+- Test solutions against representative and edge cases.
 
 Academic integrity
-Students remain responsible for the argument, interpretation and submitted prose. AI may support planning, questioning, explanation and feedback when permitted by the current assessment instructions.
+Students remain responsible for submitted solutions and explanations. AI may support planning, questioning, concept explanation and feedback when permitted by the current assessment instructions.

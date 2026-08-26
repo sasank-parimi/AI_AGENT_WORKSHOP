@@ -1,14 +1,10 @@
-# AI Agents for an ordinary student week
+# Build one Student Agent
 
-An interactive UWA AI Club workshop that teaches prompting, context engineering, tools, agent loops, retrieval, orchestration, MCP and human approval through realistic student work.
+An interactive UWA AI Club workshop that teaches CRAFT prompting, context engineering, tools, agent loops, retrieval, specialist delegation, MCP and human approval by progressively upgrading one Student Agent.
 
-- **Maya:** prioritising four assessments around work shifts.
-- **Noah:** coordinating an accessible group-project meeting.
-- **Priya:** retrieving unit material and reviewing her own essay outline.
+The Student Agent begins as a weekly planner using fictional deadlines, calendar entries, current progress and available study hours. It then gains private course retrieval, mastery-aware revision, formative quizzes and Researcher, Planner and Reviewer specialists.
 
-The participant notebook adds **Aisha**, who builds an adaptive revision coach for the fictional commerce elective *Leadership in Organisations*.
-
-The presentation makes real Claude API calls and shows observable tool requests and results. All room, calendar, policy and action data is fictional workshop simulation data.
+The presentation makes real Claude API calls and shows observable tool requests and results. All calendar, deadline, progress, course-document and action data is fictional workshop simulation data.
 
 ## Project structure
 
@@ -16,7 +12,7 @@ The presentation makes real Claude API calls and shows observable tool requests 
 - server.py — FastAPI server for the presentation and server-side Claude calls.
 - AI_AGENTS_WORKSHOP.ipynb — participant exercises matching the presentation.
 - workshopkit.py — small, inspectable notebook runtime and simulated tools.
-- data/ — fictional assessment, unit, calendar, room and leadership-study data.
+- data/ — fictional deadlines, calendar, progress, course notes, rubric and mastery data.
 - FACILITATOR_GUIDE.md — 120-minute run sheet and teaching notes.
 - requirements-live.txt — dependencies for the live presentation.
 - requirements.txt — dependencies for the participant notebook.
@@ -32,7 +28,7 @@ The presentation makes real Claude API calls and shows observable tool requests 
 
 Open http://localhost:8000.
 
-The root `.env` is loaded by both the participant notebook and a locally running `server.py`. The API key stays in Python and is never included in browser JavaScript. Editing `.env` is picked up on the next API request.
+The root `.env` is loaded by the participant notebook and by `server.py` only when the website runs locally. The API key stays in Python and is never included in browser JavaScript. Editing `.env` is picked up on the next local API request.
 
 For a deployed website, `.env` is intentionally ignored and is not uploaded. Set a valid Anthropic `ANTHROPIC_API_KEY` in the hosting provider's environment settings, then redeploy. The live-slide status checks whether Anthropic accepts that credential; a non-empty but invalid key is shown as **API KEY REJECTED**.
 
@@ -66,11 +62,11 @@ Streams visible model text. Request fields are prompt, optional system instructi
 
 ### POST /api/agent/study-session
 
-Runs a real Claude tool-selection loop with the deterministic find_study_room workshop tool. The request keeps the existing task and instructions fields.
+Runs a real Claude tool-selection loop with deterministic Student Planner tools: `get_deadlines`, `get_calendar`, `get_current_progress`, `estimate_available_hours` and approval-gated `save_study_plan`. The request retains the `task` and `instructions` fields.
 
-The response contains only observable user, tool, result, final and error events. Room availability is always labelled as simulated and the tool never books a room.
+The response contains only observable user, tool, result, final and error events. Workshop tools never modify a real LMS, calendar or student record.
 
-Set WORKSHOP_SIMULATE_ROOM_FAILURE=1 to return a controlled room-service failure.
+Set `WORKSHOP_SIMULATE_PLANNER_FAILURE=1` for a controlled planning-data failure or `WORKSHOP_SIMULATE_RETRIEVAL_FAILURE=1` for a controlled course-search failure.
 
 ## Deploy on Vercel
 

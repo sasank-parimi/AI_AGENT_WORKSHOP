@@ -1,0 +1,12 @@
+{
+  "unit_code": "CITS2200",
+  "unit_name": "Data Structures and Algorithms",
+  "scale": "0–5",
+  "source": "fictional workshop mastery data",
+  "topics": {
+    "graph traversal": 4,
+    "shortest paths": 2,
+    "dynamic programming": 1,
+    "complexity analysis": 3
+  }
+}

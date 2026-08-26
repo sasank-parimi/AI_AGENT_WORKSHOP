@@ -1,0 +1,19 @@
+Lecture 04 — Graph algorithms
+
+This is fictional workshop material, not official UWA course content.
+
+## Breadth-first search
+
+Breadth-first search explores an unweighted graph level by level. With an adjacency-list representation, its running time is O(V + E). The first time a vertex is reached gives a shortest path measured by number of edges.
+
+## Dijkstra's algorithm
+
+Dijkstra's algorithm maintains a tentative distance from the source to every vertex. At each step it selects the unsettled vertex with the smallest tentative distance, then relaxes its outgoing edges. The algorithm requires non-negative edge weights. With a binary heap and adjacency lists, the running time is O((V + E) log V).
+
+## Choosing an algorithm
+
+Use breadth-first search for shortest paths in an unweighted graph. Use Dijkstra's algorithm when edge weights are non-negative. A graph with negative weights needs a different method; Dijkstra's greedy choice is no longer safe.
+
+## Revision boundary
+
+The Student Agent may explain these notes, quote short passages and generate formative questions. It must not fabricate lecture content or complete assessed problem-set answers.
