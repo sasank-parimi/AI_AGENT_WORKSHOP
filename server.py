@@ -6,7 +6,7 @@ Why this exists:
 - One endpoint demonstrates a real Claude tool-use loop using deterministic student-planning data.
 
 Run:
-    pip install -r requirements-live.txt
+    pip install -r requirements.txt
     cp .env.example .env
     # edit .env and add ANTHROPIC_API_KEY
     python server.py
@@ -256,19 +256,6 @@ def research_agent(req: ResearchRequest) -> JSONResponse:
     """
     research_client = Anthropic(api_key=api_key()) if api_key() else None
     result = workshopkit.run_research_agent(
-        req.instructions,
-        req.task,
-        max_searches=req.max_searches,
-        client=research_client,
-    )
-    return JSONResponse(result)
-
-
-@app.post("/api/agent/web-research")
-def web_research_agent(req: ResearchRequest) -> JSONResponse:
-    """Run the bounded everyday web-research demonstration."""
-    research_client = Anthropic(api_key=api_key()) if api_key() else None
-    result = workshopkit.run_web_research_agent(
         req.instructions,
         req.task,
         max_searches=req.max_searches,

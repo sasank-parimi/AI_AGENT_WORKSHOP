@@ -529,7 +529,6 @@ search_student_docs = search_course_notes
 
 # NVIDIA capstone research and grounded-generation helpers.
 FALLBACK_PATH = DATA_DIR / "nvidia_research_fallback.md"
-PERTH_FALLBACK_PATH = DATA_DIR / "perth_weekend_fallback.md"
 DEFAULT_MAX_SEARCHES = 3
 MAX_SEARCHES = 5
 RESEARCH_QUESTION = (
@@ -693,22 +692,6 @@ def run_research_agent(
         return _fallback_result(task, "Live research remained paused after the retry limit; the dated fallback was loaded.", fallback_path)
     except Exception as exc:
         return _fallback_result(task, f"Live research unavailable ({type(exc).__name__}); the dated fallback was loaded.", fallback_path)
-
-
-def run_web_research_agent(
-    system_prompt: str,
-    task: str,
-    max_searches: int = DEFAULT_MAX_SEARCHES,
-    client: Any | None = None,
-) -> dict[str, Any]:
-    """Run the generic workshop web-search example with its own dated fallback."""
-    return run_research_agent(
-        system_prompt,
-        task,
-        max_searches=max_searches,
-        client=client,
-        fallback_path=PERTH_FALLBACK_PATH,
-    )
 
 
 def run_briefing_editor(

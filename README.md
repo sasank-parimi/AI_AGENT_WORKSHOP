@@ -1,50 +1,89 @@
 # AI Agents Workshop
 
-A complete two-hour, beginner-friendly workshop covering prompt engineering, CRAFT, context engineering, API anatomy, agent loops, tools, human approval, retrieval, multi-agent systems, evaluation and MCP.
+A two-hour, beginner-friendly workshop covering prompt engineering, CRAFT, context engineering, API anatomy, agent loops, tools, human approval, retrieval, multi-agent systems, evaluation and MCP.
 
-The NVIDIA notebook is the applied capstone, not the whole workshop:
+The included NVIDIA notebook is the applied capstone:
 
 1. A **Research Agent** chooses bounded live web searches and produces an auditable source trail.
 2. A **Briefing Editor** makes one tool-free generation call over that verified research.
 
-## Project structure
+## Download the workshop
 
-- `index.html`: 31-state interactive presentation with three live model experiences.
-- `server.py`: FastAPI server keeping credentials out of browser JavaScript.
-- `AI_AGENTS_WORKSHOP.ipynb`: two-stage NVIDIA participant capstone.
-- `workshopkit.py`: student-planning simulator, retrieval tools, specialists and NVIDIA research helpers.
-- `data/`: fictional student/course data plus dated Perth and NVIDIA continuity snapshots.
-- `FACILITATOR_GUIDE.md`: exact 120-minute run sheet, teaching cues and failure handling.
+On GitHub, select **Code**, then either:
 
-## Run the presentation
+- choose **Download ZIP** and extract the downloaded folder; or
+- copy the repository URL and run `git clone <repository-url>`.
+
+Open a terminal in the extracted or cloned project folder before running the commands below.
+
+## What is included
+
+- `index.html`: the interactive workshop presentation.
+- `server.py`: the local FastAPI server that keeps credentials out of browser JavaScript.
+- `AI_AGENTS_WORKSHOP.ipynb`: the participant capstone notebook.
+- `workshopkit.py`: the workshop tools, simulated student data and research helpers.
+- `data/`: fictional workshop data and the dated NVIDIA continuity snapshot.
+- `fonts/`: bundled presentation fonts and their licence files.
+
+## Set up once
+
+Python 3.10 or newer is recommended.
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements-live.txt
+pip install -r requirements.txt
 cp .env.example .env
-# Add a workshop-only ANTHROPIC_API_KEY to .env
+```
+
+On Windows PowerShell, activate the environment with:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Open `.env` and add a workshop-only Anthropic API key:
+
+```dotenv
+ANTHROPIC_API_KEY=your_key_here
+```
+
+Never commit or share `.env`. Use a key with an appropriate spending limit and disable it after the workshop. Anthropic web search adds per-search charges as well as token costs.
+
+## Run the presentation
+
+Activate the virtual environment, then run:
+
+```bash
 python server.py
 ```
 
-Open `http://localhost:8000`. Use arrows or Space to navigate, Home/End to jump, F for fullscreen, and Contents for the workshop map.
+Alternatively, macOS users can open `start_live_deck.command` after completing setup.
 
-Two prompt/context demonstrations call Claude through the server. Slide 6 is a prompt-only CRAFT editor seeded from slide 3, and the Student Planner makes a real tool-selection loop over deterministic fictional data. API failures remain visible and never break navigation.
+Visit `http://localhost:8000`. Use the arrow keys or Space to navigate, Home/End to jump, F for fullscreen, and Contents for the workshop map.
+
+The presentation contains two Claude prompt/context demonstrations and one Student Planner tool loop over deterministic fictional data. Slide 6 is a local CRAFT prompt editor and does not call the model. API failures remain visible and do not break navigation.
 
 ## Run the notebook capstone
 
+With the virtual environment active, run:
+
 ```bash
-source .venv/bin/activate
-pip install -r requirements.txt
 jupyter lab AI_AGENTS_WORKSHOP.ipynb
 ```
 
-The notebook loads `ANTHROPIC_API_KEY` from `.env`, with a `getpass()` fallback that does not write the key into the notebook. Learners edit only:
+If `jupyter` is not already installed, install it in the environment first:
+
+```bash
+pip install jupyterlab
+```
+
+The notebook loads `ANTHROPIC_API_KEY` from `.env`, with a secure prompt fallback that does not save the key into the notebook. Learners edit only:
 
 - `build_research_prompt()`
 - `build_briefing_prompt(research)`
 
-Each stage is run, scored against five visible checks, changed in one CRAFT component and rerun. The research stage uses at most three searches by default. If live research fails, the notebook visibly loads `data/nvidia_research_fallback.md`, which is dated and must not be presented as current research.
+Each stage is run, scored against five visible checks, changed in one CRAFT component and rerun. Research uses at most three searches by default. If live research fails, the notebook visibly loads `data/nvidia_research_fallback.md`, which is dated and must not be presented as current research.
 
 The capstone is educational. It produces no buy/sell recommendation, price target, fabricated financials, personalised financial advice or transaction.
 
@@ -56,28 +95,24 @@ Reports configuration, credential source, model, authentication status and the m
 
 ### `POST /api/claude/stream`
 
-One visible-text generation call. Fields: `prompt`, optional `system`, and optional `max_tokens`.
+Makes one visible-text generation call. Fields are `prompt`, optional `system`, and optional `max_tokens`.
 
 ### `POST /api/agent/study-session`
 
-Runs the observable Student Planner loop with `get_deadlines`, `get_calendar`, `get_current_progress`, `estimate_available_hours` and approval-gated `save_study_plan` tools. No real LMS, calendar or student record is modified.
+Runs the observable Student Planner loop with `get_deadlines`, `get_calendar`, `get_current_progress`, `estimate_available_hours` and approval-gated `save_study_plan` tools. It does not modify a real LMS, calendar or student record.
 
 ### `POST /api/agent/research`
 
 Runs bounded Anthropic server-side web search for the NVIDIA capstone. Input fields are `task`, `instructions` and optional `max_searches` from one to five. Output includes observable events, sources, usage, stop reason, visible text and `fallback_used`. Hidden reasoning is never requested or returned.
 
-### `POST /api/agent/web-research`
+## Deploy with Vercel
 
-Runs the optional bounded Perth web-research API example. It has the same input and observable output contract as the NVIDIA endpoint, but selects `data/perth_weekend_fallback.md` if live search is unavailable. It is not used by the presentation deck.
+The included `vercel.json` configures the FastAPI project. Set `ANTHROPIC_API_KEY` in the Vercel project environment rather than uploading a local `.env` file.
 
-Anthropic web search adds per-search charges plus token costs. Use a workshop-specific key with spending limits and disable it after the event.
+Optional environment settings are:
 
-## Validate and deploy
+- `WORKSHOP_MODEL`
+- `WORKSHOP_MAX_PROMPT_CHARS`
+- `WORKSHOP_MAX_OUTPUT_TOKENS`
 
-```bash
-.venv/bin/python -m unittest discover -s tests -v
-```
-
-The existing `vercel.json` deploys the FastAPI project. Set `ANTHROPIC_API_KEY` in the host environment. Optional settings are `WORKSHOP_MODEL`, `WORKSHOP_MAX_PROMPT_CHARS`, and `WORKSHOP_MAX_OUTPUT_TOKENS`.
-
-Before delivery, verify the deck at 1366×768 and 1920×1080, narrow mobile width, keyboard-only navigation, reduced motion and print layout.
+The font files remain subject to the separate licence text files included in `fonts/`.
