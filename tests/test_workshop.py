@@ -22,9 +22,9 @@ class DeckTests(unittest.TestCase):
         cls.deck = cls.html.split('<main class="deck notebook-deck" id="deck">', 1)[1].split("</main>", 1)[0]
         cls.titles = re.findall(r'data-title="([^"]+)"', cls.deck)
 
-    def test_deck_has_thirty_three_purposeful_states(self) -> None:
+    def test_deck_has_thirty_two_purposeful_states(self) -> None:
         slides = re.findall(r'<section class="slide[^>]*>', self.deck)
-        self.assertEqual(len(slides), 33)
+        self.assertEqual(len(slides), 32)
         self.assertEqual(len(slides), len(self.titles))
 
     def test_opening_matches_the_build_story(self) -> None:
@@ -55,13 +55,50 @@ class DeckTests(unittest.TestCase):
         self.assertIn("CRAFT-based agent instructions", self.deck)
         self.assertNotIn("RECIPE", self.html)
 
-    def test_prompt_challenge_offers_two_scenarios(self) -> None:
+    def test_slide_six_keeps_complete_planning_facts_constant(self) -> None:
+        slide = self.deck.split('data-title="Build with CRAFT"', 1)[1].split("</section>", 1)[0]
+        self.assertIn("facts stay fixed", slide)
+        self.assertIn("complete from the start", slide)
+        for fact in (
+            "Friday at 4 pm",
+            "two hours Tuesday",
+            "90 minutes Wednesday",
+            "two hours Thursday",
+            "situational leadership 2/5",
+            "motivation theory 3/5",
+            "team dynamics 4/5",
+            "50 minutes",
+            "15-minute buffer",
+            "assessed content must remain my own",
+        ):
+            self.assertIn(fact, self.html)
+        for forbidden in ("do not ask questions", "don't ask questions", "ask for missing information"):
+            self.assertNotIn(forbidden, slide.lower())
+
+    def test_prompt_challenge_is_complete_bounded_perth_research(self) -> None:
         slide = self.deck.split('data-title="Prompt challenge"', 1)[1].split("</section>", 1)[0]
-        self.assertIn("data-scenario-picker", slide)
-        self.assertEqual(slide.count("data-scenario="), 2)
-        self.assertIn("Leadership case study", slide)
-        self.assertIn("Organisational behaviour group task", slide)
-        self.assertIn("initScenarioPicker", self.html)
+        for detail in (
+            "5 September 2026",
+            "Perth Station",
+            "two adults",
+            "10:00",
+            "18:00",
+            "AU$120",
+            "no individual walk longer than 15 minutes",
+            "vegetarian lunch",
+            "three main activities",
+            "indoor weather backup",
+            "up to three web searches",
+            "official venue, operator, transport or booking sources",
+        ):
+            self.assertIn(detail, slide)
+        self.assertIn("data-live-web-research", slide)
+        self.assertIn("/api/agent/web-research", self.html)
+        self.assertIn("usage", slide.lower())
+        for state in ("AUTHENTICATION FAILURE", "RATE LIMIT", "EMPTY OUTPUT", "STOPPED"):
+            self.assertIn(state, self.html)
+        for forbidden in ("do not ask questions", "don't ask questions", "ask for missing information"):
+            self.assertNotIn(forbidden, slide.lower())
 
     def test_context_notes_demonstrate_three_states(self) -> None:
         slide = self.deck.split('data-title="Context picker"', 1)[1].split("</section>", 1)[0]
@@ -114,27 +151,59 @@ class DeckTests(unittest.TestCase):
         for field in ("model", "system", "messages", "tools", "max_tokens"):
             self.assertIn(f'data-api-field="{field}"', slide)
         self.assertIn("initApiAnatomy", self.html)
-        self.assertEqual(self.deck.count("data-live-claude"), 4)
+        self.assertEqual(self.deck.count("data-live-claude"), 3)
+        self.assertEqual(self.deck.count("data-live-web-research"), 1)
         self.assertEqual(self.deck.count("data-live-agent"), 1)
         self.assertGreaterEqual(self.deck.count('class="contract-strip"'), 5)
 
     def test_retrieval_systems_mcp_and_handoff_are_coherent(self) -> None:
         expected = (
-            "Your agent does not know your unit",
             "Retrieval-Augmented Generation",
+            "It does not retrain the model",
+            "retrieve-then-generate pattern",
             "RESEARCHER",
             "PLANNER",
             "REVIEWER",
             "Multi-agent systems",
             "MCP standardises discovery",
-            "Claude can run the agent loop for you",
             "Make your agent yours",
             "Frameworks package ideas",
             "LIVE DEMOS",
         )
         for text in expected:
             self.assertIn(text, self.deck)
+        self.assertNotIn('data-title="Claude managed agents"', self.deck)
+        self.assertNotIn("managed execution", self.deck.lower())
         self.assertEqual(self.titles[-3:], ["Make your agent yours", "Next steps", "Live demos"])
+
+    def test_rag_has_four_plain_english_stages_and_visible_limits(self) -> None:
+        slide = self.deck.split('data-title="RAG in plain English"', 1)[1].split("</section>", 1)[0]
+        for stage in ("Ask", "Retrieve", "Add context", "Generate + cite"):
+            self.assertIn(stage, slide)
+        self.assertEqual(slide.count('class="rag-step"'), 4)
+        self.assertIn("does not retrain the model", slide)
+        self.assertIn("Weak retrieval creates weak grounding", slide)
+        self.assertIn("missing evidence stays visible", slide)
+        self.assertIn("Course-document search and live web search", slide)
+
+    def test_generator_evaluator_has_fixed_routing_and_targeted_feedback(self) -> None:
+        slide = self.deck.split('data-title="Generator and evaluator"', 1)[1].split("</section>", 1)[0]
+        for criterion in (
+            "Within AU$120",
+            "Opening hours verified",
+            "Travel time feasible",
+            "Walking limit met?",
+            "Vegetarian lunch",
+            "Indoor backup",
+            "Claims cited",
+        ):
+            self.assertIn(criterion, slide)
+        self.assertIn("pass → user", slide)
+        self.assertIn("fail → one targeted revision", slide)
+        self.assertIn("final human judgment", slide)
+        self.assertIn("data-eval-reveal", slide)
+        self.assertIn("Targeted revision", self.html)
+        self.assertIn("Revised output status", self.html)
 
     def test_live_calls_never_fail_silently(self) -> None:
         for message in (
@@ -147,6 +216,7 @@ class DeckTests(unittest.TestCase):
             self.assertIn(message, self.html)
         self.assertIn("/api/health?validate=true", self.html)
         self.assertIn("/api/claude/stream", self.html)
+        self.assertIn("/api/agent/web-research", self.html)
 
     def test_accessible_navigation_and_no_speaker_notes(self) -> None:
         for removed in ("data-notes=", "notesPanel", "toggleNotes", "presenter notes"):
@@ -403,6 +473,36 @@ class ResearchRuntimeTests(unittest.TestCase):
             self.assertTrue(result["fallback_used"])
             self.assertIn("DATED CLASSROOM FALLBACK - NOT LIVE RESEARCH", result["text"])
 
+    def test_perth_web_research_selects_its_own_dated_fallback(self) -> None:
+        result = workshopkit.run_web_research_agent(
+            "Use official sources.",
+            "Build the Perth plan.",
+            client=self.client(self.Response([])),
+        )
+        self.assertTrue(result["fallback_used"])
+        self.assertIn("Perth", result["text"])
+        self.assertIn("5 September 2026", result["text"])
+        self.assertNotIn("NVIDIA Research Snapshot", result["text"])
+        self.assertEqual(result["stop_reason"], "fallback")
+        self.assertEqual(result["events"][-1]["type"], "usage")
+        self.assertEqual(result["events"][-1]["web_search_requests"], 0)
+
+    def test_perth_web_research_preserves_search_citations_and_pause_turn(self) -> None:
+        paused = self.Response([self.Block("text", text="Partial Perth research", citations=[])], stop_reason="pause_turn")
+        citation = {"title": "Official Perth venue", "url": "https://example.com/perth", "page_age": "2026-08-25"}
+        finished = self.Response([
+            self.Block("server_tool_use", name="web_search", input={"query": "Perth official venue hours"}),
+            self.Block("web_search_tool_result", content=[citation]),
+            self.Block("text", text="Feasible Perth itinerary.", citations=[citation]),
+        ], searches=1)
+        result = workshopkit.run_web_research_agent(
+            "Use official sources.", "Build the Perth plan.", client=self.client(paused, finished)
+        )
+        self.assertFalse(result["fallback_used"])
+        self.assertIn("Partial Perth research", result["text"])
+        self.assertEqual(result["sources"][0]["url"], "https://example.com/perth")
+        self.assertIn("search", [event["type"] for event in result["events"]])
+
     def test_authentication_and_rate_limit_failures_are_named(self) -> None:
         class AuthenticationFailure(Exception):
             pass
@@ -414,6 +514,22 @@ class ResearchRuntimeTests(unittest.TestCase):
             with self.subTest(failure=type(failure).__name__):
                 messages = type("Messages", (), {"create": lambda *_args, **_kwargs: (_ for _ in ()).throw(failure)})()
                 result = workshopkit.run_research_agent("instructions", "task", client=type("Client", (), {"messages": messages})())
+                self.assertTrue(result["fallback_used"])
+                self.assertIn(type(failure).__name__, result["events"][1]["message"])
+
+    def test_perth_authentication_and_rate_limit_failures_are_named(self) -> None:
+        class AuthenticationFailure(Exception):
+            pass
+
+        class RateLimitFailure(Exception):
+            pass
+
+        for failure in (AuthenticationFailure(), RateLimitFailure()):
+            with self.subTest(failure=type(failure).__name__):
+                messages = type("Messages", (), {"create": lambda *_args, **_kwargs: (_ for _ in ()).throw(failure)})()
+                result = workshopkit.run_web_research_agent(
+                    "Use official sources.", "Build the Perth plan.", client=type("Client", (), {"messages": messages})()
+                )
                 self.assertTrue(result["fallback_used"])
                 self.assertIn(type(failure).__name__, result["events"][1]["message"])
 
@@ -431,6 +547,27 @@ class ResearchRuntimeTests(unittest.TestCase):
         self.assertEqual(json.loads(response.body), expected)
         self.assertEqual(run_mock.call_args.kwargs["max_searches"], 2)
         self.assertEqual(server.health(validate=False)["web_search_max"], 5)
+
+    def test_perth_endpoint_forwards_the_bounded_search_contract(self) -> None:
+        expected = {
+            "ok": True,
+            "model": "test-model",
+            "events": [],
+            "sources": [],
+            "usage": {},
+            "stop_reason": "end_turn",
+            "text": "plan",
+            "fallback_used": False,
+        }
+        with patch.object(server, "api_key", return_value=""), patch.object(
+            workshopkit, "run_web_research_agent", return_value=expected
+        ) as run_mock:
+            response = server.web_research_agent(
+                server.ResearchRequest(task="Perth plan", instructions="Use official sources", max_searches=3)
+            )
+        self.assertEqual(json.loads(response.body), expected)
+        self.assertEqual(run_mock.call_args.kwargs["max_searches"], 3)
+        self.assertEqual(run_mock.call_args.args[1], "Perth plan")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # AI Agents Workshop
 
-A complete two-hour, beginner-friendly workshop covering prompt engineering, CRAFT, context engineering, API anatomy, agent loops, tools, human approval, retrieval, multi-agent systems, evaluation, MCP and managed execution.
+A complete two-hour, beginner-friendly workshop covering prompt engineering, CRAFT, context engineering, API anatomy, agent loops, tools, human approval, retrieval, multi-agent systems, evaluation and MCP.
 
 The NVIDIA notebook is the applied capstone, not the whole workshop:
 
@@ -9,11 +9,11 @@ The NVIDIA notebook is the applied capstone, not the whole workshop:
 
 ## Project structure
 
-- `index.html`: 33-state interactive presentation with five live model experiences.
+- `index.html`: 32-state interactive presentation with five live model experiences.
 - `server.py`: FastAPI server keeping credentials out of browser JavaScript.
 - `AI_AGENTS_WORKSHOP.ipynb`: two-stage NVIDIA participant capstone.
 - `workshopkit.py`: student-planning simulator, retrieval tools, specialists and NVIDIA research helpers.
-- `data/`: fictional student/course data plus the dated NVIDIA continuity snapshot.
+- `data/`: fictional student/course data plus dated Perth and NVIDIA continuity snapshots.
 - `FACILITATOR_GUIDE.md`: exact 120-minute run sheet, teaching cues and failure handling.
 
 ## Run the presentation
@@ -29,7 +29,7 @@ python server.py
 
 Open `http://localhost:8000`. Use arrows or Space to navigate, Home/End to jump, F for fullscreen, and Contents for the workshop map.
 
-The four prompt/context demonstrations call Claude through the server. The Student Planner makes a real tool-selection loop over deterministic fictional data. API failures remain visible and never break navigation.
+Three prompt/context demonstrations call Claude through the server. The Perth challenge uses bounded web search, and the Student Planner makes a real tool-selection loop over deterministic fictional data. API failures remain visible and never break navigation.
 
 ## Run the notebook capstone
 
@@ -65,6 +65,10 @@ Runs the observable Student Planner loop with `get_deadlines`, `get_calendar`, `
 ### `POST /api/agent/research`
 
 Runs bounded Anthropic server-side web search for the NVIDIA capstone. Input fields are `task`, `instructions` and optional `max_searches` from one to five. Output includes observable events, sources, usage, stop reason, visible text and `fallback_used`. Hidden reasoning is never requested or returned.
+
+### `POST /api/agent/web-research`
+
+Runs the bounded Perth web-research demonstration used on slide 7. It has the same input and observable output contract as the NVIDIA endpoint, but selects `data/perth_weekend_fallback.md` if live search is unavailable. The fallback is visibly dated and is never presented as current research.
 
 Anthropic web search adds per-search charges plus token costs. Use a workshop-specific key with spending limits and disable it after the event.
 

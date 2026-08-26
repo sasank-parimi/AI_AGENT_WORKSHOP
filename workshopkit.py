@@ -529,6 +529,7 @@ search_student_docs = search_course_notes
 
 # NVIDIA capstone research and grounded-generation helpers.
 FALLBACK_PATH = DATA_DIR / "nvidia_research_fallback.md"
+PERTH_FALLBACK_PATH = DATA_DIR / "perth_weekend_fallback.md"
 DEFAULT_MAX_SEARCHES = 3
 MAX_SEARCHES = 5
 RESEARCH_QUESTION = (
@@ -609,8 +610,8 @@ def extract_visible_content(response: Any) -> tuple[str, list[dict[str, str]], l
     return "\n".join(text_parts).strip(), list(sources.values()), events
 
 
-def _fallback_result(task: str, message: str) -> dict[str, Any]:
-    fallback = FALLBACK_PATH.read_text(encoding="utf-8")
+def _fallback_result(task: str, message: str, fallback_path: Path = FALLBACK_PATH) -> dict[str, Any]:
+    fallback = fallback_path.read_text(encoding="utf-8")
     return {
         "ok": True,
         "model": DEFAULT_MODEL,
@@ -618,6 +619,13 @@ def _fallback_result(task: str, message: str) -> dict[str, Any]:
             {"type": "user", "text": task},
             {"type": "error", "message": message},
             {"type": "final", "text": fallback, "label": "DATED CLASSROOM FALLBACK - NOT LIVE RESEARCH"},
+            {
+                "type": "usage",
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "web_search_requests": 0,
+                "stop_reason": "fallback",
+            },
         ],
         "sources": [],
         "usage": {"input_tokens": 0, "output_tokens": 0, "web_search_requests": 0},
@@ -632,6 +640,7 @@ def run_research_agent(
     task: str = RESEARCH_QUESTION,
     max_searches: int = DEFAULT_MAX_SEARCHES,
     client: Any | None = None,
+    fallback_path: Path = FALLBACK_PATH,
 ) -> dict[str, Any]:
     """Run one bounded server-tool research turn and expose its evidence trail."""
     if not system_prompt.strip() or not task.strip():
@@ -665,7 +674,7 @@ def run_research_agent(
             if stop_reason != "pause_turn":
                 final_text = "\n".join(visible_parts).strip()
                 if not final_text:
-                    return _fallback_result(task, "Live research returned no visible text; the dated fallback was loaded.")
+                    return _fallback_result(task, "Live research returned no visible text; the dated fallback was loaded.", fallback_path)
                 source_list = list(sources_by_url.values())
                 events.extend({"type": "source", **source} for source in source_list)
                 events.append({"type": "final", "text": final_text})
@@ -681,9 +690,25 @@ def run_research_agent(
                     "text": final_text,
                 }
             messages.append({"role": "assistant", "content": getattr(response, "content", [])})
-        return _fallback_result(task, "Live research remained paused after the retry limit; the dated fallback was loaded.")
+        return _fallback_result(task, "Live research remained paused after the retry limit; the dated fallback was loaded.", fallback_path)
     except Exception as exc:
-        return _fallback_result(task, f"Live research unavailable ({type(exc).__name__}); the dated fallback was loaded.")
+        return _fallback_result(task, f"Live research unavailable ({type(exc).__name__}); the dated fallback was loaded.", fallback_path)
+
+
+def run_web_research_agent(
+    system_prompt: str,
+    task: str,
+    max_searches: int = DEFAULT_MAX_SEARCHES,
+    client: Any | None = None,
+) -> dict[str, Any]:
+    """Run the generic workshop web-search example with its own dated fallback."""
+    return run_research_agent(
+        system_prompt,
+        task,
+        max_searches=max_searches,
+        client=client,
+        fallback_path=PERTH_FALLBACK_PATH,
+    )
 
 
 def run_briefing_editor(

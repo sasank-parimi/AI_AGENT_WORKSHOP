@@ -264,6 +264,19 @@ def research_agent(req: ResearchRequest) -> JSONResponse:
     return JSONResponse(result)
 
 
+@app.post("/api/agent/web-research")
+def web_research_agent(req: ResearchRequest) -> JSONResponse:
+    """Run the bounded everyday web-research demonstration."""
+    research_client = Anthropic(api_key=api_key()) if api_key() else None
+    result = workshopkit.run_web_research_agent(
+        req.instructions,
+        req.task,
+        max_searches=req.max_searches,
+        client=research_client,
+    )
+    return JSONResponse(result)
+
+
 @app.exception_handler(HTTPException)
 def http_exception_handler(_, exc: HTTPException):
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
