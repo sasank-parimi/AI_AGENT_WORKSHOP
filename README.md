@@ -9,7 +9,7 @@ The NVIDIA notebook is the applied capstone, not the whole workshop:
 
 ## Project structure
 
-- `index.html`: 32-state interactive presentation with five live model experiences.
+- `index.html`: 32-state interactive presentation with four live model experiences.
 - `server.py`: FastAPI server keeping credentials out of browser JavaScript.
 - `AI_AGENTS_WORKSHOP.ipynb`: two-stage NVIDIA participant capstone.
 - `workshopkit.py`: student-planning simulator, retrieval tools, specialists and NVIDIA research helpers.
@@ -29,7 +29,7 @@ python server.py
 
 Open `http://localhost:8000`. Use arrows or Space to navigate, Home/End to jump, F for fullscreen, and Contents for the workshop map.
 
-Three prompt/context demonstrations call Claude through the server. The Perth challenge uses bounded web search, and the Student Planner makes a real tool-selection loop over deterministic fictional data. API failures remain visible and never break navigation.
+Two prompt/context demonstrations call Claude through the server. Slide 6 is a prompt-only CRAFT editor seeded from slide 3. The Perth challenge uses bounded web search, and the Student Planner makes a real tool-selection loop over deterministic fictional data. API failures remain visible and never break navigation.
 
 ## Run the notebook capstone
 

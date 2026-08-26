@@ -55,23 +55,14 @@ class DeckTests(unittest.TestCase):
         self.assertIn("CRAFT-based agent instructions", self.deck)
         self.assertNotIn("RECIPE", self.html)
 
-    def test_slide_six_keeps_complete_planning_facts_constant(self) -> None:
+    def test_slide_six_is_a_prompt_only_craft_editor_seeded_from_slide_three(self) -> None:
         slide = self.deck.split('data-title="Build with CRAFT"', 1)[1].split("</section>", 1)[0]
-        self.assertIn("facts stay fixed", slide)
-        self.assertIn("complete from the start", slide)
-        for fact in (
-            "Friday at 4 pm",
-            "two hours Tuesday",
-            "90 minutes Wednesday",
-            "two hours Thursday",
-            "situational leadership 2/5",
-            "motivation theory 3/5",
-            "team dynamics 4/5",
-            "50 minutes",
-            "15-minute buffer",
-            "assessed content must remain my own",
-        ):
-            self.assertIn(fact, self.html)
+        self.assertIn("slide 3's request", slide)
+        self.assertIn("this slide does not call Claude", slide)
+        self.assertIn("data-baseline-prompt", self.deck)
+        self.assertNotIn("data-live-claude", slide)
+        self.assertNotIn("data-live-run", slide)
+        self.assertNotIn("data-live-output", slide)
         for forbidden in ("do not ask questions", "don't ask questions", "ask for missing information"):
             self.assertNotIn(forbidden, slide.lower())
 
@@ -146,15 +137,16 @@ class DeckTests(unittest.TestCase):
         self.assertIn("NVIDIA is the capstone task, not the whole workshop", slide)
         self.assertIn("AI_AGENTS_WORKSHOP.ipynb", slide)
 
-    def test_api_anatomy_and_five_live_experiences_are_structured(self) -> None:
+    def test_api_anatomy_and_four_live_experiences_are_structured(self) -> None:
         slide = self.deck.split('data-title="API anatomy"', 1)[1].split("</section>", 1)[0]
         for field in ("model", "system", "messages", "tools", "max_tokens"):
             self.assertIn(f'data-api-field="{field}"', slide)
         self.assertIn("initApiAnatomy", self.html)
-        self.assertEqual(self.deck.count("data-live-claude"), 3)
+        self.assertEqual(self.deck.count("data-live-claude"), 2)
         self.assertEqual(self.deck.count("data-live-web-research"), 1)
         self.assertEqual(self.deck.count("data-live-agent"), 1)
         self.assertGreaterEqual(self.deck.count('class="contract-strip"'), 5)
+        self.assertIn("normaliseWebEvents", self.html)
 
     def test_retrieval_systems_mcp_and_handoff_are_coherent(self) -> None:
         expected = (

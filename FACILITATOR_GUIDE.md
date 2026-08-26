@@ -46,15 +46,15 @@ The advanced tail is deliberately rapid because the workshop has already demonst
 
 ## Live-call routine
 
-The deck contains five live experiences:
+The deck contains four live model experiences and one local prompt-building exercise:
 
 1. vague baseline through `/api/claude/stream`;
-2. completed CRAFT prompt through `/api/claude/stream`;
+2. slide 3 prompt rebuilt locally with CRAFT, without a model call;
 3. Perth activity research through `/api/agent/web-research`;
 4. focused/overloaded context through `/api/claude/stream`;
 5. Student Planner through `/api/agent/study-session`.
 
-Each workbench exposes the goal, system instructions, context, tools and success-test status. Slide 6 keeps every planning fact constant while CRAFT improves the specification. Slide 7 deliberately uses a different, fully specified Perth task so learners can see bounded search, sources and usage. Run the baseline, complete CRAFT call, one context call and Student Planner. Treat an extra API rerun as optional if time is tight.
+Each workbench exposes the goal, system instructions, context, tools and success-test status. Slide 6 carries forward the editable request from slide 3 so learners can change the prompt with CRAFT without generating another response. Slide 7 deliberately uses a different, fully specified Perth task so learners can see bounded search, sources and usage. Run the baseline, complete the local CRAFT edit, run the Perth search, one context call and Student Planner. Treat an extra API rerun as optional if time is tight.
 
 Never describe observable traces as hidden reasoning. Discuss user goals, searches, tool requests, tool results, sources, final responses, stop reasons and usage only.
 
