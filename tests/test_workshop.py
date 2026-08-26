@@ -66,6 +66,37 @@ class DeckTests(unittest.TestCase):
         self.assertIn("/api/health?validate=true", self.html)
         self.assertIn("API KEY REJECTED", self.html)
 
+    def test_slide_eight_is_a_source_grounded_research_activity(self) -> None:
+        prompt_builder = self.deck.split('data-title="Prompt builder"', 1)[1].split("</section>", 1)[0]
+        self.assertIn("Build Priya’s research request", prompt_builder)
+        self.assertIn("Your task: create an evidence map", prompt_builder)
+        self.assertIn("Claude’s research output", prompt_builder)
+        self.assertIn('type="button" class="btn primary" data-live-run', prompt_builder)
+        self.assertIn('data-live-output aria-live="polite"', prompt_builder)
+        self.assertIn('data-live-state role="status" aria-live="polite"', prompt_builder)
+        for ingredient in ("role", "examples", "context", "instructions", "parameters", "examine"):
+            self.assertIn(f'data-part="{ingredient}"', prompt_builder)
+
+        for source_text in (
+            "Source A — fictional lecture summary",
+            "Source B — fictional reading excerpt",
+            "Finding | Source support | Confidence or limitation | Useful next search",
+        ):
+            self.assertIn(source_text, self.html)
+        self.assertIn("Never claim to have searched the web", prompt_builder)
+        self.assertIn("Do not invent citations", self.html)
+
+    def test_live_stream_never_fails_silently(self) -> None:
+        for message in (
+            "Connecting to Claude…",
+            "Claude returned an empty response. Check the API status and try again.",
+            "Generation stopped before a response arrived.",
+            "API key rejected",
+        ):
+            self.assertIn(message, self.html)
+        self.assertIn("if(!res.body)", self.html)
+        self.assertIn("[Workshop API error:", self.html)
+
     def test_notebook_is_valid_and_uses_three_prompt_study_build(self) -> None:
         notebook = json.loads((ROOT / "AI_AGENTS_WORKSHOP.ipynb").read_text(encoding="utf-8"))
         source = "\n".join("".join(cell.get("source", [])) for cell in notebook["cells"])

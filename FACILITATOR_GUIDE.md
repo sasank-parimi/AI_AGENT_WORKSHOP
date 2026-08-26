@@ -22,7 +22,7 @@ The participant notebook adds **Aisha — adaptive revision** as a deliberate ne
 |---|---|---|
 | 0:00–0:07 | Opening discussion | Ask “What is AI?” and collect the room's current definitions |
 | 0:07–0:15 | Cold open and student stories | Inspect the live deadline response and name its assumptions |
-| 0:15–0:33 | Prompting | Reveal RECIPE, build Maya's request and complete prompt surgery |
+| 0:15–0:33 | Prompting | Reveal RECIPE with Maya, then build and test Priya's source-grounded research request |
 | 0:33–0:45 | Context engineering | Identify what enters Maya's working context, what remains useful and what should leave |
 | 0:45–1:02 | Tools and trace | Run the study-room agent and explain each observable event |
 | 1:02–1:10 | Agent loop | Reconstruct the model → action → result loop with the room |
@@ -85,8 +85,8 @@ For the live tool slide, first run the default instructions. Then weaken them an
 
 - On “What is AI?”, accept conflicting definitions and return to them after the agent loop.
 - On the cold open, ask what the model organised and what it had to guess.
-- On RECIPE and the live builder, ask the room to predict the effect before each click.
-- On prompt surgery, give pairs 90 seconds and debrief the intended audience, stage of work and academically appropriate help.
+- On RECIPE, ask the room to predict the effect before each click. On the live builder, ask them to choose the evidence, gaps and next-search output they would need before they run it.
+- On prompt surgery, give pairs 90 seconds and debrief the research question, available evidence, desired output and academically appropriate help.
 - On context selection, keep the distracting options plausible so the discussion is about signal rather than trivia.
 - On the live tool call, weaken the instructions on a second run to show that tool availability does not guarantee appropriate use.
 - On workflow versus agent, require students to explain who controls the next step.
@@ -95,6 +95,7 @@ For the live tool slide, first run the default instructions. Then weaken them an
 ## If the API is unavailable
 
 - Keep teaching from the editable prompts and prepared task text.
+- If a live call returns nothing, point out the on-slide API status and explicit error message before moving to the prepared comparison.
 - Read the expected observable sequence from the trace debrief slide.
 - Pair students around one working machine if only some calls fail.
 - Do not imply that a simulated room result is live university data.

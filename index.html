@@ -526,29 +526,29 @@ body.live-demo .api-status{display:flex}.api-status.offline{color:var(--red);bor
 </section>
 
 <section class="slide workspace-slide" data-section="prompt" data-title="Prompt builder">
-  <header class="slide-heading"><span class="chapter-label">Live workshop</span><h2>Build Maya’s request, one useful detail at a time</h2></header>
-  <div class="prompt-builder notebook-builder" data-prompt-builder data-live-claude data-system="Help the student plan rather than completing assessed work. Follow the requested output shape and state any missing information.">
-    <div class="prompt-parts"><button class="prompt-part" data-part="role"><b>Role</b>A careful study-planning coach</button><button class="prompt-part" data-part="examples"><b>Examples</b>One finished timetable row</button><button class="prompt-part" data-part="context"><b>Context</b>Deadlines, weighting and free time</button><button class="prompt-part" data-part="instructions"><b>Instructions</b>Prioritise, divide and explain</button><button class="prompt-part" data-part="parameters"><b>Parameters</b>Time, boundaries and output</button><button class="prompt-part" data-part="examine"><b>Examine first</b>Check gaps and state assumptions</button></div>
-    <div class="paper"><label>Editable request</label><textarea class="live-textarea" data-prompt-output data-live-input></textarea><div class="output-quality"><span>Specification</span><div class="quality-bar"><div class="quality-fill" data-quality-fill></div></div><span data-quality-label></span></div></div>
-    <div class="paper output-paper"><span class="paper-label">Live response</span><pre class="code live-output" data-live-output>Build the request, then ask Claude.</pre><div class="live-controls"><button class="btn primary" data-live-run>Ask Claude</button><button class="btn" data-live-stop disabled>Stop</button><span class="live-state" data-live-state>Ready</span></div></div>
+  <header class="slide-heading"><span class="chapter-label">Live workshop · research and revision</span><h2>Build Priya’s research request, then inspect what comes back</h2><p>Your task: create an evidence map from two supplied excerpts, identify what the evidence cannot establish, and produce four useful next-search queries.</p></header>
+  <div class="prompt-builder notebook-builder" data-prompt-builder data-live-claude data-system="Support source-grounded research planning. Use only the source excerpts supplied in the request. Never claim to have searched the web, invent sources or citations, or write assessed prose for submission. Clearly separate evidence, interpretation and suggested next searches.">
+    <div class="prompt-parts"><button type="button" class="prompt-part" data-part="role"><b>Role</b>A source-conscious research assistant</button><button type="button" class="prompt-part" data-part="examples"><b>Examples</b>One finished evidence-map row</button><button type="button" class="prompt-part" data-part="context"><b>Context</b>Question and two supplied excerpts</button><button type="button" class="prompt-part" data-part="instructions"><b>Instructions</b>Map evidence, tensions and gaps</button><button type="button" class="prompt-part" data-part="parameters"><b>Parameters</b>Boundaries and research output</button><button type="button" class="prompt-part" data-part="examine"><b>Examine first</b>Check support before making claims</button></div>
+    <div class="paper"><label>Editable research request</label><textarea class="live-textarea" data-prompt-output data-live-input></textarea><div class="output-quality"><span>Research brief</span><div class="quality-bar"><div class="quality-fill" data-quality-fill></div></div><span data-quality-label></span></div></div>
+    <div class="paper output-paper"><span class="paper-label">Claude’s research output</span><pre class="code live-output" data-live-output aria-live="polite">Build the request, then ask Claude.</pre><div class="live-controls"><button type="button" class="btn primary" data-live-run>Ask Claude</button><button type="button" class="btn" data-live-stop disabled>Stop</button><span class="live-state" data-live-state role="status" aria-live="polite">Ready</span></div></div>
   </div>
 </section>
 
 <section class="slide editorial-slide" data-section="prompt" data-title="Define success">
   <header class="slide-heading"><span class="chapter-label">Evaluation before optimisation</span><h2>“Better” becomes useful when the room agrees what it means</h2></header>
-  <div class="rubric-layout"><div class="rubric-page paper"><h3>For Maya, a useful plan should…</h3><ul class="check-list"><li>use the real deadlines and available hours</li><li>protect time for the highest-weighted tasks</li><li>fit work into blocks that are plausible for one person</li><li>make uncertainty visible instead of inventing details</li><li>leave the assessed thinking and writing with Maya</li></ul></div><div class="note-rail"><aside class="margin-note">If we cannot describe success, we cannot judge whether a prompt change helped.</aside><div class="mascot-sticker" data-marv><span>Marv's check</span></div></div></div>
+  <div class="rubric-layout"><div class="rubric-page paper"><h3>For Priya, a useful research brief should…</h3><ul class="check-list"><li>answer the research question using only the supplied excerpts</li><li>label which source supports each finding</li><li>separate evidence from interpretation</li><li>identify disagreements, limitations and missing evidence</li><li>suggest searches without inventing papers or citations</li><li>leave the assessed argument and prose with Priya</li></ul></div><div class="note-rail"><aside class="margin-note">If we cannot describe success, we cannot judge whether a prompt change helped.</aside><div class="mascot-sticker" data-marv><span>Marv's check</span></div></div></div>
 </section>
 
 <section class="slide workspace-slide" data-section="prompt" data-title="Prompt surgery">
-  <header class="slide-heading"><span class="chapter-label">Pair exercise · 90 seconds</span><h2>Rewrite this until another student could judge the answer</h2></header>
-  <div class="workbench live-workbench" data-live-claude data-system="Support the student's planning and learning. Do not produce assessed work for submission. Be explicit about missing information."><div class="paper input-paper"><label>Starting request</label><textarea class="live-textarea" data-live-input>Help me with my essay.</textarea><div class="live-controls"><button class="btn primary" data-live-run>Run our version</button><button class="btn" data-live-stop disabled>Stop</button><span class="live-state" data-live-state>Ready</span></div></div><div class="paper output-paper"><span class="paper-label">What Claude returns</span><pre class="code live-output" data-live-output>Your revised request will run here.</pre></div></div>
-  <aside class="question-note">Who is the student, what stage are they at, and what help is academically appropriate?</aside>
+  <header class="slide-heading"><span class="chapter-label">Pair exercise · 90 seconds</span><h2>Turn a vague topic into a research task we can evaluate</h2></header>
+  <div class="workbench live-workbench" data-live-claude data-system="Support source-grounded research planning. Do not claim web access, invent citations or produce assessed prose. State which material is missing."><div class="paper input-paper"><label>Starting request</label><textarea class="live-textarea" data-live-input>Research psychological safety for my leadership essay.</textarea><div class="live-controls"><button type="button" class="btn primary" data-live-run>Run our version</button><button type="button" class="btn" data-live-stop disabled>Stop</button><span class="live-state" data-live-state>Ready</span></div></div><div class="paper output-paper"><span class="paper-label">What Claude returns</span><pre class="code live-output" data-live-output>Your revised research request will run here.</pre></div></div>
+  <aside class="question-note">What question is Priya investigating, what evidence is available, and what research output would help her next?</aside>
 </section>
 
 <section class="slide comparison-slide" data-section="prompt" data-title="Examples">
   <header class="slide-heading"><span class="chapter-label">Examples make an expectation visible</span><h2>What changes when the model sees an example?</h2></header>
-  <div class="before-after"><article class="paper"><span class="paper-label">Without an example</span><p>Return a day-by-day study plan.</p><h3>The request leaves the shape open</h3><p class="pencil-note">A paragraph, a checklist and a table could all satisfy it.</p></article><article class="paper kept"><span class="paper-label">With one representative row</span><p>Use this pattern for each study block:</p><table class="example-table"><thead><tr><th>Time</th><th>Finish line</th><th>Why now?</th></tr></thead><tbody><tr><td>Mon 9:00–10:30</td><td>Map the essay argument from the rubric</td><td>Highest weighting and earliest deadline</td></tr></tbody></table></article></div>
-  <p class="body-note">The example does not supply Maya’s whole plan. It shows the level of detail and structure she expects.</p>
+  <div class="before-after"><article class="paper"><span class="paper-label">Without an example</span><p>Return a research brief.</p><h3>The request leaves the evidence structure open</h3><p class="pencil-note">A summary can sound confident without showing which source supports each claim.</p></article><article class="paper kept"><span class="paper-label">With one representative row</span><table class="example-table"><thead><tr><th>Finding</th><th>Support</th><th>Confidence</th><th>Next search</th></tr></thead><tbody><tr><td>Leader responses influence whether people speak up</td><td>Source B</td><td>Supported by supplied excerpt</td><td>Empirical studies of team voice</td></tr></tbody></table></article></div>
+  <p class="body-note">The example shows how to expose evidence and uncertainty. It does not supply Priya’s assessed argument.</p>
 </section>
 
 <section class="slide editorial-slide chapter-opening" data-section="context" data-title="Context engineering"><span class="chapter-number">02</span><div><span class="chapter-label">Context engineering</span><h1>What should the model see while it works?</h1><p class="lede">Context engineering means choosing and maintaining the information available at each step, rather than placing every possible document into one prompt.</p></div></section>
@@ -825,21 +825,27 @@ function initPromptBuilder(){
   const quality = q('[data-quality-fill]', root);
   const qualityLabel = q('[data-quality-label]', root);
   const snippets = {
-    role: 'You are a careful study-planning coach who helps Maya make her own decisions.',
-    examples: `Use this row format:
-Monday, 9:00–10:30 | Map the essay argument from the rubric | Highest weighting and earliest deadline`,
-    context: 'The history essay is due Wednesday and worth 40%. The statistics quiz is Friday and worth 15%. A group presentation is Monday. I work Tuesday and Thursday evenings.',
-    instructions: 'Prioritise the assessments, divide the available time into study blocks, and explain why each block comes when it does.',
-    parameters: 'Plan and explain the work without writing assessed content. Use blocks no longer than 90 minutes, leave Sunday afternoon free, and return a day-by-day table.',
-    examine: 'Before drafting, check for missing deadlines, weighting or availability. State any assumptions in the answer.'
+    role: 'You are a source-conscious research assistant helping Priya plan her own investigation.',
+    examples: `Use this evidence-map pattern:
+Finding | Source support | Confidence or limitation | Useful next search`,
+    context: `Research question: How does psychological safety affect learning and accountability in student project teams?
+
+Source A — fictional lecture summary:
+Psychological safety is a shared belief that people can ask questions, admit mistakes and challenge ideas without humiliation. It does not mean lowering standards.
+
+Source B — fictional reading excerpt:
+Leaders can support speaking up by acknowledging uncertainty, inviting dissent and responding constructively to bad news. Psychological safety and clear accountability can coexist.`,
+    instructions: 'Identify the strongest findings supported by the excerpts, map each finding to its source, note tensions or missing evidence, and propose searches that would move the investigation forward.',
+    parameters: 'Return an evidence map followed by a short research-gap note and four precise search queries. Use only Source A and Source B for factual findings. Do not invent citations or write Priya’s assessed argument.',
+    examine: 'Before answering, check that every finding has source support. Mark anything the excerpts cannot establish and separate those gaps from suggested next searches.'
   };
   function setPrompt(value){ if('value' in promptOut) promptOut.value=value; else promptOut.textContent=value; }
   function update(){
     const active = parts.filter(p=>p.classList.contains('on')).map(p=>p.dataset.part);
-    setPrompt(active.length ? active.map(k=>snippets[k]).join(String.fromCharCode(10, 10)) : 'Make me a study schedule for next week.');
+    setPrompt(active.length ? active.map(k=>snippets[k]).join(String.fromCharCode(10, 10)) : 'Help me research psychological safety for a leadership essay.');
     const score = Math.min(100, 18 + active.length*13);
     quality.style.width = `${score}%`;
-    qualityLabel.textContent = active.length <= 1 ? 'vague' : active.length <= 4 ? 'much clearer' : 'testable specification';
+    qualityLabel.textContent = active.length <= 1 ? 'vague research topic' : active.length <= 4 ? 'workable brief' : 'testable research brief';
   }
   parts.forEach(p=>p.addEventListener('click',()=>{p.classList.toggle('on');update();}));
   update();
@@ -865,19 +871,37 @@ async function streamClaude(root){
   const prompt=(input?.value||'').trim();
   if(!prompt){ state.textContent='enter a prompt first'; state.className='live-state error'; input?.focus(); return; }
   const controller=new AbortController(); root._liveController=controller;
-  run.disabled=true; if(stop) stop.disabled=false; state.textContent='calling Claude…'; state.className='live-state running'; output.textContent='';
+  let received=false;
+  run.disabled=true; if(stop) stop.disabled=false; state.textContent='calling Claude…'; state.className='live-state running'; output.textContent='Connecting to Claude…';
   try{
-    const res=await fetch('/api/claude/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt,system:root.dataset.system||'',max_tokens:900}),signal:controller.signal});
-    if(!res.ok){ const msg=await res.text(); throw new Error(msg||`HTTP ${res.status}`); }
-    const reader=res.body.getReader(); const decoder=new TextDecoder();
-    while(true){ const {value,done}=await reader.read(); if(done) break; output.textContent += decoder.decode(value,{stream:true}); output.scrollTop=output.scrollHeight; }
+    const res=await fetch('/api/claude/stream',{method:'POST',headers:{'Content-Type':'application/json','Accept':'text/plain'},body:JSON.stringify({prompt,system:root.dataset.system||'',max_tokens:1100}),signal:controller.signal});
+    if(!res.ok){
+      const raw=await res.text(); let msg=raw||`HTTP ${res.status}`;
+      try{ const data=JSON.parse(raw); msg=data.detail||data.error||msg; }catch(_){}
+      throw new Error(msg);
+    }
+    if(!res.body){
+      const text=await res.text();
+      if(text.trim()){ output.textContent=text; received=true; }
+    }else{
+      const reader=res.body.getReader(); const decoder=new TextDecoder();
+      while(true){
+        const {value,done}=await reader.read(); if(done) break;
+        const chunk=decoder.decode(value,{stream:true});
+        if(chunk){ if(!received) output.textContent=''; output.textContent+=chunk; received=true; output.scrollTop=output.scrollHeight; }
+      }
+      const tail=decoder.decode(); if(tail){ if(!received) output.textContent=''; output.textContent+=tail; received=true; }
+    }
+    if(!received||!output.textContent.trim()) throw new Error('Claude returned an empty response. Check the API status and try again.');
     if(output.textContent.includes('[Website API authentication failed.')){
       state.textContent='API key rejected'; state.className='live-state error';
+    }else if(output.textContent.includes('[Workshop API error:')){
+      state.textContent='API error'; state.className='live-state error';
     }else{
       state.textContent='complete'; state.className='live-state ok';
     }
   }catch(err){
-    if(err.name==='AbortError'){ state.textContent='stopped'; state.className='live-state'; }
+    if(err.name==='AbortError'){ if(!received) output.textContent='Generation stopped before a response arrived.'; state.textContent='stopped'; state.className='live-state'; }
     else { output.textContent = `API error: ${String(err.message||err)}`; state.textContent='API error'; state.className='live-state error'; }
   }finally{ run.disabled=false; if(stop) stop.disabled=true; root._liveController=null; }
 }
