@@ -1,0 +1,31 @@
+Sample student calendar: current workshop week
+
+This document contains fictional workshop data.
+
+Monday
+- 9:00–12:00 available for study
+- 2:00–4:00 available for study
+
+Tuesday
+- Classes 10:00–2:00
+- Work shift 5:00–10:00
+
+Wednesday
+- 8:30–10:30 available for study
+- 11:00–1:00 classes
+- 2:00–4:00 available for study
+- ACCT1101 problem set due at 5:00 pm
+
+Thursday
+- Classes 11:00–3:00
+- Work shift 5:00–10:00
+- MGMT2002 case analysis due at 5:00 pm
+
+Friday
+- 9:00–12:00 available for study
+- MKTG1101 quiz at 1:00 pm
+
+Sunday
+- 9:00–12:00 available for study
+- BUSN1001 group slides due at 6:00 pm
+- Afternoon reserved for rest
