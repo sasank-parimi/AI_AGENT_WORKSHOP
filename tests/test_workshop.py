@@ -237,6 +237,8 @@ class DeckTests(unittest.TestCase):
         self.assertIn("NVIDIA Research Lab", source)
         self.assertEqual(source.count("def build_research_prompt"), 1)
         self.assertEqual(source.count("def build_briefing_prompt"), 1)
+        self.assertIn('def build_research_prompt():\n    return """\n""".strip()', source)
+        self.assertIn('def build_briefing_prompt(research):\n    return """\n""".strip()', source)
         self.assertIn("def run_research_agent", source)
         self.assertIn("def run_briefing_editor", source)
         self.assertIn("research_v1", source)
