@@ -215,13 +215,11 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
 .arch-block.agent { border-color:var(--yellow); }
 .arch-block.human { border-color:#d8d4bf; }
 .arch-arrow{color:var(--line);font-size:26px;}
-.notes-panel { position:fixed;right:18px;top:18px;width:min(440px,40vw);max-height:70vh;overflow:auto;display:none;z-index:100;padding:18px;border-radius:16px;background:rgba(4,12,8,.96);border:1px solid rgba(234,219,112,.25);box-shadow:var(--shadow);font-size:14px;line-height:1.5; }
-.notes-panel.show{display:block;}
 
 @media print {
   html,body{overflow:visible;background:white;color:black}
   .slide{position:relative;display:flex!important;width:100vw;height:100vh;page-break-after:always;background:white;color:black}
-  .nav,.progress-circuit,.top-progress,.slide-num,.notes-panel{display:none!important}
+  .nav,.progress-circuit,.top-progress,.slide-num{display:none!important}
   .card,.code,.trace,.node,.pattern-node,.connector,.wheel{box-shadow:none;background:white;color:black;border-color:#aaa}
 }
 
@@ -238,7 +236,6 @@ p, li { font-size: clamp(18px, 1.7vw, 27px); line-height: 1.45; }
 }
 html,body{background:#d8d1c3;color:var(--ink);font-family:var(--sans)}
 body{background:linear-gradient(90deg,rgba(23,77,57,.055) 1px,transparent 1px),linear-gradient(rgba(23,77,57,.045) 1px,transparent 1px),#d8d1c3;background-size:32px 32px}
-.legacy-deck{display:none!important}
 .notebook-deck{background:var(--paper);box-shadow:0 0 80px rgba(30,32,25,.22)}
 .notebook-deck .slide{
   padding:clamp(70px,7vh,92px) clamp(64px,6vw,112px) 82px;
@@ -269,10 +266,12 @@ body{background:linear-gradient(90deg,rgba(23,77,57,.055) 1px,transparent 1px),l
 }
 .paper::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(23,77,57,.05) 31px)}
 .paper>*{position:relative;z-index:1}
-.margin-note,.question-note,.pencil-note,.annotation{
-  font-family:var(--serif);font-style:italic;color:var(--red);line-height:1.25
+.margin-note,.question-note,.pencil-note{font-family:var(--serif);font-style:italic;line-height:1.25}
+.margin-note,.question-note{color:var(--ink)}.pencil-note{color:var(--red)}
+.margin-note,.question-note{
+  position:relative;inset:auto;max-width:1050px;margin:18px 0 0;padding:10px 16px;
+  border-left:3px solid var(--red);background:rgba(167,72,61,.055);font-size:clamp(16px,1.25vw,20px)
 }
-.margin-note{position:absolute;max-width:300px;font-size:clamp(19px,1.6vw,26px)}
 .tilt-left{transform:rotate(-3deg)}.tilt-right{transform:rotate(2.5deg)}
 .body-note,.integrity-note{
   max-width:1050px;margin:22px 0 0;padding:14px 18px;border-left:4px solid var(--ochre);
@@ -290,8 +289,10 @@ mark{color:inherit;background:linear-gradient(transparent 48%,rgba(243,220,142,.
 .cover-copy{max-width:1060px;margin-left:6vw}
 .cover-copy h1{max-width:1000px;margin:34px 0 26px}
 .wordmark{font-weight:800;color:var(--green);font-size:18px}.wordmark span{font-weight:400;color:var(--pencil);margin-left:12px}
-.cover-slide .margin-note{right:8vw;bottom:17vh}
 .cover-footer{position:absolute;left:13vw;bottom:30px;color:var(--pencil);font-size:14px}
+.question-slide{justify-content:center;align-items:center;text-align:center}
+.question-slide h1{font-size:clamp(72px,9vw,150px);margin:0;max-width:none}
+.question-emphasis{color:var(--green);font-style:italic;text-decoration:underline;text-decoration-color:var(--ochre);text-decoration-thickness:.12em;text-underline-offset:.12em}
 .chapter-opening{display:none;flex-direction:row!important;align-items:center;gap:7vw}
 .chapter-opening.active{display:flex}
 .chapter-opening>div{max-width:980px}
@@ -309,21 +310,26 @@ mark{color:inherit;background:linear-gradient(transparent 48%,rgba(243,220,142,.
 .journey-line li{position:relative;padding:68px 10px 0;text-align:center}
 .journey-line li::before{content:"";position:absolute;top:20px;left:calc(50% - 10px);width:20px;height:20px;border:4px solid var(--paper);background:var(--ochre);border-radius:50%;box-shadow:0 0 0 2px var(--green)}
 .journey-line b{display:block;font-family:var(--serif);font-size:26px}.journey-line span{display:block;color:var(--pencil);font-size:15px;margin-top:5px}
-.journey-slide .margin-note{right:8vw;bottom:12vh}
-.annotated-page{position:relative;flex:1;display:grid;place-items:center}
-.prompt-sheet{width:min(940px,76vw);padding:52px 66px;transform:rotate(-.6deg)}
-.prompt-sheet p{font-family:var(--serif);font-size:clamp(29px,3vw,48px);line-height:1.35;margin:0}
-.annotation{position:absolute;font-size:22px}.a1{left:3%;top:23%}.a2{right:2%;top:38%}.a3{right:8%;bottom:10%}
-.annotation::after{content:" ↝";font-size:34px}
+.journey-slide .margin-note{max-width:760px;align-self:flex-end}
+.recipe-layout{display:grid;grid-template-columns:minmax(250px,.7fr) minmax(0,1.3fr);gap:30px;flex:1;min-height:0}
+.recipe-steps{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:start}
+.recipe-step{display:flex;align-items:center;gap:12px;min-height:76px;padding:12px;text-align:left;color:var(--ink);background:#fffaf0;border:1px solid var(--rule);cursor:pointer}
+.recipe-step strong{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:50%;background:var(--green);color:#fff;font:700 19px var(--sans)}
+.recipe-step span{font-weight:700}.recipe-step[aria-pressed="true"]{background:#fff4c8;border-color:var(--ochre);box-shadow:3px 4px 0 rgba(23,77,57,.08)}
+.recipe-workspace{display:flex;flex-direction:column;min-height:0}
+.recipe-workspace [data-recipe-description]{margin:0 0 14px;color:var(--green);font-weight:700}
+.recipe-prompt{flex:1;overflow:auto;margin:0;padding:18px;background:#f0ede3;border-left:4px solid var(--ochre);white-space:pre-wrap;font:clamp(15px,1.2vw,19px)/1.55 var(--sans)}
+.recipe-progress{display:flex;justify-content:space-between;gap:16px;margin-top:12px;color:var(--pencil);font-size:14px}
 .before-after{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(26px,4vw,64px);align-items:center;flex:1}
 .before-after .paper{min-height:270px;display:flex;flex-direction:column;justify-content:center}
 .crossed{transform:rotate(-1.3deg);background:#eee9dd!important}.crossed::after{content:"";position:absolute;left:8%;right:8%;top:52%;height:3px;background:var(--red);transform:rotate(-5deg)}
 .kept{transform:rotate(.7deg);border-color:rgba(23,77,57,.4)!important}
 .pencil-note{font-size:19px;margin-top:24px}
 .check-list{list-style:none;padding:0;margin:20px 0 0}.check-list li{position:relative;padding:9px 0 9px 42px}.check-list li::before{content:"✓";position:absolute;left:0;color:var(--green);font:700 24px var(--serif)}
-.rubric-page{width:min(840px,70vw);margin:auto 8vw}
-.editorial-slide>.margin-note{right:8vw;bottom:15vh}
-.mascot-sticker{position:absolute;right:3vw;bottom:28vh;width:118px;transform:rotate(3deg);text-align:center}
+.rubric-layout{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:32px;align-items:center;flex:1}
+.rubric-page{width:100%;margin:0}
+.note-rail{display:flex;flex-direction:column;gap:18px;align-items:center}.note-rail .margin-note{margin:0;transform:none}
+.mascot-sticker{position:relative;inset:auto;width:112px;transform:rotate(2deg);text-align:center}
 .mascot-sticker img{display:block;width:100%;max-height:116px;object-fit:cover;object-position:center top;border-radius:50%;border:5px solid #fffaf0;box-shadow:4px 5px 0 rgba(23,77,57,.12)}
 .mascot-sticker span{display:inline-block;margin-top:-5px;padding:5px 9px;background:#fff4b9;color:var(--red);font:italic 16px var(--serif);transform:rotate(-4deg)}
 .wide-sheet{width:100%;margin:auto 0}
@@ -345,10 +351,10 @@ mark{color:inherit;background:linear-gradient(transparent 48%,rgba(243,220,142,.
 .live-state.running{color:#8c6710}.live-state.ok{color:var(--green)}.live-state.error{color:var(--red)}
 .btn{border:1.5px solid var(--green);background:transparent;color:var(--green);border-radius:2px;padding:11px 16px;font-weight:700;box-shadow:none}
 .btn:hover{transform:translateY(-1px) rotate(-.3deg);background:rgba(23,77,57,.06)}
-.btn:focus-visible,.nav button:focus-visible,.prompt-part:focus-visible,.context-item:focus-visible,.sort-card:focus-visible{outline:4px solid rgba(217,169,40,.55);outline-offset:3px}
+.btn:focus-visible,.nav button:focus-visible,.prompt-part:focus-visible,.recipe-step:focus-visible,.context-item:focus-visible,.sort-card:focus-visible{outline:4px solid rgba(217,169,40,.55);outline-offset:3px}
 .btn.primary{background:var(--green);color:#fffdf7;border-color:var(--green)}
 .btn.danger{color:var(--red);border-color:var(--red);background:transparent}
-.question-note{position:absolute;right:5vw;bottom:72px;max-width:520px;text-align:right;font-size:21px;transform:rotate(-1deg)}
+.question-note{align-self:flex-end;text-align:left;transform:none}
 .notebook-builder{grid-template-columns:270px 1fr 1fr;gap:20px}
 .notebook-builder .paper{min-height:0;display:flex;flex-direction:column}
 .prompt-parts{display:flex;flex-direction:column;gap:7px;overflow:auto}
@@ -363,16 +369,26 @@ mark{color:inherit;background:linear-gradient(transparent 48%,rgba(243,220,142,.
 .context-item.selected{border:2px solid var(--green);background:#eff4e9}.context-item[data-signal=noise]{border-style:dashed}
 .context-window{min-height:330px}.context-list{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.context-chip{background:#eef1e7;border:1px solid rgba(23,77,57,.25);padding:8px 10px;font-size:13px}.context-chip.noise{color:var(--red);background:#f6e7e1;border-color:rgba(167,72,61,.3)}
 .signal-track{height:10px;background:#ded8ca;margin-top:8px}.signal-fill{height:100%;background:var(--green);width:0}
+.context-engineering-map{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:stretch;flex:1}
+.context-source{display:flex;flex-direction:column;justify-content:space-between;gap:18px;padding:22px;background:#fffaf0;border-top:5px solid var(--green);box-shadow:3px 5px 0 rgba(23,77,57,.08)}
+.context-source:nth-child(even){margin-top:34px;border-color:var(--ochre)}
+.context-source b{font-family:var(--serif);font-size:clamp(22px,2vw,30px)}.context-source span{color:var(--pencil);font-size:clamp(15px,1.15vw,18px);line-height:1.4}
+.context-cycle{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-top:22px;padding:14px 18px;border-left:4px solid var(--ochre);background:rgba(243,220,142,.26)}
+.context-cycle p{margin:0;font-size:clamp(16px,1.25vw,20px)}
 .context-balance{display:flex;align-items:center;justify-content:center;gap:5vw;flex:1}.context-balance .paper{width:min(380px,32vw);min-height:280px}.messy-stack{transform:rotate(2deg);box-shadow:8px 8px 0 #e7e0d2,15px 15px 0 #d9d1c3}.balance-arrow{font-family:var(--serif);font-style:italic;color:var(--red);font-size:28px}
 .sketch-flow{display:flex;align-items:center;justify-content:center;gap:20px;flex:1;flex-wrap:wrap}.sketch-node,.loop-card{border:2px solid var(--green);background:#fffaf0;padding:22px 25px;min-width:170px;text-align:center;box-shadow:4px 5px 0 rgba(23,77,57,.12);font-family:var(--serif);font-size:22px}.primary-node,.loop-card.emphasis{background:#e9eee4}.drawn-arrow,.loop-arrow{font:42px var(--serif);color:var(--red)}
-.diagram-slide>.margin-note{right:8vw;bottom:13vh}
-.loop-diagram{display:flex;align-items:center;justify-content:center;gap:22px;flex:1;position:relative}.loop-return{position:absolute;bottom:12%;left:36%;right:20%;padding-top:22px;border-top:2px dashed var(--red);text-align:center;color:var(--red);font-family:var(--serif);font-style:italic;font-size:21px}
+.diagram-slide>.margin-note{max-width:760px;align-self:flex-end}
+.loop-diagram{display:grid;grid-template-columns:minmax(170px,1fr) 46px minmax(190px,1fr) 46px minmax(170px,1fr);align-items:center;gap:12px;flex:1}.loop-return{position:relative;grid-column:3/6;padding-top:16px;border-top:2px dashed var(--red);text-align:center;color:var(--ink);font-family:var(--serif);font-style:italic;font-size:19px}
 .notebook-map{grid-template-columns:1fr 160px 1fr 1fr}.node{background:#fffaf0;color:var(--ink);border:2px solid var(--green);border-radius:2px;font-family:var(--serif);box-shadow:4px 5px 0 rgba(23,77,57,.10)}.node.agent{border-color:var(--ochre)}.node.tool{border-color:var(--green-2)}.circuit-line{background:var(--green)}.packet{background:var(--red);box-shadow:none}
 .toolbar{display:flex;gap:10px;justify-content:center}
 .notebook-live-grid{grid-template-columns:.92fr 1.08fr;gap:24px}.live-panel{display:flex;flex-direction:column;gap:8px}.agent-input{min-height:88px}.trace{background:#202721;color:#f4f0e5;border:0;border-radius:2px;padding:20px;overflow:auto}.trace-event{display:block;background:rgba(255,255,255,.04);border-left:3px solid #d9a928;border-radius:0;padding:12px;margin-bottom:12px;font:13px/1.55 var(--mono)}.trace-event.tool{border-color:#f0c95e}.trace-event.result{border-color:#7db793}.trace-event.error{border-color:#d67f73}
 .trace-explainer{list-style:none;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;flex:1;align-items:center}.trace-explainer li{min-height:190px;border-top:3px solid var(--green);padding:18px}.trace-explainer li span{font:500 46px var(--serif);color:var(--ochre)}
 .tool-stamps{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}.tool-stamps span{padding:9px 12px;border:1.5px solid var(--green);color:var(--green);font:13px var(--mono);transform:rotate(-.4deg)}
 .mission-sheet{display:grid;grid-template-columns:110px 1fr;gap:30px;width:min(1050px,86vw);margin:auto}.mission-number{font:500 clamp(70px,9vw,130px)/1 var(--serif);color:var(--ochre)}
+.notebook-handoff{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:34px;align-items:center;flex:1}
+.notebook-handoff .mission-sheet{width:auto;margin:0;grid-template-columns:90px minmax(0,1fr)}.notebook-handoff .mission-number{font-size:clamp(64px,7vw,100px)}
+.prompt-fields{display:grid;gap:10px}.prompt-field{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:center;padding:14px 16px;background:#f1eee4;border-left:4px solid var(--green)}
+.prompt-field b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff}.prompt-field span{font-size:17px}
 .behaviour-notes{display:grid;grid-template-columns:repeat(3,1fr);gap:34px;align-items:center;flex:1}.note-card{padding:30px;background:#fff4b9;box-shadow:6px 7px 0 rgba(53,48,34,.10)}.note-card:nth-child(2){background:#efdcd5}.selected-note{background:#dce9d9;border:2px solid var(--green)}
 .code-and-sketch{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;flex:1}.hand-loop{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}.hand-loop span{padding:22px;border:2px solid var(--green);border-radius:50%;font:24px var(--serif)}.hand-loop b{font-size:34px;color:var(--red)}
 .sort-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;flex:1}.sort-card{padding:18px 22px;text-align:left;background:#fffaf0;color:var(--ink);border:1px solid var(--rule);box-shadow:3px 4px 0 rgba(23,77,57,.07);cursor:pointer}.sort-card[data-choice=workflow]{border-left:7px solid var(--green)}.sort-card[data-choice=agent]{border-left:7px solid var(--ochre)}.choice-tag{font:700 12px var(--mono);color:var(--green)}
@@ -402,14 +418,15 @@ mark{color:inherit;background:linear-gradient(transparent 48%,rgba(243,220,142,.
 .nav{right:20px;bottom:17px}.nav button{width:auto;height:40px;min-width:42px;padding:0 12px;border:1px solid var(--green);border-radius:2px;background:rgba(245,240,228,.94);color:var(--green);font-weight:700}
 .api-status{display:none;top:auto;bottom:17px;left:94px;border:1px solid var(--green);border-radius:2px;background:rgba(245,240,228,.96);color:var(--green);font-family:var(--sans)}
 body.live-demo .api-status{display:flex}.api-status.offline{color:var(--red);border-color:var(--red)}.api-status.online{color:var(--green)}
-.notes-panel{right:22px;top:65px;width:min(480px,45vw);background:#fffaf0;color:var(--ink);border:1px solid var(--green);border-radius:2px;box-shadow:8px 10px 0 rgba(23,77,57,.12);font-size:16px}
 .overview-panel{display:none;position:fixed;inset:0;z-index:200;background:rgba(23,34,28,.62);padding:5vh 6vw}.overview-panel.show{display:block}.overview-sheet{height:90vh;overflow:auto;background:var(--paper);padding:30px;box-shadow:0 20px 70px rgba(0,0,0,.28)}.overview-head{display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:-30px;background:var(--paper);z-index:2;padding:20px 0 14px}.overview-head h3{margin:0;font:600 38px var(--serif)}.overview-list{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.overview-item{padding:16px;text-align:left;background:#fffaf0;color:var(--ink);border:1px solid var(--rule);cursor:pointer}.overview-item b{display:block;color:var(--green);font:13px var(--mono);margin-bottom:7px}.overview-item:hover{border-color:var(--ochre);transform:rotate(-.4deg)}
 
 @media(max-width:1000px){
   .notebook-deck .slide{padding:72px 38px 76px}
   .story-spread,.scenario-callouts,.rag-results{grid-template-columns:1fr 1fr}.student-story:nth-child(3){grid-column:1/-1;margin-top:0}
   .journey-line{grid-template-columns:repeat(3,1fr);row-gap:28px}.journey-line::before{display:none}
+  .recipe-layout{grid-template-columns:1fr}.recipe-steps{grid-template-columns:repeat(3,1fr)}
   .notebook-builder{grid-template-columns:220px 1fr}.notebook-builder>.paper:last-child{grid-column:1/-1;min-height:220px}
+  .context-engineering-map{grid-template-columns:repeat(3,1fr)}.context-source:nth-child(even){margin-top:0}
   .taxonomy-line{grid-template-columns:repeat(3,1fr)}
   .overview-list{grid-template-columns:repeat(3,1fr)}
 }
@@ -418,18 +435,19 @@ body.live-demo .api-status{display:flex}.api-status.offline{color:var(--red);bor
   .notebook-deck .slide.active{display:flex}
   .notebook-deck .slide>*,.prompt-builder,.workbench,.paper,.code,.live-textarea{min-width:0;max-width:100%}
   .notebook-deck h1,.notebook-deck h2,.notebook-deck h3,.notebook-deck p{max-width:100%;overflow-wrap:break-word}
-  .story-spread,.before-after,.workbench,.notebook-context,.notebook-live-grid,.code-and-sketch,.knowledge-split,.challenge-grid,.failure-page{grid-template-columns:1fr}
+  .story-spread,.before-after,.workbench,.notebook-context,.notebook-live-grid,.code-and-sketch,.knowledge-split,.challenge-grid,.failure-page,.rubric-layout,.notebook-handoff{grid-template-columns:1fr}
   .story-spread,.behaviour-notes,.trace-explainer,.rag-results,.branch-lines{grid-template-columns:1fr}
   .notebook-builder{grid-template-columns:1fr}.notebook-builder>.paper:last-child{grid-column:auto}
   .chapter-opening{flex-direction:column!important;align-items:flex-start}.chapter-number{font-size:80px}
   .journey-line{grid-template-columns:1fr 1fr}.taxonomy-line{grid-template-columns:1fr 1fr}.overview-list{grid-template-columns:1fr}
   .progress-circuit{width:calc(100vw - 24px);max-width:calc(100vw - 24px);left:12px;right:12px;transform:none}.nav button:first-child{display:none}
-  .margin-note,.annotation{position:relative;inset:auto!important;margin:16px 0}.prompt-sheet{width:100%;padding:28px}.rubric-page{width:100%;margin:auto}
+  .margin-note,.question-note{position:relative;inset:auto!important;margin:16px 0}.rubric-page{width:100%;margin:auto}
+  .recipe-steps,.context-engineering-map{grid-template-columns:1fr 1fr}.loop-diagram{display:flex;flex-wrap:wrap}.loop-return{flex-basis:100%}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 @media print{
   html,body{background:white}.notebook-deck .slide{display:flex!important;position:relative;width:100vw;height:100vh;page-break-after:always;background:white}
-  .legacy-deck,.nav,.progress-circuit,.top-progress,.slide-num,.notes-panel,.overview-panel,.api-status{display:none!important}
+  .nav,.progress-circuit,.top-progress,.slide-num,.overview-panel,.api-status{display:none!important}
   .paper,.note-card,.student-story,.sketch-node,.loop-card{box-shadow:none}
 }
 
@@ -440,25 +458,26 @@ body.live-demo .api-status{display:flex}.api-status.offline{color:var(--red);bor
 <div class="slide-num" id="slideNum"></div>
 <div class="progress-circuit" id="progressCircuit"></div>
 <div class="nav"><button id="overviewBtn" aria-label="Open workshop overview">Contents</button><button id="prevBtn" aria-label="Previous slide">←</button><button id="nextBtn" aria-label="Next slide">→</button></div>
-<div class="notes-panel" id="notesPanel"></div>
 <div class="overview-panel" id="overviewPanel" aria-hidden="true"><div class="overview-sheet"><div class="overview-head"><div><span class="chapter-label">Workshop map</span><h3>Choose a page</h3></div><button class="btn" id="overviewClose">Close</button></div><div class="overview-list" id="overviewList"></div></div></div>
 <div class="api-status" id="apiStatus" title="Live Claude API status"><span class="api-dot"></span><span id="apiStatusText">checking API…</span></div>
 
 <main class="deck notebook-deck" id="deck">
-<section class="slide cover-slide" data-section="prompt" data-title="Welcome" data-notes="Ask students to name one piece of university work they keep postponing. The workshop stays with ordinary student pressures rather than imaginary enterprise cases.">
+<section class="slide cover-slide" data-section="prompt" data-title="AI Agent Workshop">
   <div class="cover-rule"></div>
   <div class="club-mark" data-brand></div>
   <div class="cover-copy">
     <div class="wordmark">UWA AI Club <span>hands-on workshop</span></div>
-    <p class="chapter-label">A practical workshop about AI agents</p>
-    <h1>Build an assistant that understands the work around your degree</h1>
-    <p class="lede">We will start with a crowded student week, then add context, tools and judgment only when the task genuinely needs them.</p>
+    <h1>AI AGENT WORKSHOP</h1>
   </div>
-  <aside class="margin-note tilt-left">Bring a real student problem to mind. We will use it later.</aside>
-  <div class="cover-footer">Use ← → to move · F for fullscreen · N for presenter notes</div>
+  <div class="cover-footer">Use ← → to move · F for fullscreen</div>
 </section>
 
-<section class="slide workspace-slide" data-section="prompt" data-title="Cold open" data-notes="Run the request before teaching any vocabulary. Ask what the response organised and what it had to guess.">
+<section class="slide question-slide" data-section="prompt" data-title="What is AI?">
+  <div class="club-mark" data-brand></div>
+  <h1>What <span class="question-emphasis">IS</span> AI?</h1>
+</section>
+
+<section class="slide workspace-slide" data-section="prompt" data-title="Cold open">
   <header class="slide-heading"><span class="chapter-label">Deadline triage · live model</span><h2>What can a model do with a messy week?</h2><p>Start with the kind of request a student might type at 11:40 pm.</p></header>
   <div class="workbench live-workbench" data-live-claude data-system="Help the student plan their work without inventing course details. Make assumptions visible. Do not write assessed work for them.">
     <div class="paper input-paper"><label>Student request</label><textarea class="live-textarea" data-live-input>I have four assignments due next week, two shifts at work and no idea where to start. Help me plan the week.</textarea><div class="live-controls"><button class="btn primary" data-live-run>Ask Claude</button><button class="btn" data-live-stop disabled>Stop</button><span class="live-state" data-live-state>Ready</span></div></div>
@@ -467,7 +486,7 @@ body.live-demo .api-status{display:flex}.api-status.offline{color:var(--red);bor
   <aside class="question-note">What did it organise, and what did it have to guess?</aside>
 </section>
 
-<section class="slide editorial-slide" data-section="prompt" data-title="Three student stories" data-notes="Introduce the three recurring people. Every later example should visibly belong to one of these stories.">
+<section class="slide editorial-slide" data-section="prompt" data-title="Three student stories">
   <header class="slide-heading"><span class="chapter-label">The people in this workshop</span><h2>Three students, three kinds of pressure</h2></header>
   <div class="story-spread">
     <article class="student-story rotate-neg"><span class="story-number">01</span><h3>Maya is juggling deadlines</h3><p>Four assessments, two work shifts and different rubrics. She needs a plan she can actually follow.</p><small>Prompting · context · evaluation</small></article>
@@ -482,10 +501,23 @@ body.live-demo .api-status{display:flex}.api-status.offline{color:var(--red);bor
   <p class="margin-note tilt-right">The model stays the same. The system around it becomes more useful.</p>
 </section>
 
-<section class="slide editorial-slide" data-section="prompt" data-title="Prompt anatomy">
-  <header class="slide-heading"><span class="chapter-label">Deadline triage</span><h2>A useful prompt reads more like a good handover than a spell</h2></header>
-  <div class="annotated-page"><div class="paper prompt-sheet"><p><mark>Help me plan</mark> four assignments due next week. I can study <mark>Monday, Wednesday and Sunday</mark>, but I work Tuesday and Thursday evenings. Prioritise by deadline and weighting. <mark>Return a day-by-day plan with one achievable goal per study block.</mark></p></div><div class="annotation a1">the job</div><div class="annotation a2">the context</div><div class="annotation a3">what should come back</div></div>
-  <p class="body-note">Success criteria, task, context, useful examples, constraints and output shape are ingredients—not a mandatory six-part template.</p>
+<section class="slide workspace-slide" data-section="prompt" data-title="RECIPE prompt framework" data-recipe-framework>
+  <header class="slide-heading"><span class="chapter-label">RECIPE · our workshop mnemonic based on Anthropic’s six techniques</span><h2>What makes a prompt useful?</h2><p>Click any ingredient to add it to Maya’s request. The order below keeps the finished prompt readable.</p></header>
+  <div class="recipe-layout">
+    <div class="recipe-steps" role="group" aria-label="RECIPE prompt ingredients">
+      <button class="recipe-step" data-recipe="role" aria-pressed="false"><strong>R</strong><span>Role</span></button>
+      <button class="recipe-step" data-recipe="examples" aria-pressed="false"><strong>E</strong><span>Examples</span></button>
+      <button class="recipe-step" data-recipe="context" aria-pressed="false"><strong>C</strong><span>Context</span></button>
+      <button class="recipe-step" data-recipe="instructions" aria-pressed="false"><strong>I</strong><span>Instructions</span></button>
+      <button class="recipe-step" data-recipe="parameters" aria-pressed="false"><strong>P</strong><span>Parameters</span></button>
+      <button class="recipe-step" data-recipe="examine" aria-pressed="false"><strong>E</strong><span>Examine first</span></button>
+    </div>
+    <div class="paper recipe-workspace">
+      <p data-recipe-description>Start with the request, then add only the structure this task needs.</p>
+      <div class="recipe-prompt" data-recipe-prompt>Help me plan next week.</div>
+      <div class="recipe-progress"><span data-recipe-progress>0 of 6 ingredients selected</span><span>RECIPE is a workshop mnemonic, not an official Anthropic acronym.</span></div>
+    </div>
+  </div>
 </section>
 
 <section class="slide comparison-slide" data-section="prompt" data-title="A better request">
@@ -493,10 +525,10 @@ body.live-demo .api-status{display:flex}.api-status.offline{color:var(--red);bor
   <div class="before-after"><article class="paper crossed"><span class="paper-label">Vague</span><p>Make me a study schedule for next week.</p><div class="pencil-note">Which units? Which deadlines? When is the student free?</div></article><article class="paper kept"><span class="paper-label">Specific enough to test</span><p>I have a 1,500-word history essay due Wednesday, a statistics quiz Friday and a group presentation Monday. I work Tuesday and Thursday evenings. Make a realistic plan with 90-minute blocks and leave Sunday afternoon free.</p></article></div>
 </section>
 
-<section class="slide workspace-slide" data-section="prompt" data-title="Prompt builder" data-notes="Toggle one ingredient at a time. Ask the room to predict what should change before each live run.">
+<section class="slide workspace-slide" data-section="prompt" data-title="Prompt builder">
   <header class="slide-heading"><span class="chapter-label">Live workshop</span><h2>Build Maya’s request, one useful detail at a time</h2></header>
   <div class="prompt-builder notebook-builder" data-prompt-builder data-live-claude data-system="Help the student plan rather than completing assessed work. Follow the requested output shape and state any missing information.">
-    <div class="prompt-parts"><button class="prompt-part" data-part="success"><b>Success</b>A plan that can be followed</button><button class="prompt-part" data-part="task"><b>Task</b>Prioritise four assessments</button><button class="prompt-part" data-part="context"><b>Context</b>Deadlines, weighting and free time</button><button class="prompt-part" data-part="examples"><b>Example</b>Show one finished timetable row</button><button class="prompt-part" data-part="constraints"><b>Boundaries</b>Plan the work; do not write it</button><button class="prompt-part" data-part="output"><b>Output</b>A day-by-day table</button></div>
+    <div class="prompt-parts"><button class="prompt-part" data-part="role"><b>Role</b>A careful study-planning coach</button><button class="prompt-part" data-part="examples"><b>Examples</b>One finished timetable row</button><button class="prompt-part" data-part="context"><b>Context</b>Deadlines, weighting and free time</button><button class="prompt-part" data-part="instructions"><b>Instructions</b>Prioritise, divide and explain</button><button class="prompt-part" data-part="parameters"><b>Parameters</b>Time, boundaries and output</button><button class="prompt-part" data-part="examine"><b>Examine first</b>Check gaps and state assumptions</button></div>
     <div class="paper"><label>Editable request</label><textarea class="live-textarea" data-prompt-output data-live-input></textarea><div class="output-quality"><span>Specification</span><div class="quality-bar"><div class="quality-fill" data-quality-fill></div></div><span data-quality-label></span></div></div>
     <div class="paper output-paper"><span class="paper-label">Live response</span><pre class="code live-output" data-live-output>Build the request, then ask Claude.</pre><div class="live-controls"><button class="btn primary" data-live-run>Ask Claude</button><button class="btn" data-live-stop disabled>Stop</button><span class="live-state" data-live-state>Ready</span></div></div>
   </div>
@@ -504,26 +536,30 @@ body.live-demo .api-status{display:flex}.api-status.offline{color:var(--red);bor
 
 <section class="slide editorial-slide" data-section="prompt" data-title="Define success">
   <header class="slide-heading"><span class="chapter-label">Evaluation before optimisation</span><h2>“Better” becomes useful when the room agrees what it means</h2></header>
-  <div class="rubric-page paper"><h3>For Maya, a useful plan should…</h3><ul class="check-list"><li>use the real deadlines and available hours</li><li>protect time for the highest-weighted tasks</li><li>fit work into blocks that are plausible for one person</li><li>make uncertainty visible instead of inventing details</li><li>leave the assessed thinking and writing with Maya</li></ul></div>
-  <aside class="margin-note tilt-left">If we cannot describe success, we cannot judge whether a prompt change helped.</aside>
-  <div class="mascot-sticker" data-marv><span>Marv's check</span></div>
+  <div class="rubric-layout"><div class="rubric-page paper"><h3>For Maya, a useful plan should…</h3><ul class="check-list"><li>use the real deadlines and available hours</li><li>protect time for the highest-weighted tasks</li><li>fit work into blocks that are plausible for one person</li><li>make uncertainty visible instead of inventing details</li><li>leave the assessed thinking and writing with Maya</li></ul></div><div class="note-rail"><aside class="margin-note">If we cannot describe success, we cannot judge whether a prompt change helped.</aside><div class="mascot-sticker" data-marv><span>Marv's check</span></div></div></div>
 </section>
 
-<section class="slide workspace-slide" data-section="prompt" data-title="Prompt surgery" data-notes="Pairs have 90 seconds. Debrief the audience, stage of work, appropriate help and output they chose.">
+<section class="slide workspace-slide" data-section="prompt" data-title="Prompt surgery">
   <header class="slide-heading"><span class="chapter-label">Pair exercise · 90 seconds</span><h2>Rewrite this until another student could judge the answer</h2></header>
   <div class="workbench live-workbench" data-live-claude data-system="Support the student's planning and learning. Do not produce assessed work for submission. Be explicit about missing information."><div class="paper input-paper"><label>Starting request</label><textarea class="live-textarea" data-live-input>Help me with my essay.</textarea><div class="live-controls"><button class="btn primary" data-live-run>Run our version</button><button class="btn" data-live-stop disabled>Stop</button><span class="live-state" data-live-state>Ready</span></div></div><div class="paper output-paper"><span class="paper-label">What Claude returns</span><pre class="code live-output" data-live-output>Your revised request will run here.</pre></div></div>
   <aside class="question-note">Who is the student, what stage are they at, and what help is academically appropriate?</aside>
 </section>
 
 <section class="slide comparison-slide" data-section="prompt" data-title="Examples">
-  <header class="slide-heading"><span class="chapter-label">Showing the pattern</span><h2>An example is useful when the shape matters more than another explanation</h2></header>
-  <div class="paper wide-sheet"><table class="example-table"><thead><tr><th>Day</th><th>Study block</th><th>Finish line</th><th>Why now?</th></tr></thead><tbody><tr><td>Monday</td><td>9:00–10:30</td><td>Map the essay argument from the rubric</td><td>Highest weighting and earliest deadline</td></tr><tr><td>Monday</td><td>14:00–15:00</td><td>Complete statistics practice set 3</td><td>Expose gaps before Friday’s quiz</td></tr></tbody></table></div>
-  <p class="body-note">One representative row can establish tone, detail and formatting. Use more examples only when the desired pattern has real variation.</p>
+  <header class="slide-heading"><span class="chapter-label">Examples make an expectation visible</span><h2>What changes when the model sees an example?</h2></header>
+  <div class="before-after"><article class="paper"><span class="paper-label">Without an example</span><p>Return a day-by-day study plan.</p><h3>The request leaves the shape open</h3><p class="pencil-note">A paragraph, a checklist and a table could all satisfy it.</p></article><article class="paper kept"><span class="paper-label">With one representative row</span><p>Use this pattern for each study block:</p><table class="example-table"><thead><tr><th>Time</th><th>Finish line</th><th>Why now?</th></tr></thead><tbody><tr><td>Mon 9:00–10:30</td><td>Map the essay argument from the rubric</td><td>Highest weighting and earliest deadline</td></tr></tbody></table></article></div>
+  <p class="body-note">The example does not supply Maya’s whole plan. It shows the level of detail and structure she expects.</p>
 </section>
 
-<section class="slide editorial-slide chapter-opening" data-section="context" data-title="Context"><span class="chapter-number">02</span><div><span class="chapter-label">Context</span><h1>What should the model know while it works?</h1><p class="lede">Instructions describe the job. Context supplies the facts, documents and earlier decisions that make the job possible.</p></div></section>
+<section class="slide editorial-slide chapter-opening" data-section="context" data-title="Context engineering"><span class="chapter-number">02</span><div><span class="chapter-label">Context engineering</span><h1>What should the model see while it works?</h1><p class="lede">Context engineering means choosing and maintaining the information available at each step, rather than placing every possible document into one prompt.</p></div></section>
 
-<section class="slide workspace-slide" data-section="context" data-title="Choose the context" data-notes="Ask the room to select only what changes the deadline plan. Noise should be plausible, not silly.">
+<section class="slide editorial-slide" data-section="context" data-title="Working context">
+  <header class="slide-heading"><span class="chapter-label">The information available on this turn</span><h2>What belongs in the working context at this step?</h2></header>
+  <div class="context-engineering-map"><article class="context-source"><b>Instructions</b><span>The job, boundaries and expected behaviour.</span></article><article class="context-source"><b>Student information</b><span>Deadlines, availability and progress that matter now.</span></article><article class="context-source"><b>Conversation history</b><span>Earlier decisions that still affect the task.</span></article><article class="context-source"><b>Retrieved material</b><span>Relevant passages brought in when needed.</span></article><article class="context-source"><b>Tool results</b><span>Current information returned by the system.</span></article></div>
+  <div class="context-cycle"><p>The useful context changes as the work changes.</p><p>Choose → use → update → remove</p></div>
+</section>
+
+<section class="slide workspace-slide" data-section="context" data-title="Choose the context">
   <header class="slide-heading"><span class="chapter-label">Deadline triage · audience activity</span><h2>Which information belongs on Maya’s desk right now?</h2></header>
   <div class="context-game notebook-context" data-context-game><div class="context-items"><button class="context-item" data-signal="signal">Assessment deadlines and weighting</button><button class="context-item" data-signal="signal">Maya’s work shifts</button><button class="context-item" data-signal="signal">Current progress on each task</button><button class="context-item" data-signal="signal">Hours available for study</button><button class="context-item" data-signal="noise">Every lecture transcript this semester</button><button class="context-item" data-signal="noise">Last year’s unit outline</button><button class="context-item" data-signal="noise">The group chat since February</button><button class="context-item" data-signal="noise">A generic productivity blog</button></div><div class="paper context-window"><span class="paper-label">Working context</span><div class="context-list" data-context-list></div><div class="signal-meter"><span data-signal-label></span><div class="signal-track"><div class="signal-fill" data-signal-fill></div></div></div></div></div>
 </section>
@@ -548,19 +584,13 @@ body.live-demo .api-status{display:flex}.api-status.offline{color:var(--red);bor
   <p class="body-note">The model requests a structured action. The surrounding application executes it and returns an observable result.</p>
 </section>
 
-<section class="slide workbook-slide" data-section="tools" data-title="First model call">
-  <header class="slide-heading"><span class="chapter-label">Notebook · Mission 1</span><h2>Turn the model into a deadline-triage assistant</h2></header>
-  <div class="mission-sheet paper"><div class="mission-number">1</div><div><p>Write the instructions and student request. The notebook handles authentication and the API plumbing.</p><pre class="code">SYSTEM_PROMPT = """You help students plan their own work…"""
-USER_REQUEST = """I have four assessments due…"""</pre><p class="integrity-note">The assistant may plan, explain and question. It must not create work for submission.</p></div></div>
-</section>
-
 <section class="slide diagram-slide" data-section="tools" data-title="Add a tool">
   <header class="slide-heading"><span class="chapter-label">Noah’s group project</span><h2>The answer changes when room availability becomes checkable</h2></header>
   <div class="agent-map notebook-map fill"><div class="node human">Noah’s group<br><small>Tuesday, 3 pm · five people</small></div><div class="circuit-line"><span class="packet"></span></div><div class="node agent" data-agent-locked>Study-session assistant</div><div class="node tool" data-hidden-tool style="opacity:.2">find_study_room()</div></div>
   <div class="toolbar"><button class="btn primary" data-unlock-tools>Make room availability available</button></div>
 </section>
 
-<section class="slide workspace-slide" data-section="tools" data-title="Live tool call" data-notes="Run once with the default task, then weaken the instructions so students can see that tool availability does not force good tool use.">
+<section class="slide workspace-slide" data-section="tools" data-title="Live tool call">
   <header class="slide-heading"><span class="chapter-label">Live agent · observable trace</span><h2>Will the model ask for information it does not have?</h2></header>
   <div class="live-grid notebook-live-grid" data-live-agent><div class="paper live-panel"><label>Agent instructions</label><textarea class="live-textarea agent-input" data-agent-instructions>You coordinate university study sessions. When a recommendation depends on room availability, use the room tool. Respect group size and accessibility needs. Never claim simulated availability is live university data.</textarea><label>Student task</label><textarea class="live-textarea agent-input" data-agent-task>Find an accessible room for five students next Tuesday at 3 pm for a two-hour group meeting.</textarea><div class="live-controls"><button class="btn primary" data-agent-run>Run the agent</button><span class="live-state" data-agent-state>Ready</span></div></div><div class="trace live-trace" data-agent-trace><div class="trace-event">The visible user request, tool request, tool result and final answer will appear here.</div></div></div>
 </section>
@@ -579,11 +609,6 @@ USER_REQUEST = """I have four assessments due…"""</pre><p class="integrity-not
 )</pre><p>Returns matching rooms or an explicit no-match result.</p></article></div>
 </section>
 
-<section class="slide workbook-slide" data-section="tools" data-title="Toolbox mission">
-  <header class="slide-heading"><span class="chapter-label">Notebook · Mission 2</span><h2>Give Noah’s coordinator a small toolbox</h2></header>
-  <div class="mission-sheet paper"><div class="mission-number">2</div><div><p>The group needs a meeting that works for five calendars and an accessible room. Ask the agent to use only what the goal requires.</p><div class="tool-stamps"><span>check_group_availability</span><span>find_study_room</span><span>create_group_task</span><span>draft_calendar_invite</span></div><p>Compare traces with the person next to you. Which instruction changed the tool choices?</p></div></div>
-</section>
-
 <section class="slide comparison-slide" data-section="agents" data-title="Different behaviour">
   <header class="slide-heading"><span class="chapter-label">Same tools, different instructions</span><h2>Why did three coordinators behave differently?</h2></header>
   <div class="behaviour-notes"><article class="note-card rotate-neg"><h3>Called everything</h3><p>It treated tool availability as a checklist.</p></article><article class="note-card rotate-pos"><h3>Only wrote advice</h3><p>It never used the capabilities needed to move the task forward.</p></article><article class="note-card rotate-neg selected-note"><h3>Checked what mattered</h3><p>It used the minimum information and actions needed for the group’s goal.</p></article></div>
@@ -600,7 +625,12 @@ USER_REQUEST = """I have four assessments due…"""</pre><p class="integrity-not
         finished = True</pre><div class="hand-loop"><span>model</span><b>→</b><span>action</span><b>→</b><span>result</span><b>↺</b></div></div>
 </section>
 
-<section class="slide workspace-slide" data-section="agents" data-title="Workflow or agent" data-notes="Click each sheet to cycle workflow and agent. Ask students to explain who controls the next step.">
+<section class="slide workbook-slide" data-section="agents" data-title="Build an adaptive revision coach">
+  <header class="slide-heading"><span class="chapter-label">Notebook · Mission 1</span><h2>Build an adaptive revision coach</h2><p>Aisha is preparing for a fictional Leadership in Organisations exam. Her study coach must inspect what she has mastered before deciding what kind of practice will help.</p></header>
+  <div class="notebook-handoff"><div class="mission-sheet paper"><div class="mission-number">1</div><div><h3>You write three prompts</h3><p>The notebook provides the Python loop, simulated mastery data and study tools.</p><p class="integrity-note">The coach supports formative revision. It must not write assessed responses or invent course material.</p></div></div><div class="prompt-fields"><div class="prompt-field"><b>1</b><span>Agent behaviour and boundaries</span></div><div class="prompt-field"><b>2</b><span>Aisha’s study request</span></div><div class="prompt-field"><b>3</b><span>Quality criteria for the study pack</span></div><div class="tool-stamps"><span>get_mastery_record</span><span>search_leadership_notes</span><span>draft_flashcards</span><span>draft_practice_questions</span></div></div></div>
+</section>
+
+<section class="slide workspace-slide" data-section="agents" data-title="Workflow or agent">
   <header class="slide-heading"><span class="chapter-label">Audience classification</span><h2>Who controls the next step?</h2></header>
   <div class="sort-grid"><button class="sort-card"><span class="choice-tag">Click to classify</span><p>Turn lecture notes into flashcards, then export a fixed CSV.</p></button><button class="sort-card"><span class="choice-tag">Click to classify</span><p>Investigate why a group cannot meet and decide what to inspect next.</p></button><button class="sort-card"><span class="choice-tag">Click to classify</span><p>Rename uploaded readings, sort by week and produce an index.</p></button><button class="sort-card"><span class="choice-tag">Click to classify</span><p>Research until Priya’s rubric is supported, then ask her to review the outline.</p></button></div>
   <div class="body-note">A workflow follows a predetermined path. An agent lets the model choose its process and tool use.</div>
@@ -645,8 +675,8 @@ SERVICE_UNAVAILABLE</pre><div class="recovery-paths"><span>Retry once with a lim
 </section>
 
 <section class="slide workbook-slide" data-section="knowledge" data-title="Orchestrator mission">
-  <header class="slide-heading"><span class="chapter-label">Notebook · Mission 3</span><h2>Build a revision orchestrator, then justify whether it was necessary</h2></header>
-  <div class="mission-sheet paper"><div class="mission-number">3</div><div><p>Priya has lecture notes, three readings, her own outline and the assessment rubric. Configure a manager that retrieves evidence and requests a rubric review only when useful.</p><p>Finish by comparing the result, cost and trace with one ordinary model call.</p></div></div>
+  <header class="slide-heading"><span class="chapter-label">Notebook · Mission 2</span><h2>Build a revision orchestrator, then justify whether it was necessary</h2></header>
+  <div class="mission-sheet paper"><div class="mission-number">2</div><div><p>Priya has lecture notes, three readings, her own outline and the assessment rubric. Configure a manager that retrieves evidence and requests a rubric review only when useful.</p><p>Finish by comparing the result, cost and trace with one ordinary model call.</p></div></div>
 </section>
 
 <section class="slide comparison-slide" data-section="knowledge" data-title="Multi-agent cost">
@@ -668,8 +698,8 @@ SERVICE_UNAVAILABLE</pre><div class="recovery-paths"><span>Retry once with a lim
 </section>
 
 <section class="slide workbook-slide" data-section="knowledge" data-title="Document-aware mission">
-  <header class="slide-heading"><span class="chapter-label">Notebook · Mission 4</span><h2>Make the assistant answer from the supplied university documents</h2></header>
-  <div class="mission-sheet paper"><div class="mission-number">4</div><div><p>Ask about an extension, an essay requirement or a room rule. The assistant should retrieve only when private knowledge is needed, name its sources and admit when the documents do not answer.</p><div class="tool-stamps"><span>assessment_policy.txt</span><span>unit_outline.txt</span><span>room_rules.txt</span><span>student_calendar.txt</span></div></div></div>
+  <header class="slide-heading"><span class="chapter-label">Notebook · Mission 3</span><h2>Make the assistant answer from the supplied university documents</h2></header>
+  <div class="mission-sheet paper"><div class="mission-number">3</div><div><p>Ask about an extension, an essay requirement or a room rule. The assistant should retrieve only when private knowledge is needed, name its sources and admit when the documents do not answer.</p><div class="tool-stamps"><span>assessment_policy.txt</span><span>unit_outline.txt</span><span>room_rules.txt</span><span>student_calendar.txt</span></div></div></div>
 </section>
 
 <section class="slide editorial-slide chapter-opening" data-section="mcp" data-title="MCP"><span class="chapter-number">05</span><div><span class="chapter-label">Model Context Protocol</span><h1>How can one assistant work with the services students already use?</h1><p class="lede">Calendars, learning materials, cloud documents, rooms and task lists all expose capabilities differently. MCP standardises how a host can discover them.</p></div></section>
@@ -680,7 +710,7 @@ SERVICE_UNAVAILABLE</pre><div class="recovery-paths"><span>Retry once with a lim
   <div class="taxonomy-line"><span><b>Model</b> generates</span><span><b>Agent</b> chooses</span><span><b>Tool</b> acts</span><span><b>Retrieval</b> supplies knowledge</span><span><b>MCP</b> exposes capabilities</span><span><b>Human</b> owns judgment</span></div>
 </section>
 
-<section class="slide workbook-slide" data-section="mcp" data-title="Architecture challenge" data-notes="Give groups three minutes. They should start from the student outcome, not from a diagram full of agents.">
+<section class="slide workbook-slide" data-section="mcp" data-title="Architecture challenge">
   <header class="slide-heading"><span class="chapter-label">Final challenge · 3 minutes</span><h2>Design Noah’s group-project coordinator before drawing any agents</h2></header>
   <div class="challenge-grid"><div class="mission-sheet paper"><div class="mission-number">?</div><div><p>Five students need a recurring accessible meeting, shared reading notes and clear task ownership.</p><p>The system may prepare bookings and invitations but must ask before sending or reserving anything.</p></div></div><ol class="design-prompts"><li>What outcome belongs to the students?</li><li>Which context is needed now?</li><li>Which facts require tools or retrieval?</li><li>Would a workflow be enough?</li><li>Where must a person approve?</li></ol></div>
 </section>
@@ -691,785 +721,7 @@ SERVICE_UNAVAILABLE</pre><div class="recovery-paths"><span>Retry once with a lim
 </section>
 </main>
 
-<template id="legacyDeck" aria-hidden="true">
-<section class="slide center" data-section="prompt" data-notes="Open fast. Do not define an agent yet. Ask the room what they expect an agent to be able to do.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">UWA AI CLUB // HANDS-ON WORKSHOP</div>
-  <h1>AI<br><span class="hero-line">AGENTS</span></h1>
-  <p class="big-copy">From better prompts to systems that can <span class="yellow">actually do things.</span></p>
-  <div class="pill">← → navigate · F fullscreen · N presenter notes</div>
-</section>
 
-<section class="slide" data-section="prompt" data-notes="This is now a real API call. Type any job, click ASK CLAUDE, then ask the room whether the model actually acted or merely produced language. The API key stays on the Python server, not in this browser.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">COLD OPEN // LIVE CLAUDE</div>
-  <h2>Give Claude a job.</h2>
-  <div class="live-grid" data-live-claude data-system="Answer the user's request directly. Do not pretend you have tools or external access that are not provided. If the request requires real-world actions, explain what you can provide rather than claiming you performed them.">
-    <div class="card live-panel">
-      <div class="pill">YOU // TYPE ANYTHING</div>
-      <textarea class="live-textarea fill" data-live-input aria-label="Prompt for Claude">Help me plan a study schedule for four university assignments due next Friday.</textarea>
-      <div class="live-controls">
-        <button class="btn primary" data-live-run>ASK CLAUDE ↗</button>
-        <button class="btn" data-live-stop disabled>STOP</button>
-        <span class="live-state" data-live-state>ready</span>
-      </div>
-    </div>
-    <div class="card soft live-panel">
-      <div class="pill">LIVE CLAUDE RESPONSE</div>
-      <pre class="code live-output fill" data-live-output>Press ASK CLAUDE to make a real Messages API call.</pre>
-      <div class="callout"><strong>QUESTION</strong><span>Did it actually organise anything, or did it only tell us what to do?</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="tools" data-notes="Click ENABLE TOOLS. Let the audience watch the system change before explaining it.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">COLD OPEN // 02</div>
-  <h2>Now give it <span class="mint">abilities.</span></h2>
-  <div class="agent-map fill">
-    <div class="node human">USER<br><span class="muted small">plan a study schedule</span></div>
-    <div class="circuit-line"><span class="packet"></span></div>
-    <div class="node agent" data-agent-locked>CLAUDE<br><span class="muted small">decides what it needs</span></div>
-    <div class="node tool" data-hidden-tool style="opacity:.18;transform:translateY(8px);transition:.3s">find_room()</div>
-    <div class="node tool" data-hidden-tool style="opacity:.18;transform:translateY(8px);transition:.3s">calculate_budget()</div>
-    <div class="node tool" data-hidden-tool style="opacity:.18;transform:translateY(8px);transition:.3s">create_tasks()</div>
-  </div>
-  <div class="toolbar" style="justify-content:center"><button class="btn primary" data-unlock-tools>ENABLE TOOLS</button></div>
-</section>
-
-<section class="slide center" data-section="prompt" data-notes="This is the workshop contract. Everything we introduce should solve a limitation exposed by the previous concept.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">THE JOURNEY</div>
-  <h2>We're going to build the whole stack.</h2>
-  <div class="pattern-row" style="max-width:1200px;margin-top:28px">
-    <div class="pattern-node">PROMPT</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node">CONTEXT</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node">TOOLS</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node">AGENT</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node">KNOWLEDGE</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node">MCP</div>
-  </div>
-  <p class="big-copy" style="margin-top:36px">No magic. Just pieces you can understand, test and compose.</p>
-</section>
-
-<section class="slide" data-section="prompt" data-notes="Use this as a live reveal. The deck is not claiming one magic framework; this is a workshop checklist derived from Anthropic's current prompting guidance.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">PROMPT ENGINEERING // 05</div>
-  <h2>What does a good prompt actually contain?</h2>
-  <div class="grid-3 fill" style="align-content:center">
-    <div class="card"><div class="pill">01</div><h3 style="margin-top:16px">Success criteria</h3><p class="muted">What does “good” look like?</p></div>
-    <div class="card"><div class="pill">02</div><h3 style="margin-top:16px">Task</h3><p class="muted">What exactly should happen?</p></div>
-    <div class="card"><div class="pill">03</div><h3 style="margin-top:16px">Context</h3><p class="muted">What does Claude need to know?</p></div>
-    <div class="card"><div class="pill">04</div><h3 style="margin-top:16px">Examples</h3><p class="muted">Show the pattern when useful.</p></div>
-    <div class="card"><div class="pill">05</div><h3 style="margin-top:16px">Constraints</h3><p class="muted">Boundaries, scope and rules.</p></div>
-    <div class="card yellow-edge"><div class="pill">06</div><h3 style="margin-top:16px">Output</h3><p class="muted">What should come back?</p></div>
-  </div>
-  <div class="source-note">Anthropic: Prompting best practices, including clear instructions, context, examples, XML structure, roles and explicit output constraints.</div>
-</section>
-
-<section class="slide" data-section="prompt" data-notes="This is the main interactive. Toggle different prompt ingredients. Ask the audience to predict what each addition will change before clicking it.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">INTERACTIVE // PROMPT BUILDER</div>
-  <h2>Same model. Better specification.</h2>
-  <div class="prompt-builder" data-prompt-builder data-live-claude data-system="Follow the user's specification carefully. Do not invent missing university details. Return only the content requested by the user.">
-    <div class="prompt-parts">
-      <button class="prompt-part" data-part="success"><b>SUCCESS</b>Define what a useful answer must accomplish.</button>
-      <button class="prompt-part" data-part="task"><b>TASK</b>State the exact job.</button>
-      <button class="prompt-part" data-part="context"><b>CONTEXT</b>Give relevant background.</button>
-      <button class="prompt-part" data-part="examples"><b>EXAMPLES</b>Demonstrate the desired pattern.</button>
-      <button class="prompt-part" data-part="constraints"><b>CONSTRAINTS</b>Set scope and rules.</button>
-      <button class="prompt-part" data-part="output"><b>OUTPUT</b>Specify the returned structure.</button>
-      <div class="live-hint">Toggle ingredients, then edit the assembled prompt yourself. Every run below is a real Claude API request.</div>
-    </div>
-    <div class="card soft col" style="min-height:0">
-      <div class="pill">EDITABLE PROMPT</div>
-      <textarea class="live-textarea fill" data-prompt-output data-live-input aria-label="Editable assembled prompt"></textarea>
-      <div class="output-quality"><span class="small muted">specification</span><div class="quality-bar"><div class="quality-fill" data-quality-fill></div></div><span class="small" data-quality-label></span></div>
-    </div>
-    <div class="card soft col" style="min-height:0">
-      <div class="pill">LIVE CLAUDE RESPONSE</div>
-      <pre class="code live-output fill" data-response-output data-live-output>Build or edit the prompt, then click ASK CLAUDE.</pre>
-      <div class="live-controls"><button class="btn primary" data-live-run>ASK CLAUDE ↗</button><button class="btn" data-live-stop disabled>STOP</button><span class="live-state" data-live-state>ready</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="prompt" data-notes="Get them to notice that 'better' is undefined until success is defined. This tees up evaluation rather than prompt superstition.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">PROMPT ENGINEERING // 07</div>
-  <h2>Before you optimise a prompt...</h2>
-  <div class="grid-2 fill">
-    <div class="card center"><div class="quote">“Which response is <span class="yellow">better</span>?”</div></div>
-    <div class="card yellow-edge">
-      <div class="pill">DEFINE SUCCESS</div>
-      <div class="divider"></div>
-      <p><span class="mint">Goal:</span> Get a student to register.</p>
-      <p><span class="mint">Success:</span></p>
-      <div class="code">• under 120 words<br>• timetable facts correct<br>• single obvious next step<br>• student-friendly tone</div>
-    </div>
-  </div>
-  <p class="big-copy" style="margin-top:20px">Prompt engineering is much easier when the output is <span class="mint">testable.</span></p>
-</section>
-
-<section class="slide" data-section="prompt" data-notes="Hands-on checkpoint inside the deck. Give pairs 90 seconds to rewrite the prompt, then let 2–3 groups run their version live. This is deliberately a real model call so everyone can compare outputs immediately.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">MARV'S MISSION // LIVE PROMPT SURGERY</div>
-  <h2>Fix it. Run it. Compare it.</h2>
-  <div class="live-grid" data-live-claude data-system="Follow the user's prompt exactly. Be concise unless the prompt requests depth.">
-    <div class="card live-panel yellow-edge">
-      <div class="pill">90 SECONDS // YOUR PROMPT</div>
-      <textarea class="live-textarea fill" data-live-input aria-label="Prompt surgery input">Tell me about cybersecurity.</textarea>
-      <div class="live-controls"><button class="btn primary" data-live-run>RUN MY PROMPT ↗</button><button class="btn" data-live-stop disabled>STOP</button><span class="live-state" data-live-state>ready</span></div>
-      <div class="live-hint">Try adding a real audience, objective, context, boundaries and output format. Then compare the result with the original.</div>
-    </div>
-    <div class="card soft live-panel">
-      <div class="pill">LIVE OUTPUT</div>
-      <pre class="code live-output fill" data-live-output>Rewrite the prompt on the left, then run it.</pre>
-      <div class="callout"><strong>DEBRIEF</strong><span>What changed in the response, and which part of your prompt caused it?</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="prompt" data-notes="Ask for 2-3 volunteer prompts. The visual rubric is a conversation aid, not an automated score.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">DEBRIEF // PROMPT SURGERY</div>
-  <h2>Don't ask “is this a good prompt?”</h2>
-  <p class="big-copy">Ask whether the prompt gives enough information to achieve a specific outcome.</p>
-  <div class="grid-3 fill" style="align-content:center">
-    <div class="card"><h3>Prompt A</h3><div class="code">Clear task      ●<br>Useful context  ○<br>Constraints     ○<br>Output          ○</div></div>
-    <div class="card"><h3>Prompt B</h3><div class="code">Clear task      ●<br>Useful context  ●<br>Constraints     ○<br>Output          ●</div></div>
-    <div class="card yellow-edge"><h3>Prompt C</h3><div class="code">Clear task      ●<br>Useful context  ●<br>Constraints     ●<br>Output          ●</div></div>
-  </div>
-  <div class="callout"><strong>IDEA</strong><span>Prompt engineering is experimental engineering: specify → test → inspect failure → iterate.</span></div>
-</section>
-
-<section class="slide" data-section="prompt" data-notes="Explain few-shot examples briefly. Anthropic recommends relevant, diverse, structured examples and currently suggests 3–5 for best results.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">PROMPT ENGINEERING // EXAMPLES</div>
-  <h2>Sometimes explaining isn't enough. <span class="yellow">Show it.</span></h2>
-  <div class="grid-2 fill">
-    <div class="card"><div class="pill">0 EXAMPLES</div><div class="code" style="margin-top:18px">User request: “Where can I submit my assignment?”<br><br>Response: inconsistent answer format...</div></div>
-    <div class="card yellow-edge"><div class="pill">3 GOOD EXAMPLES</div><div class="code" style="margin-top:18px">Examples:<br>Example 1: “Where can I submit my assignment?” → Give the portal and a short next step.<br>Example 2: “How do I join the study group?” → Give the channel and meeting time.<br>Example 3: “I need a quiet place to study.” → Suggest a library or campus study space.</div></div>
-  </div>
-  <p class="big-copy" style="margin-top:20px">Examples reduce ambiguity about <span class="mint">format, tone and boundaries.</span></p>
-  <div class="source-note">Anthropic: “Use examples effectively”, with relevant, diverse and structured examples; 3–5 examples suggested for best results.</div>
-</section>
-
-<section class="slide" data-section="prompt" data-notes="Emphasise that XML is not magic syntax. The teaching point is separation of instructions, context, examples and variable input.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">PROMPT ENGINEERING // STRUCTURE</div>
-  <h2>Complex prompt? Separate the pieces.</h2>
-  <div class="grid-2 fill">
-    <div class="card soft"><div class="pill">BEFORE</div><div class="code" style="margin-top:16px">You are booking a university study room and here are the room rules and make it short and here are some examples and the new request is...</div></div>
-    <div class="card yellow-edge"><div class="pill">AFTER</div><div class="code" style="margin-top:16px">Campus rooms require a booking and have capacity limits. Recommend a compliant room in two sentences.<br><br>Example: “Library seminar room — suitable for 12 students.”<br><br>Request: “I need a room for 10 students on Tuesday.”</div></div>
-  </div>
-  <div class="callout"><strong>NOT MAGIC</strong><span>XML tags are useful because they create explicit boundaries in a complex prompt.</span></div>
-  <div class="source-note">Anthropic: “Structure prompts with XML tags” for prompts mixing instructions, context, examples and variable inputs.</div>
-</section>
-
-<section class="slide" data-section="context" data-notes="Draw a hard distinction between the instructions and the information available while the model works.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">CONTEXT ENGINEERING // 12</div>
-  <h2>Prompt engineering ≠ context engineering.</h2>
-  <div class="grid-2 fill" style="align-items:center">
-    <div class="card center"><div class="pill">PROMPT ENGINEERING</div><div class="quote" style="margin-top:24px">How should I <span class="yellow">instruct</span> the model?</div></div>
-    <div class="card center yellow-edge"><div class="pill">CONTEXT ENGINEERING</div><div class="quote" style="margin-top:24px">What should the model <span class="mint">know right now?</span></div></div>
-  </div>
-</section>
-
-<section class="slide" data-section="context" data-notes="Interactive. Ask the room to click/select only what is useful for deciding whether to run an outdoor event tomorrow. Noise is deliberately plausible, not silly.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">INTERACTIVE // PACK MARV'S CONTEXT</div>
-  <h2>More context is not automatically better.</h2>
-  <div class="context-game" data-context-game>
-    <div class="context-items">
-      <div class="context-item" data-signal="signal">Perth weather tomorrow</div>
-      <div class="context-item" data-signal="signal">Event location</div>
-      <div class="context-item" data-signal="signal">Expected attendance</div>
-      <div class="context-item" data-signal="signal">Accessibility requirements</div>
-      <div class="context-item" data-signal="noise">Last year's 80-page financial report</div>
-      <div class="context-item" data-signal="noise">Random Discord conversations</div>
-      <div class="context-item" data-signal="noise">2024 catering invoice</div>
-      <div class="context-item" data-signal="noise">Full club constitution</div>
-    </div>
-    <div class="context-window">
-      <div class="pill">CLAUDE'S WORKING CONTEXT</div>
-      <div class="context-list" data-context-list style="margin-top:16px"></div>
-      <div class="signal-meter"><div class="small muted" data-signal-label></div><div class="signal-track" style="margin-top:7px"><div class="signal-fill" data-signal-fill></div></div></div>
-      <div class="marv-buried" data-marv></div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="context" data-notes="Keep this conceptual: context is finite and attention gets diluted. Avoid a long token-window lecture.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">CONTEXT ENGINEERING // SIGNAL</div>
-  <h2>Context is a <span class="yellow">finite resource.</span></h2>
-  <div class="grid-2 fill" style="align-items:center">
-    <div class="card">
-      <div class="pill">HIGH SIGNAL</div>
-      <div class="flow-stack" style="margin-top:24px"><div class="node">Relevant facts</div><div class="flow-arrow">↓</div><div class="node agent">MODEL</div></div>
-    </div>
-    <div class="card">
-      <div class="pill">CONTEXT ROT</div>
-      <div class="code" style="margin-top:24px">relevant<br>+ stale<br>+ duplicate<br>+ irrelevant<br>+ enormous<br>+ conflicting</div>
-      <div class="flow-arrow" style="text-align:center">↓</div><div class="node agent">MODEL</div>
-    </div>
-  </div>
-  <p class="big-copy" style="margin-top:18px">The goal is not maximum context. It is <span class="mint">minimum high-signal context that reliably works.</span></p>
-  <div class="source-note">Anthropic engineering: Effective context engineering for AI agents, curate a high-signal working context and retrieve information as needed.</div>
-</section>
-
-<section class="slide" data-section="context" data-notes="This is the bridge to tools and retrieval. Ask: instead of stuffing the entire drive into the prompt, what if Claude can search it when it needs something?">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">CONTEXT ENGINEERING // JUST IN TIME</div>
-  <h2>Don't carry the library. <span class="mint">Know how to search it.</span></h2>
-  <div class="agent-map fill">
-    <div class="node agent">AGENT<br><span class="muted small">working context stays focused</span></div>
-    <div class="circuit-line"><span class="packet"></span></div>
-    <div class="col">
-      <div class="node tool">list_files()</div>
-      <div class="node tool">search_docs()</div>
-      <div class="node tool">read_document()</div>
-    </div>
-  </div>
-  <div class="callout"><strong>SHIFT</strong><span>Instead of preloading everything, give the model a way to retrieve what it needs when it needs it.</span></div>
-</section>
-
-<section class="slide center" data-section="agents" data-notes="Pause after the reveal. The audience already understands most of the parts of an agent before hearing the definition.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">WAIT...</div>
-  <div class="pattern-row" style="margin-bottom:28px">
-    <div class="pattern-node">INSTRUCTIONS</div><div class="pattern-arrow">+</div>
-    <div class="pattern-node">CONTEXT</div><div class="pattern-arrow">+</div>
-    <div class="pattern-node">MODEL</div><div class="pattern-arrow">+</div>
-    <div class="pattern-node yellow-edge">TOOLS</div><div class="pattern-arrow">+</div>
-    <div class="pattern-node yellow-edge">LOOP</div>
-  </div>
-  <h1 style="font-size:clamp(54px,7vw,112px)">You just reached<br><span class="hero-line">AGENTS.</span></h1>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Keep the definition simple. The precise implementation varies, but this mental model will survive different SDKs.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">BUILD YOUR FIRST AGENT // 17</div>
-  <h2>What actually is an agent?</h2>
-  <div class="agent-map fill">
-    <div class="node human">USER<br><span class="muted small">goal</span></div>
-    <div class="circuit-line"><span class="packet"></span></div>
-    <div class="node agent">CLAUDE<br><span class="muted small">chooses the next action</span></div>
-    <div class="node tool">TOOL<br><span class="muted small">does something</span></div>
-    <div class="circuit-line"><span class="packet"></span></div>
-    <div class="node">RESULT<br><span class="muted small">returns to context</span></div>
-  </div>
-  <div class="callout"><strong>MENTAL MODEL</strong><span>An LLM using tools in a loop to accomplish a goal.</span></div>
-  <div class="source-note">Anthropic: tool use is a contract. Claude chooses a structured tool call; your app or Anthropic executes it; results flow back into the conversation.</div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Switch to the notebook. This first mission is intentionally easy so everyone gets a live API result before dealing with tools.">
-  <div class="brand-mark" data-brand></div>
-  <div class="grid-2 fill" style="align-items:center">
-    <div>
-      <div class="eyebrow">NOTEBOOK // MISSION 2</div>
-      <h2>Your first live model call.</h2>
-      <div class="code">SYSTEM_PROMPT = """<br>You are ...<br>"""<br><br>USER_REQUEST = """<br>Help organise ...<br>"""<br><br>ask_claude(SYSTEM_PROMPT, USER_REQUEST)</div>
-      <p class="big-copy" style="margin-top:22px">You control the <span class="yellow">instructions.</span> The notebook handles the API plumbing.</p>
-    </div>
-    <div class="card center"><div class="pill">GOAL</div><div class="quote" style="margin-top:24px">Turn Claude into a useful university study assistant.</div></div>
-  </div>
-</section>
-
-<section class="slide" data-section="tools" data-notes="This is the first capability unlock. We already supply the Python function and its schema; participants only decide how the agent should behave.">
-  <div class="brand-mark" data-brand></div>
-  <div class="grid-2 fill" style="align-items:center">
-    <div class="marv marv-crop" data-marv></div>
-    <div>
-      <div class="eyebrow">ABILITY UNLOCKED</div>
-      <h1 style="font-size:clamp(62px,8vw,120px)">🔧<br><span class="hero-line">TOOLS</span></h1>
-      <p class="big-copy">Claude can now request information or actions instead of guessing.</p>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="tools" data-notes="This is a real Claude tool-use loop. The browser sends the task and instructions to the local workshop server; Claude chooses whether to request get_weather(); Python executes the workshop simulator and returns the tool result. The trace exposes only observable actions/results, not hidden chain-of-thought.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">LIVE API // REAL TOOL CALL</div>
-  <h2>Can Claude decide when it needs a tool?</h2>
-  <div class="grid-2 fill" data-live-agent>
-    <div class="card soft live-panel">
-      <div class="pill">AVAILABLE TOOL</div>
-      <div class="code">get_weather(
-  date: str,
-  location: str = "Perth"
-)</div>
-      <label class="small muted" for="agentInstructions">AGENT INSTRUCTIONS</label>
-      <textarea id="agentInstructions" class="live-textarea agent-input" data-agent-instructions>You are a practical event-planning agent. If the user's decision depends on weather, use the weather tool before recommending anything. Never claim the workshop weather simulator is live real-world data.</textarea>
-      <label class="small muted" for="agentTask">TASK</label>
-      <textarea id="agentTask" class="live-textarea agent-input" data-agent-task>Should I study at the library or at home this Saturday in Perth?</textarea>
-      <div class="live-controls"><button class="btn primary" data-agent-run>RUN LIVE AGENT ↗</button><span class="live-state" data-agent-state>ready</span></div>
-    </div>
-    <div class="trace live-trace" data-agent-trace aria-live="polite">
-      <div class="trace-event"><b>READY</b><br>Edit the instructions or task, then run the agent. Claude's tool request and the returned result will appear here.</div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="tools" data-notes="Make the 'Claude did not know the weather' distinction explicit. This is the difference between language-model knowledge and tool-acquired state.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">DEBRIEF // TOOL USE</div>
-  <h2>What just happened?</h2>
-  <div class="grid-2 fill">
-    <div class="card"><div class="pill">CLAUDE DID NOT</div><div class="quote" style="margin-top:24px">magically “know” the live weather.</div></div>
-    <div class="card yellow-edge"><div class="pill">CLAUDE DID</div>
-      <div class="flow-stack" style="margin-top:22px">
-        <div class="step-card"><div class="step-num">1</div><span>Recognise missing information</span></div>
-        <div class="flow-arrow">↓</div>
-        <div class="step-card"><div class="step-num">2</div><span>Select a tool + arguments</span></div>
-        <div class="flow-arrow">↓</div>
-        <div class="step-card"><div class="step-num">3</div><span>Use the returned result</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="tools" data-notes="Tool descriptions matter because the model has to choose among them. Ask which API is easier for a human new employee to use from the signature alone.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">TOOLS // THE CONTRACT</div>
-  <h2>A tool is an interface Claude has to understand.</h2>
-  <div class="grid-2 fill">
-    <div class="card"><div class="pill">BAD CONTRACT</div><div class="code" style="margin-top:16px">def search(x):<br>    ...</div><p class="muted">Search what? What is x? What comes back?</p></div>
-    <div class="card yellow-edge"><div class="pill">BETTER CONTRACT</div><div class="code" style="margin-top:16px">def search_events(<br>  event_type: str,<br>  date: str,<br>  max_results: int<br>):<br>    """Find matching events."""</div></div>
-  </div>
-  <p class="big-copy" style="margin-top:18px">Clear tools reduce ambiguity in the agent's <span class="mint">action space.</span></p>
-</section>
-
-<section class="slide" data-section="tools" data-notes="Notebook Mission 3. Give the room 7–10 minutes. Encourage them to change only instructions first, then compare traces with neighbours.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">NOTEBOOK // MISSION 3</div>
-  <h2>Give Marv a toolbox.</h2>
-  <div class="grid-2 fill">
-    <div class="card soft"><div class="pill">PREBUILT TOOLS</div><div class="code" style="margin-top:16px">TOOLS = [<br>  get_weather,<br>  find_room,<br>  calculate_budget,<br>  search_events,<br>  create_task<br>]</div></div>
-    <div class="card yellow-edge"><div class="pill">YOUR MISSION</div><div class="quote" style="font-size:clamp(28px,3vw,48px);margin-top:20px">Plan a one-week study timetable for five subjects using available time and deadlines.</div><p class="muted">Write only the agent instructions. Watch what it chooses to do.</p></div>
-  </div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Use real traces from the room if possible. The three university event-planning scenarios classify common failure modes.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">COMPARE // SAME TOOLS, DIFFERENT AGENT</div>
-  <h2>Why did they behave differently?</h2>
-  <div class="grid-3 fill" style="align-content:center">
-    <div class="card"><div class="pill">AGENT A</div><h3 style="margin-top:16px">Tool-happy</h3><p class="muted">Called every tool even when it already had enough information.</p></div>
-    <div class="card"><div class="pill">AGENT B</div><h3 style="margin-top:16px">Passive</h3><p class="muted">Wrote suggestions instead of using available capabilities.</p></div>
-    <div class="card yellow-edge"><div class="pill">AGENT C</div><h3 style="margin-top:16px">Selective</h3><p class="muted">Used the minimum tools needed to answer the goal.</p></div>
-  </div>
-  <div class="callout"><strong>WHAT CHANGED?</strong><span>Instructions + context + tool descriptions, not the underlying capabilities.</span></div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Show the pseudocode only after students have seen it happen. The loop should feel obvious by now.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">THE AGENT LOOP</div>
-  <h2>The core is surprisingly small.</h2>
-  <div class="grid-2 fill" style="align-items:center">
-    <div class="code" style="font-size:clamp(17px,1.7vw,25px)">while not finished:<br>    response = model(context, tools)<br><br>    if response.requests_tool:<br>        result = execute_tool()<br>        context += result<br>    else:<br>        finished = True</div>
-    <div class="flow-stack">
-      <div class="node agent">MODEL</div><div class="flow-arrow">↓</div><div class="node">DECIDE</div><div class="flow-arrow">↙ &nbsp; ↘</div><div class="pattern-row"><div class="node">ANSWER</div><div class="node tool">TOOL</div></div><div class="flow-arrow">↺</div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Interactive sorting. Click each card to cycle WORKFLOW → AGENT. Ask the audience to justify the classification, especially ambiguous cases.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">INTERACTIVE // WORKFLOW OR AGENT?</div>
-  <h2>Who controls the path?</h2>
-  <div class="grid-2 fill" style="align-content:center">
-    <div class="sort-card"><div class="choice-tag pill">CLICK TO CLASSIFY</div><p>Translate → summarise → format a fixed report.</p></div>
-    <div class="sort-card"><div class="choice-tag pill">CLICK TO CLASSIFY</div><p>Debug an unfamiliar repository and decide what to inspect next.</p></div>
-    <div class="sort-card"><div class="choice-tag pill">CLICK TO CLASSIFY</div><p>Generate an invoice, then email the same template.</p></div>
-    <div class="sort-card"><div class="choice-tag pill">CLICK TO CLASSIFY</div><p>Research competitors until evidence is sufficient, then recommend a strategy.</p></div>
-  </div>
-  <div class="callout"><strong>RULE OF THUMB</strong><span>Workflow = predetermined orchestration. Agent = model dynamically chooses its process/tool usage.</span></div>
-  <div class="source-note">Anthropic: Building Effective Agents distinguishes workflows (predefined code paths) from agents (model-directed process and tool use).</div>
-</section>
-
-<section class="slide center" data-section="agents" data-notes="This is an anti-hype slide. Make the audience laugh at using a giant agent to do simple arithmetic.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">DESIGN PRINCIPLE</div>
-  <h2>Don't agentify everything.</h2>
-  <div class="pattern-row" style="margin:28px 0 34px">
-    <div class="pattern-node">PROMPT</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node">WORKFLOW</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node yellow-edge">SINGLE AGENT</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node">MULTI-AGENT</div>
-  </div>
-  <div class="quote">Use the <span class="yellow">lowest-complexity architecture</span> that reliably solves the problem.</div>
-  <div class="source-note">Anthropic: start with the simplest solution and only add complexity when it demonstrably improves outcomes.</div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Notebook Mission 4. The task should cause the agent to revise its path based on tool feedback rather than follow a fixed sequence.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">NOTEBOOK // MISSION 4</div>
-  <h2>Now make the path genuinely dynamic.</h2>
-  <div class="grid-2 fill">
-    <div class="card yellow-edge"><div class="pill">MISSION</div><div class="quote" style="font-size:clamp(26px,3vw,46px);margin-top:20px">Choose a practical study location using room capacity, weather, opening hours and travel time.</div></div>
-    <div class="card"><div class="pill">WHY AN AGENT?</div><div class="code" style="margin-top:16px">check room<br>↓<br>room too small<br>↓<br>find alternative<br>↓<br>recalculate budget<br>↓<br>weather changes plan<br>↓<br>recommend</div></div>
-  </div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Trigger the tool failure in the notebook if time allows. Ask the room to name recovery strategies before revealing them.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">AGENTS // FAILURE IS INPUT</div>
-  <h2>What happens when the world says no?</h2>
-  <div class="grid-2 fill" style="align-items:center">
-    <div class="card"><div class="code">find_room(...)<br><br>ERROR:<br>Booking service unavailable</div></div>
-    <div class="col">
-      <div class="step-card"><div class="step-num">?</div><span>Retry with a sensible limit?</span></div>
-      <div class="step-card"><div class="step-num">?</div><span>Use another source?</span></div>
-      <div class="step-card"><div class="step-num">?</div><span>Ask the human?</span></div>
-      <div class="step-card"><div class="step-num">?</div><span>Stop safely?</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Use examples where approval is obviously appropriate: sending many emails, purchases, public changes. Connect this later to Managed Agents permission policies.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">AGENTS // HUMAN IN THE LOOP</div>
-  <h2>Autonomy does not mean “never ask.”</h2>
-  <div class="architecture-stage fill">
-    <div class="arch-block agent">AGENT</div><div class="arch-arrow">→</div><div class="arch-block">prepare action</div><div class="arch-arrow">→</div><div class="arch-block human">HUMAN APPROVAL</div><div class="arch-arrow">→</div><div class="arch-block">send / buy / publish</div>
-  </div>
-  <div class="callout"><strong>GOOD CHECKPOINTS</strong><span>Consequential, irreversible, expensive or externally visible actions.</span></div>
-</section>
-
-<section class="slide center" data-section="agents" data-notes="Transition to multi-agent systems. First expose the limitation: one prompt is accumulating too many conflicting jobs.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">NEXT LIMITATION</div>
-  <h2>One agent. Too many jobs.</h2>
-  <div class="grid-3" style="max-width:1050px;width:100%;margin-top:20px">
-    <div class="card soft">RESEARCH</div><div class="card soft">ANALYSIS</div><div class="card soft">WRITING</div>
-    <div class="card soft">CRITIQUE</div><div class="card soft">BUDGET</div><div class="card soft">PLANNING</div>
-  </div>
-  <p class="big-copy" style="margin-top:28px">When work decomposes cleanly, we can split the responsibilities.</p>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Introduce specialists as different configurations, not clones. Different prompts, tools and context are the important part.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">MULTI-AGENT SYSTEMS // 29</div>
-  <h2>A team of agents.</h2>
-  <div class="architecture-stage fill">
-    <div class="arch-block agent">MANAGER</div><div class="arch-arrow">↙</div><div class="arch-block agent">RESEARCH</div><div class="arch-arrow">↘</div><div class="arch-block agent">BUDGET</div><div class="arch-arrow">↘</div><div class="arch-block agent">AUDIENCE</div>
-  </div>
-  <div class="grid-4">
-    <div class="card soft"><div class="pill">PROMPT</div><p class="small">Different instructions</p></div>
-    <div class="card soft"><div class="pill">TOOLS</div><p class="small">Different capabilities</p></div>
-    <div class="card soft"><div class="pill">CONTEXT</div><p class="small">Different information</p></div>
-    <div class="card soft"><div class="pill">GOAL</div><p class="small">Different responsibility</p></div>
-  </div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Click through the patterns quickly. These are visual vocabulary, not five separate lectures. Tie them to Anthropic's Building Effective Agents patterns.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">INTERACTIVE // ORCHESTRATION PATTERNS</div>
-  <h2>How can work be split?</h2>
-  <div class="pattern-tabs" data-pattern-tabs>
-    <button class="btn primary" data-pattern="chain">CHAIN</button>
-    <button class="btn" data-pattern="router">ROUTER</button>
-    <button class="btn" data-pattern="parallel">PARALLEL</button>
-    <button class="btn" data-pattern="orchestrator">ORCHESTRATOR</button>
-    <button class="btn" data-pattern="evaluator">EVALUATOR</button>
-  </div>
-  <div class="pattern-view fill">
-    <div class="pattern-diagram active" data-view="chain"><div class="pattern-row"><div class="pattern-node">A</div><div class="pattern-arrow">→</div><div class="pattern-node">B</div><div class="pattern-arrow">→</div><div class="pattern-node">C</div></div><p class="big-copy center" style="margin:32px auto 0">Each stage transforms the previous stage's output.</p></div>
-    <div class="pattern-diagram" data-view="router"><div class="pattern-row"><div class="pattern-node">INPUT</div><div class="pattern-arrow">→</div><div class="pattern-node yellow-edge">ROUTER</div><div class="pattern-arrow">→</div><div class="col"><div class="pattern-node">A</div><div class="pattern-node">B</div><div class="pattern-node">C</div></div></div><p class="big-copy center" style="margin:32px auto 0">Classify the task, then send it to the right specialist.</p></div>
-    <div class="pattern-diagram" data-view="parallel"><div class="pattern-row"><div class="pattern-node">INPUT</div><div class="pattern-arrow">→</div><div class="col"><div class="pattern-node">A</div><div class="pattern-node">B</div><div class="pattern-node">C</div></div><div class="pattern-arrow">→</div><div class="pattern-node">MERGE</div></div><p class="big-copy center" style="margin:32px auto 0">Independent work happens simultaneously, then gets combined.</p></div>
-    <div class="pattern-diagram" data-view="orchestrator"><div class="pattern-row"><div class="pattern-node yellow-edge">LEAD</div><div class="pattern-arrow">⇄</div><div class="col"><div class="pattern-node">WORKER</div><div class="pattern-node">WORKER</div><div class="pattern-node">WORKER</div></div></div><p class="big-copy center" style="margin:32px auto 0">The lead dynamically decides what work to delegate.</p></div>
-    <div class="pattern-diagram" data-view="evaluator"><div class="pattern-row"><div class="pattern-node">GENERATE</div><div class="pattern-arrow">⇄</div><div class="pattern-node yellow-edge">CRITIQUE</div></div><p class="big-copy center" style="margin:32px auto 0">One component produces; another evaluates against explicit criteria.</p></div>
-  </div>
-  <div class="source-note">Anthropic: Building Effective Agents, including prompt chaining, routing, parallelization, orchestrator-workers and evaluator-optimizer.</div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Notebook Mission 5. Participants write the manager instructions; specialist agents and their tools are already set up.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">NOTEBOOK // MISSION 5</div>
-  <h2>Build an orchestrator.</h2>
-  <div class="grid-2 fill">
-    <div class="card yellow-edge"><div class="pill">MISSION</div><div class="quote" style="font-size:clamp(26px,3vw,46px);margin-top:20px">Should I revise in the library, book a study room or work from home this weekend?</div><p class="muted">Produce one recommendation.</p></div>
-    <div class="card"><div class="pill">SPECIALISTS READY</div><div class="code" style="margin-top:16px">research_agent<br>budget_agent<br>audience_agent<br><br># You write:<br>MANAGER_PROMPT = """<br>...<br>"""</div></div>
-  </div>
-</section>
-
-<section class="slide" data-section="agents" data-notes="Use this to stop the audience equating multi-agent with sophistication. Ask for one case where multiple agents clearly add coordination cost without benefit.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">MULTI-AGENT // COST</div>
-  <h2>Did we actually need three agents?</h2>
-  <div class="grid-2 fill" style="align-items:center">
-    <div class="card center"><div class="quote">“What is 15% of $400?”</div><div class="pill" style="margin-top:26px">ONE CALL IS ENOUGH</div></div>
-    <div class="card yellow-edge center"><div class="quote">“Research 3 unrelated markets across 10 countries and synthesise the evidence.”</div><div class="pill" style="margin-top:26px">DECOMPOSITION MAY HELP</div></div>
-  </div>
-  <div class="callout"><strong>ARCHITECTURE FOLLOWS THE PROBLEM</strong><span>More agents mean more calls, more coordination, more failure modes and more cost.</span></div>
-</section>
-
-<section class="slide" data-section="knowledge" data-notes="Start from a question Claude cannot reliably know: a private club policy. The need for retrieval should arise naturally.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">KNOWLEDGE // 32</div>
-  <h2>Your agent doesn't know your private world.</h2>
-  <div class="grid-2 fill" style="align-items:center">
-    <div class="card center"><div class="quote">“What does my university's late-submission policy say?”</div></div>
-    <div class="card"><div class="pill">MODEL KNOWLEDGE</div><p class="big-copy" style="margin-top:22px">It may know general university policy concepts.</p><div class="divider"></div><div class="pill">PRIVATE / CURRENT KNOWLEDGE</div><p class="big-copy" style="margin-top:22px">It does not automatically know your university's latest policy.</p></div>
-  </div>
-</section>
-
-<section class="slide" data-section="knowledge" data-notes="Reveal RAG only after students already understand the flow. Keep vector databases as an optional extension, not the core explanation.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">KNOWLEDGE // RETRIEVAL</div>
-  <h2>Search first. Then answer.</h2>
-  <div class="pattern-row fill" style="align-content:center">
-    <div class="pattern-node">QUESTION</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node yellow-edge">RETRIEVE</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node">RELEVANT CONTENT</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node">CONTEXT</div><div class="pattern-arrow">→</div>
-    <div class="pattern-node yellow-edge">CLAUDE</div>
-  </div>
-  <h2 class="center" style="margin-top:12px"><span class="mint">Retrieval-Augmented Generation.</span></h2>
-</section>
-
-<section class="slide" data-section="knowledge" data-notes="Interactive visual only. Type extension, room, timetable or assignment and click retrieve. The notebook does a real local retrieval over supplied documents.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">INTERACTIVE // WHAT SHOULD ENTER CONTEXT?</div>
-  <h2>Retrieve only the relevant pieces.</h2>
-  <div class="card fill" data-rag>
-    <div class="rag-search"><input value="late submission extension assignment" aria-label="Search university documents"><button class="btn primary">RETRIEVE</button></div>
-    <div class="rag-results">
-      <div class="doc-result" data-keys="late,submission,extension,assignment" data-default="1"><div class="pill">assessment_policy.txt</div><p class="small">Students may request an extension before the published deadline...</p></div>
-      <div class="doc-result" data-keys="room,capacity,venue"><div class="pill">room_rules.txt</div><p class="small">Rooms must not exceed listed capacity and accessible access must remain clear...</p></div>
-      <div class="doc-result" data-keys="timetable,assignment,deadline"><div class="pill">assessment_calendar.txt</div><p class="small">Assignment deadlines and examination dates are listed by teaching period...</p></div>
-    </div>
-    <div class="architecture-stage" style="min-height:220px"><div class="arch-block">QUESTION</div><div class="arch-arrow">→</div><div class="arch-block">search_club_docs()</div><div class="arch-arrow">→</div><div class="arch-block agent">AGENT</div></div>
-  </div>
-</section>
-
-<section class="slide" data-section="knowledge" data-notes="Notebook Mission 6. The retrieval helper is prebuilt; participants focus on deciding when the agent should use it and how to ground answers.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">NOTEBOOK // MISSION 6</div>
-  <h2>Make your agent document-aware.</h2>
-  <div class="grid-2 fill">
-    <div class="card"><div class="pill">FILES PROVIDED</div><div class="code" style="margin-top:16px">student_handbook.txt<br>assessment_policy.txt<br>assessment_calendar.txt<br>room_rules.txt</div></div>
-    <div class="card yellow-edge"><div class="pill">PREBUILT TOOL</div><div class="code" style="margin-top:16px">search_club_docs(query)</div><p class="big-copy" style="margin-top:18px">Your agent decides <span class="yellow">when private knowledge is needed.</span></p></div>
-  </div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="Create the pain before naming MCP: integrations exist, but each one is bespoke. This is a standards problem, not an intelligence problem.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">MCP // 35</div>
-  <h2>Now connect the agent to the real world.</h2>
-  <div class="grid-3 fill" style="align-content:center">
-    <div class="card soft center"><h3>GitHub</h3><p class="small muted">custom connector</p></div>
-    <div class="card soft center"><h3>Google Drive</h3><p class="small muted">different connector</p></div>
-    <div class="card soft center"><h3>Calendar</h3><p class="small muted">another connector</p></div>
-    <div class="card soft center"><h3>Slack</h3><p class="small muted">another connector</p></div>
-    <div class="card yellow-edge center"><h3>AGENT</h3><p class="small muted">trying to understand all of them</p></div>
-    <div class="card soft center"><h3>Database</h3><p class="small muted">another connector</p></div>
-  </div>
-  <div class="callout"><strong>PROBLEM</strong><span>We keep rebuilding the same connection layer for different hosts and capabilities.</span></div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="Click CONNECT MCP. Explain that MCP standardises how tools/resources/prompts are exposed; it does not decide what action to take.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">INTERACTIVE // MODEL CONTEXT PROTOCOL</div>
-  <h2>A standard interface for capabilities and context.</h2>
-  <div class="mcp-network fill" data-mcp-network>
-    <div class="connector-list"><div class="connector">GitHub</div><div class="connector">Google Drive</div><div class="connector">Calendar</div><div class="connector">Slack</div></div>
-    <div class="mcp-hub"><div class="mcp-core">MCP</div><button class="btn primary" data-mcp-connect>CONNECT MCP</button></div>
-    <div class="connector-list"><div class="connector">Claude</div><div class="connector">IDE</div><div class="connector">Custom Agent</div><div class="connector">Managed Agent</div></div>
-    <svg class="mcp-lines" width="100%" height="100%" preserveAspectRatio="none"><line x1="30%" y1="10%" x2="50%" y2="50%" stroke="#9be9d1"/><line x1="30%" y1="35%" x2="50%" y2="50%" stroke="#9be9d1"/><line x1="30%" y1="65%" x2="50%" y2="50%" stroke="#9be9d1"/><line x1="30%" y1="90%" x2="50%" y2="50%" stroke="#9be9d1"/><line x1="50%" y1="50%" x2="70%" y2="10%" stroke="#eadb70"/><line x1="50%" y1="50%" x2="70%" y2="35%" stroke="#eadb70"/><line x1="50%" y1="50%" x2="70%" y2="65%" stroke="#eadb70"/><line x1="50%" y1="50%" x2="70%" y2="90%" stroke="#eadb70"/></svg>
-  </div>
-  <div class="source-note">MCP Python SDK v2: current stable line; protocol revision 2026-07-28. Servers expose tools, resources and prompts to MCP hosts/clients.</div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="Use the mini server to make discovery tangible. In the instructor demo, show the same tools from the current mcp Python SDK v2 server.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">MCP // WORKSHOP SERVER</div>
-  <h2>One tiny server. Four discoverable capabilities.</h2>
-  <div class="grid-2 fill">
-    <div class="card yellow-edge"><div class="pill">uwa-ai-workshop</div><div class="code" style="margin-top:16px">get_event_schedule()<br>find_room()<br>get_club_information()<br>create_task()</div></div>
-    <div class="card"><div class="pill">MCP HOST SEES</div><div class="flow-stack" style="margin-top:24px"><div class="node tool">TOOLS</div><div class="flow-arrow">+</div><div class="node">RESOURCES</div><div class="flow-arrow">+</div><div class="node">PROMPTS</div></div></div>
-  </div>
-  <p class="big-copy" style="margin-top:18px">The server doesn't “talk to the model.” It exposes capabilities to a host that does.</p>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="This is the screenshot-worthy taxonomy slide. Ask students to explain each row in their own words.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">MCP // DON'T MIX THESE UP</div>
-  <h2>Different concepts solve different problems.</h2>
-  <div class="grid-2 fill" style="align-content:center">
-    <div class="card"><div class="pill">LLM</div><p>What should I say?</p></div>
-    <div class="card yellow-edge"><div class="pill">AGENT</div><p>What should I do next?</p></div>
-    <div class="card"><div class="pill">TOOL</div><p>How can I perform an action?</p></div>
-    <div class="card"><div class="pill">RAG</div><p>What knowledge should I retrieve?</p></div>
-    <div class="card"><div class="pill">MCP</div><p>How can capabilities/context be exposed consistently?</p></div>
-    <div class="card"><div class="pill">HUMAN</div><p>Where should judgment or approval stay with a person?</p></div>
-  </div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="Transition: our notebook deliberately hid a lot of infrastructure. Managed Agents packages much of that harness for long-running/asynchronous work.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">CLAUDE MANAGED AGENTS // 39</div>
-  <h2>We've secretly been building infrastructure too.</h2>
-  <div class="grid-2 fill">
-    <div class="card"><div class="pill">OUR NOTEBOOK HANDLES</div><div class="code" style="margin-top:16px">conversation state<br>agent loop<br>tool execution<br>retries<br>trace rendering<br>stopping rules</div></div>
-    <div class="card yellow-edge center"><div class="quote">What if the runtime manages much of this for us?</div></div>
-  </div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="Anthropic currently frames Managed Agents around Agent, Environment, Session and Events. Mention it is beta so the workshop isolates this demo from the core notebook.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">MANAGED AGENTS // CORE CONCEPTS</div>
-  <h2>A prebuilt agent harness.</h2>
-  <div class="grid-4 fill" style="align-content:center">
-    <div class="card yellow-edge"><div class="pill">AGENT</div><p class="small">model + system prompt + tools + MCP + skills</p></div>
-    <div class="card"><div class="pill">ENVIRONMENT</div><p class="small">where the session runs</p></div>
-    <div class="card"><div class="pill">SESSION</div><p class="small">one running instance doing a task</p></div>
-    <div class="card"><div class="pill">EVENTS</div><p class="small">messages, tool use and status updates</p></div>
-  </div>
-  <div class="callout"><strong>BETA</strong><span>Keep this as an instructor demo / extension so API changes cannot break the core workshop.</span></div>
-  <div class="source-note">Anthropic Managed Agents docs (Aug 2026): pre-built configurable harness for long-running/asynchronous work; Agent + Environment + Session + Events.</div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="Presenter-led demo. Run the instructor notebook against a small repo. The visual here mirrors the event stream participants should see.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">LIVE DEMO // MANAGED AGENT</div>
-  <h2>Give the runtime a real job.</h2>
-  <div class="grid-2 fill">
-    <div class="card yellow-edge"><div class="pill">TASK</div><div class="quote" style="font-size:clamp(25px,2.8vw,44px);margin-top:20px">Inspect this small repository, identify its most important problem, fix it, run tests and explain what changed.</div></div>
-    <div class="trace">
-      <div class="trace-event visible"><b>SESSION STARTED</b></div>
-      <div class="trace-event tool visible">▸ read / search files</div>
-      <div class="trace-event tool visible">▸ write changes</div>
-      <div class="trace-event tool visible">▸ bash / test</div>
-      <div class="trace-event result visible">▸ stream status + result events</div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="Permission policies make the earlier human-in-the-loop discussion concrete. Use this as a mock approval UI even if the live demo is configured conservatively.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">INTERACTIVE // HUMAN APPROVAL</div>
-  <h2>Autonomy with boundaries.</h2>
-  <div class="card fill" style="display:grid;place-items:center">
-    <div style="width:min(920px,100%)">
-      <div class="trace" style="min-height:180px"><div class="trace-event visible"><b>AGENT</b><br>I updated the code. I should run the project test suite to verify the fix.</div><div class="trace-event tool visible"><b>TOOL REQUEST</b><br>bash: pytest -q</div></div>
-      <div class="permission" data-permission style="margin-top:18px"><div><div class="pill">APPROVAL REQUIRED</div><div data-permission-status style="margin-top:10px">Allow the agent to execute the test command?</div></div><div class="toolbar"><button class="btn primary" data-decision="allow">ALLOW</button><button class="btn danger" data-decision="deny">DENY</button></div></div>
-    </div>
-  </div>
-  <div class="source-note">Anthropic Managed Agents supports permission policies that can automatically allow or pause tool execution for approval.</div>
-</section>
-
-<section class="slide center" data-section="mcp" data-notes="The pedagogical payoff: Managed Agents are not a new magical topic. Students already know the conceptual pieces.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">ZOOM OUT</div>
-  <h2>Same ideas. Bigger harness.</h2>
-  <div class="grid-3" style="max-width:1050px;width:100%;margin-top:28px">
-    <div class="card soft">Prompt engineering ✓</div><div class="card soft">Context engineering ✓</div><div class="card soft">Tools ✓</div>
-    <div class="card soft">Agent loop ✓</div><div class="card soft">MCP ✓</div><div class="card soft">Permissions ✓</div>
-  </div>
-  <p class="big-copy" style="margin-top:30px">Managed runtimes package concepts you already understand into reusable infrastructure.</p>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="This is the final audience challenge. Spin once, then give teams 90 seconds to design an architecture. They do not code here.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">FINAL CHALLENGE // YOU ARE THE ARCHITECT</div>
-  <h2>Design the system, not just the prompt.</h2>
-  <div class="wheels fill" data-wheels>
-    <div class="wheel"><div><div class="wheel-label">DOMAIN</div><div class="wheel-value">Cybersecurity</div></div></div>
-    <div class="wheel"><div><div class="wheel-label">MISSION</div><div class="wheel-value">Detect</div></div></div>
-    <div class="wheel"><div><div class="wheel-label">TWIST</div><div class="wheel-value">Human approval</div></div></div>
-  </div>
-  <div class="toolbar" style="justify-content:center;margin-top:18px"><button class="btn primary" data-spin>SPIN THE BRIEF</button></div>
-  <div class="callout" style="margin-top:18px"><strong>YOUR BRIEF</strong><span data-brief>University event system that must organise, with human approval required.</span></div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="Give them 90 seconds. They should explicitly decide what stays deterministic and what is agentic.">
-  <div class="brand-mark" data-brand></div>
-  <div class="grid-2 fill" style="align-items:center">
-    <div class="marv marv-crop" data-marv></div>
-    <div>
-      <div class="eyebrow">MARV'S MISSION // 90 SECONDS</div>
-      <h2>Sketch the architecture.</h2>
-      <div class="grid-2">
-        <div class="card soft"><div class="pill">01</div><p class="small">What is the goal?</p></div>
-        <div class="card soft"><div class="pill">02</div><p class="small">What context?</p></div>
-        <div class="card soft"><div class="pill">03</div><p class="small">Which tools?</p></div>
-        <div class="card soft"><div class="pill">04</div><p class="small">RAG or live data?</p></div>
-        <div class="card soft"><div class="pill">05</div><p class="small">One agent or many?</p></div>
-        <div class="card soft"><div class="pill">06</div><p class="small">Where does a human approve?</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="This is one possible answer, not the answer. Ask the room where they would simplify it and which components are overkill.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">ONE POSSIBLE ARCHITECTURE</div>
-  <h2>Cybersecurity detection + approval.</h2>
-  <div class="architecture-stage fill">
-    <div class="arch-block">LOGS</div><div class="arch-arrow">→</div>
-    <div class="arch-block agent">DETECTION AGENT</div><div class="arch-arrow">→</div>
-    <div class="arch-block">THREAT SEARCH</div><div class="arch-arrow">+</div>
-    <div class="arch-block">INTERNAL RAG</div><div class="arch-arrow">→</div>
-    <div class="arch-block agent">RISK AGENT</div><div class="arch-arrow">→</div>
-    <div class="arch-block human">HUMAN APPROVAL</div><div class="arch-arrow">→</div>
-    <div class="arch-block">MCP → JIRA</div>
-  </div>
-  <div class="callout"><strong>QUESTION</strong><span>Which pieces are necessary, and which could be simpler?</span></div>
-</section>
-
-<section class="slide" data-section="mcp" data-notes="Fast architecture examples across domains. Do not read them all; pick two based on the room.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">REAL WORLD // COMPOSE THE SAME PIECES</div>
-  <h2>Different domains. Same building blocks.</h2>
-  <div class="grid-2 fill">
-    <div class="card"><div class="pill">STUDENT STUDY</div><p class="small mono">Lecture PDFs → RAG → Tutor Agent → Quiz / Explanation</p></div>
-    <div class="card"><div class="pill">RECRUITMENT</div><p class="small mono">CVs → Retrieval → Matching Agent → Human Recruiter</p></div>
-    <div class="card"><div class="pill">STARTUP RESEARCH</div><p class="small mono">Idea → Market Workers → Analyst → Recommendation</p></div>
-    <div class="card"><div class="pill">COMPLIANCE</div><p class="small mono">Regulations → RAG → Applicability Agent → Evidence → Reviewer</p></div>
-  </div>
-</section>
-
-<section class="slide center" data-section="mcp" data-notes="End on the mental model, not on product branding. Pause before revealing the final line.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">THE MENTAL MODEL</div>
-  <div class="architecture-stage" style="max-width:1250px">
-    <div class="arch-block">PROMPT</div><div class="arch-arrow">→</div>
-    <div class="arch-block">CONTEXT</div><div class="arch-arrow">→</div>
-    <div class="arch-block agent">MODEL</div><div class="arch-arrow">→</div>
-    <div class="arch-block">TOOLS</div><div class="arch-arrow">→</div>
-    <div class="arch-block">REAL WORLD</div>
-  </div>
-  <div class="pattern-row" style="margin:24px 0"><div class="pattern-node">KNOWLEDGE</div><div class="pattern-arrow">+</div><div class="pattern-node">AGENTS</div><div class="pattern-arrow">+</div><div class="pattern-node">MCP</div><div class="pattern-arrow">+</div><div class="pattern-node">HUMANS</div></div>
-  <h1 style="font-size:clamp(50px,6.5vw,96px);margin-top:18px">Agents aren't magic.</h1>
-  <p class="big-copy">They're models, context, tools and loops, <span class="yellow">composed well.</span></p>
-</section>
-
-<section class="slide center" data-section="mcp" data-notes="Leave this up for Q&A. Replace the placeholder links/QRs before the event.">
-  <div class="brand-mark" data-brand></div>
-  <div class="grid-2 fill" style="align-items:center;text-align:left;width:min(1180px,100%)">
-    <div>
-      <div class="eyebrow">KEEP BUILDING</div>
-      <h1 style="font-size:clamp(50px,6vw,90px)">You now know the pieces.</h1>
-      <p class="big-copy">Try changing one thing at a time: the prompt, the context, the tool contract, the orchestration pattern.</p>
-      <div class="toolbar"><span class="pill">Notebook repo → add link</span><span class="pill">Anthropic docs → platform.claude.com</span><span class="pill">MCP docs → modelcontextprotocol.io</span></div>
-    </div>
-    <div class="marv marv-crop" data-marv></div>
-  </div>
-</section>
-
-<section class="slide center" data-section="mcp" data-notes="Final frame. Thank the audience verbally; keep the slide minimal.">
-  <div class="brand-mark" data-brand></div>
-  <div class="eyebrow">UWA AI CLUB</div>
-  <h1>BUILD<br><span class="hero-line">SOMETHING.</span></h1>
-  <p class="big-copy">Prompt → context → tools → agents → systems.</p>
-  <div class="pill">Q&A</div>
-</section>
-
-</template>
 
 <script>
 const ASSETS = {
@@ -1478,7 +730,7 @@ const ASSETS = {
 };
 const SECTION_ORDER = [
   ["Prompt", "prompt"],
-  ["Context", "context"],
+  ["Context engineering", "context"],
   ["Tools", "tools"],
   ["Agent loop", "agents"],
   ["Knowledge", "knowledge"],
@@ -1512,19 +764,12 @@ function showSlide(index, pushHash=true){
   qa('.progress-link').forEach((n,i)=>n.classList.toggle('done', i<sectionIndex));
   q('#slideNum').textContent = `${String(current+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
   q('#topProgress').style.width = `${((current+1)/slides.length)*100}%`;
-  q('#notesPanel').classList.remove('show');
   document.body.classList.toggle('live-demo', Boolean(slide.querySelector('[data-live-claude],[data-live-agent]')));
   if(pushHash) history.replaceState(null,'',`#${current+1}`);
   slide.dispatchEvent(new CustomEvent('slide:shown'));
 }
 function next(){ showSlide(current+1); }
 function prev(){ showSlide(current-1); }
-function toggleNotes(){
-  const panel = q('#notesPanel');
-  const notes = slides[current]?.dataset.notes || 'No presenter notes for this slide.';
-  panel.innerHTML = `<div class="eyebrow" style="margin-bottom:10px">Presenter notes</div>${notes}`;
-  panel.classList.toggle('show');
-}
 function initNav(){
   slides = qa('#deck .slide');
   q('#nextBtn').addEventListener('click', next);
@@ -1534,7 +779,6 @@ function initNav(){
     if(['ArrowRight','PageDown',' '].includes(e.key)){ e.preventDefault(); next(); }
     if(['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); prev(); }
     if(e.key.toLowerCase()==='f') document.documentElement.requestFullscreen?.();
-    if(e.key.toLowerCase()==='n') toggleNotes();
     if(e.key==='Home') showSlide(0);
     if(e.key==='End') showSlide(slides.length-1);
   });
@@ -1546,6 +790,34 @@ function initNav(){
   }));
 }
 
+function initRecipeFramework(){
+  const root=q('[data-recipe-framework]'); if(!root) return;
+  const steps=qa('[data-recipe]',root), prompt=q('[data-recipe-prompt]',root), description=q('[data-recipe-description]',root), progress=q('[data-recipe-progress]',root);
+  const order=['role','examples','context','instructions','parameters','examine'];
+  const ingredients={
+    role:{description:'Role sets the perspective and communication style.',text:'You are a careful study-planning coach who supports the student\'s own decisions.'},
+    examples:{description:'Examples demonstrate the pattern or level of detail expected.',text:'Use this pattern for each block: Monday 9:00–10:30 | Map the essay argument from the rubric | Highest weighting and earliest deadline.'},
+    context:{description:'Context supplies the facts that matter for this request.',text:'Maya has a history essay due Wednesday worth 40%, a statistics quiz Friday worth 15%, and a group presentation Monday. She works Tuesday and Thursday evenings.'},
+    instructions:{description:'Instructions make the work explicit and break a complex task into manageable steps.',text:'Prioritise the assessments, divide the available time into study blocks, and explain why each block comes when it does.'},
+    parameters:{description:'Parameters define boundaries, constraints and the form of the response.',text:'Use blocks no longer than 90 minutes, leave Sunday afternoon free, and return a day-by-day table. Plan the work without writing assessed content.'},
+    examine:{description:'Examine first asks the model to check relevant factors before answering, without exposing private reasoning.',text:'Before drafting the plan, check whether deadlines, weighting or availability are missing. State any assumptions in the answer.'}
+  };
+  function update(){
+    const active=new Set(steps.filter(step=>step.getAttribute('aria-pressed')==='true').map(step=>step.dataset.recipe));
+    const selected=order.filter(key=>active.has(key));
+    prompt.textContent=selected.length?selected.map(key=>ingredients[key].text).join('\n\n'):'Help me plan next week.';
+    progress.textContent=`${selected.length} of 6 ingredients selected`;
+    if(!selected.length) description.textContent='Start with the request, then add only the structure this task needs.';
+  }
+  steps.forEach(step=>step.addEventListener('click',()=>{
+    const active=step.getAttribute('aria-pressed')==='true';
+    step.setAttribute('aria-pressed',String(!active));
+    if(!active) description.textContent=ingredients[step.dataset.recipe].description;
+    update();
+  }));
+  update();
+}
+
 function initPromptBuilder(){
   const root = q('[data-prompt-builder]'); if(!root) return;
   const parts = qa('.prompt-part', root);
@@ -1553,13 +825,13 @@ function initPromptBuilder(){
   const quality = q('[data-quality-fill]', root);
   const qualityLabel = q('[data-quality-label]', root);
   const snippets = {
-    success: 'A useful plan must fit the available hours, prioritise by deadline and weighting, and make assumptions visible.',
-    task: 'Build a realistic study plan for four assessments due next week.',
-    context: 'The history essay is due Wednesday and worth 40%. The statistics quiz is Friday and worth 15%. A group presentation is Monday. I work Tuesday and Thursday evenings.',
+    role: 'You are a careful study-planning coach who helps Maya make her own decisions.',
     examples: `Use this row format:
 Monday, 9:00–10:30 | Map the essay argument from the rubric | Highest weighting and earliest deadline`,
-    constraints: 'Plan and explain the work, but do not write assessed content. Use blocks no longer than 90 minutes and leave Sunday afternoon free.',
-    output: 'Return a day-by-day table with time, finish line and reason for priority.'
+    context: 'The history essay is due Wednesday and worth 40%. The statistics quiz is Friday and worth 15%. A group presentation is Monday. I work Tuesday and Thursday evenings.',
+    instructions: 'Prioritise the assessments, divide the available time into study blocks, and explain why each block comes when it does.',
+    parameters: 'Plan and explain the work without writing assessed content. Use blocks no longer than 90 minutes, leave Sunday afternoon free, and return a day-by-day table.',
+    examine: 'Before drafting, check for missing deadlines, weighting or availability. State any assumptions in the answer.'
   };
   function setPrompt(value){ if('value' in promptOut) promptOut.value=value; else promptOut.textContent=value; }
   function update(){
@@ -1761,7 +1033,7 @@ function initOverview(){
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&panel.classList.contains('show'))hide();});
 }
 
-function initAll(){ buildChrome(); initNav(); initOverview(); initPromptBuilder(); initLiveClaude(); initLiveAgent(); checkApi(); initContextGame(); initUnlock(); initTrace(); initSort(); initPatterns(); initRag(); initMcp(); initPermission(); initWheels(); }
+function initAll(){ buildChrome(); initNav(); initOverview(); initRecipeFramework(); initPromptBuilder(); initLiveClaude(); initLiveAgent(); checkApi(); initContextGame(); initUnlock(); initTrace(); initSort(); initPatterns(); initRag(); initMcp(); initPermission(); initWheels(); }
 document.addEventListener('DOMContentLoaded',initAll);
 
 </script>

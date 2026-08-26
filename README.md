@@ -1,20 +1,22 @@
 # AI Agents for an ordinary student week
 
-An interactive UWA AI Club workshop that teaches prompting, context, tools, agent loops, retrieval, orchestration, MCP and human approval through three recurring student stories.
+An interactive UWA AI Club workshop that teaches prompting, context engineering, tools, agent loops, retrieval, orchestration, MCP and human approval through realistic student work.
 
 - **Maya:** prioritising four assessments around work shifts.
 - **Noah:** coordinating an accessible group-project meeting.
 - **Priya:** retrieving unit material and reviewing her own essay outline.
 
+The participant notebook adds **Aisha**, who builds an adaptive revision coach for the fictional commerce elective *Leadership in Organisations*.
+
 The presentation makes real Claude API calls and shows observable tool requests and results. All room, calendar, policy and action data is fictional workshop simulation data.
 
 ## Project structure
 
-- index.html — self-contained interactive presentation and presenter notes.
+- index.html — self-contained interactive presentation.
 - server.py — FastAPI server for the presentation and server-side Claude calls.
 - AI_AGENTS_WORKSHOP.ipynb — participant exercises matching the presentation.
 - workshopkit.py — small, inspectable notebook runtime and simulated tools.
-- data/ — fictional assessment, unit, calendar and room documents for retrieval.
+- data/ — fictional assessment, unit, calendar, room and leadership-study data.
 - FACILITATOR_GUIDE.md — 120-minute run sheet and teaching notes.
 - requirements-live.txt — dependencies for the live presentation.
 - requirements.txt — dependencies for the participant notebook.
@@ -39,7 +41,6 @@ Presentation controls:
 - Left/right arrows or Space — navigate.
 - Home / End — first or last slide.
 - F — fullscreen.
-- N — presenter notes.
 - Contents — overview navigator.
 - URL hash — deep-link to a presentation state, for example #20.
 
